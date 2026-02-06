@@ -1,0 +1,18 @@
+/**
+ * Pagination Component Styles
+ *
+ * Minimal CSS - most styling is handled by Tailwind classes
+ * This file is kept for any necessary overrides only
+ */
+
+/* High contrast mode support for accessibility */
+@media (prefers-contrast: high) {
+  nav[aria-label="페이지네이션"] button {
+    border-width: 2px;
+  }
+
+  nav[aria-label="페이지네이션"] button[aria-current="page"] {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,107 @@
+/**
+ * ProjectsPage Responsive Styles
+ *
+ * 반응형 디자인:
+ * - Desktop (> 1024px): 3-4 columns
+ * - Tablet (769px - 1024px): 2 columns
+ * - Mobile (<= 768px): 1 column
+ */
+
+/* ========================================
+   Container
+   ======================================== */
+
+.projects-container {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   Filter Buttons
+   ======================================== */
+
+.projects-filters {
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+/* ========================================
+   Projects Grid
+   ======================================== */
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* ========================================
+   Tablet (769px - 1024px)
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .projects-container {
+    padding: var(--spacing-md);
+  }
+
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+}
+
+/* ========================================
+   Mobile (<= 768px)
+   ======================================== */
+
+@media (max-width: 768px) {
+  .projects-container {
+    padding: var(--spacing-sm);
+  }
+
+  /* Header */
+  .projects-header-title {
+    font-size: var(--font-size-2xl) !important;
+  }
+
+  .projects-header-description {
+    font-size: var(--font-size-sm) !important;
+  }
+
+  /* Filters - 2 columns for better mobile UX */
+  .projects-filters {
+    gap: var(--spacing-sm);
+  }
+
+  /* Projects Grid - 1 column */
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  /* Result count */
+  .projects-result-count {
+    font-size: var(--font-size-xs) !important;
+  }
+}
+
+/* ========================================
+   Small Mobile (<= 480px)
+   ======================================== */
+
+@media (max-width: 480px) {
+  .projects-container {
+    padding: var(--spacing-xs);
+  }
+
+  .projects-filters {
+    gap: var(--spacing-xs);
+  }
+
+  .projects-grid {
+    gap: var(--spacing-sm);
+  }
+}

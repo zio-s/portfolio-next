@@ -1,0 +1,586 @@
+/**
+ * Recent Menu Side Panel Styles
+ *
+ * 🎨 Design System:
+ * - 360px 넓은 패널
+ * - 오른쪽에서 슬라이드
+ * - 타임라인 스타일
+ * - 부드러운 애니메이션
+ * - 다크모드 지원
+ */
+
+/* ========================================
+   트리거 버튼
+   ======================================== */
+
+.recent-panel__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.recent-panel__trigger:hover {
+  background: var(--hover-background);
+}
+
+.recent-panel__trigger-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.recent-panel__badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 9px;
+  border: 2px solid var(--background-primary);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* ========================================
+   오버레이
+   ======================================== */
+
+.recent-panel__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: var(--z-panel-overlay);
+}
+
+.recent-panel__overlay--visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========================================
+   사이드 패널
+   ======================================== */
+
+.recent-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: calc(100vw - 40px);
+  background: var(--background-primary);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: var(--z-panel);
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-panel--open {
+  transform: translateX(0);
+}
+
+/* ========================================
+   헤더 섹션
+   ======================================== */
+
+.recent-panel__header-section {
+  flex-shrink: 0;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--background-secondary);
+}
+
+.recent-panel__header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.recent-panel__main-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.recent-panel__main-title svg {
+  width: 24px;
+  height: 24px;
+  color: #667eea;
+}
+
+.recent-panel__close {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.recent-panel__close:hover {
+  background: var(--hover-background);
+  color: var(--text-primary);
+}
+
+.recent-panel__close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ========================================
+   검색바
+   ======================================== */
+
+.recent-panel__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--background-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.recent-panel__search:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.recent-panel__search-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.recent-panel__search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.recent-panel__search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.recent-panel__search-clear {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  transition: all 0.2s ease;
+}
+
+.recent-panel__search-clear:hover {
+  background: var(--hover-background);
+  color: var(--text-primary);
+}
+
+.recent-panel__search-clear svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ========================================
+   전체 삭제 버튼
+   ======================================== */
+
+.recent-panel__clear-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recent-panel__clear-all:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+  border-color: #ef4444;
+}
+
+/* ========================================
+   바디 (스크롤 영역)
+   ======================================== */
+
+.recent-panel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.recent-panel__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.recent-panel__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.recent-panel__body::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.recent-panel__body::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* ========================================
+   빈 상태
+   ======================================== */
+
+.recent-panel__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.recent-panel__empty-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: var(--text-tertiary);
+  opacity: 0.5;
+}
+
+.recent-panel__empty-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.recent-panel__empty-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   타임라인 섹션
+   ======================================== */
+
+.recent-panel__section {
+  margin-bottom: 32px;
+}
+
+.recent-panel__section:last-child {
+  margin-bottom: 0;
+}
+
+.recent-panel__section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+}
+
+.recent-panel__section-title::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+/* ========================================
+   타임라인
+   ======================================== */
+
+.recent-panel__timeline {
+  position: relative;
+  padding-left: 20px;
+}
+
+.recent-panel__timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--border-color);
+}
+
+/* ========================================
+   카드
+   ======================================== */
+
+.recent-panel__card {
+  position: relative;
+  display: block;
+  padding: 12px;
+  margin-bottom: 12px;
+  text-decoration: none;
+  background: var(--background-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.recent-panel__card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  transform: translateX(4px);
+}
+
+.recent-panel__card:hover .recent-panel__thumbnail-overlay {
+  opacity: 1;
+}
+
+.recent-panel__card:hover .recent-panel__remove {
+  opacity: 1;
+}
+
+/* 타임라인 도트 */
+.recent-panel__timeline-dot {
+  position: absolute;
+  left: -17px;
+  top: 20px;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 3px solid var(--background-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--border-color);
+  z-index: 1;
+}
+
+/* ========================================
+   썸네일
+   ======================================== */
+
+.recent-panel__thumbnail {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--background-secondary);
+}
+
+.recent-panel__thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recent-panel__thumbnail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(102, 126, 234, 0.9);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* ========================================
+   콘텐츠
+   ======================================== */
+
+.recent-panel__content {
+  position: relative;
+}
+
+.recent-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.recent-panel__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.recent-panel__remove {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.recent-panel__remove:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.recent-panel__remove svg {
+  width: 16px;
+  height: 16px;
+}
+
+.recent-panel__description {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ========================================
+   메타 정보
+   ======================================== */
+
+.recent-panel__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.recent-panel__time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-tertiary);
+}
+
+.recent-panel__time svg {
+  width: 14px;
+  height: 14px;
+}
+
+.recent-panel__type {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 4px;
+}
+
+/* ========================================
+   모바일 대응
+   ======================================== */
+
+@media (max-width: 768px) {
+  .recent-panel {
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .recent-panel__thumbnail {
+    height: 140px;
+  }
+
+  .recent-panel__timeline {
+    padding-left: 16px;
+  }
+
+  .recent-panel__timeline-dot {
+    left: -14px;
+  }
+}
+
+/* ========================================
+   다크모드 최적화
+   ======================================== */
+
+[data-theme='dark'] .recent-panel {
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='dark'] .recent-panel__badge {
+  border-color: var(--background-primary);
+}
+
+[data-theme='dark'] .recent-panel__overlay {
+  background: rgba(0, 0, 0, 0.7);
+}

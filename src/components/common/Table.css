@@ -1,0 +1,250 @@
+/* 테이블 래퍼 */
+.table-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 테이블 컨테이너 (스크롤) */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 테이블 기본 스타일 */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background-color: white;
+  color: #1f2937;
+}
+
+/* 테이블 헤더 */
+.table-head {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* 테이블 셀 */
+.table-cell {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-cell--header {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+/* 셀 정렬 */
+.table-cell--left {
+  text-align: left;
+}
+
+.table-cell--center {
+  text-align: center;
+}
+
+.table-cell--right {
+  text-align: right;
+}
+
+/* 정렬 가능한 헤더 */
+.table-cell--sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.table-cell--sortable:hover {
+  background-color: #f3f4f6;
+}
+
+.table-cell__content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-sort-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #646cff;
+}
+
+.table-sort-icon--inactive {
+  color: #9ca3af;
+}
+
+/* 테이블 본문 */
+.table-body .table-row:last-child .table-cell {
+  border-bottom: none;
+}
+
+/* 행 스타일 */
+.table-row {
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* 스트라이프 */
+.table--striped .table-body .table-row:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* 호버 효과 */
+.table--hoverable .table-body .table-row:hover {
+  background-color: #f3f4f6;
+}
+
+/* 클릭 가능한 행 */
+.table-row--clickable {
+  cursor: pointer;
+}
+
+.table-row--clickable:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+/* 테두리 */
+.table--bordered {
+  border: 1px solid #e5e7eb;
+}
+
+.table--bordered .table-cell {
+  border-right: 1px solid #e5e7eb;
+}
+
+.table--bordered .table-cell:last-child {
+  border-right: none;
+}
+
+/* 컴팩트 모드 */
+.table--compact .table-cell {
+  padding: 0.5rem 0.75rem;
+}
+
+.table--compact .table-cell--header {
+  padding: 0.625rem 0.75rem;
+}
+
+/* 로딩 상태 */
+.table-cell--loading {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.table-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* 빈 상태 */
+.table-cell--empty {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.table-empty {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* 다크 모드 대응 */
+@media (prefers-color-scheme: dark) {
+  .table {
+    background-color: #1f2937;
+    color: rgba(255, 255, 255, 0.87);
+  }
+
+  .table-head {
+    background-color: #374151;
+    border-bottom-color: #4b5563;
+  }
+
+  .table-cell {
+    border-bottom-color: #374151;
+  }
+
+  .table-cell--header {
+    color: rgba(255, 255, 255, 0.87);
+  }
+
+  .table-cell--sortable:hover {
+    background-color: #4b5563;
+  }
+
+  .table--striped .table-body .table-row:nth-child(even) {
+    background-color: #374151;
+  }
+
+  .table--hoverable .table-body .table-row:hover {
+    background-color: #4b5563;
+  }
+
+  .table--bordered {
+    border-color: #4b5563;
+  }
+
+  .table--bordered .table-cell {
+    border-right-color: #4b5563;
+  }
+
+  .table-loading,
+  .table-empty {
+    color: #9ca3af;
+  }
+}
+
+/* 반응형: 모바일에서 가로 스크롤 힌트 */
+@media (max-width: 768px) {
+  .table-container {
+    position: relative;
+  }
+
+  .table-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
+    pointer-events: none;
+  }
+
+  .table-cell {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .table-cell--header {
+    padding: 0.75rem 0.75rem;
+  }
+}
+
+/* 접근성: 고대비 모드 */
+@media (prefers-contrast: high) {
+  .table {
+    border: 2px solid currentColor;
+  }
+
+  .table-cell {
+    border-bottom-width: 2px;
+  }
+
+  .table--bordered .table-cell {
+    border-right-width: 2px;
+  }
+}

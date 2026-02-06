@@ -1,0 +1,282 @@
+/**
+ * ProjectDetailPage Responsive Styles
+ *
+ * 반응형 디자인:
+ * - Desktop (> 1024px): 900px max-width
+ * - Tablet (769px - 1024px): Reduced padding, adjust image
+ * - Mobile (<= 768px): Mobile-optimized layout
+ */
+
+/* ========================================
+   Container
+   ======================================== */
+
+.project-detail-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+/* ========================================
+   Loading & Error States
+   ======================================== */
+
+.project-detail-loading,
+.project-detail-error {
+  padding: var(--spacing-3xl);
+  text-align: center;
+}
+
+.project-detail-loading-text,
+.project-detail-error-text {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+}
+
+.project-detail-error-text {
+  color: var(--color-error);
+  margin-bottom: var(--spacing-md);
+}
+
+/* ========================================
+   Header
+   ======================================== */
+
+.project-detail-header {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.project-detail-title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.project-detail-description {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+/* ========================================
+   Stats & Actions
+   ======================================== */
+
+.project-detail-stats-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.project-detail-stats {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+/* ========================================
+   Thumbnail
+   ======================================== */
+
+.project-detail-thumbnail {
+  width: 100%;
+  height: 400px;
+  margin-bottom: var(--spacing-2xl);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--background-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========================================
+   Tech Stack
+   ======================================== */
+
+.project-detail-tech-section {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.project-detail-tech-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.project-detail-tech-list {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* ========================================
+   Links
+   ======================================== */
+
+.project-detail-links {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-2xl);
+}
+
+/* ========================================
+   Content
+   ======================================== */
+
+.project-detail-content {
+  padding: var(--spacing-lg);
+  background: var(--background-secondary);
+  border-radius: var(--radius-xl);
+  line-height: 1.7;
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--border-color);
+}
+
+/* ========================================
+   Comments
+   ======================================== */
+
+.project-detail-comments {
+  margin-top: var(--spacing-3xl);
+}
+
+.project-detail-comments-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-primary);
+}
+
+.project-detail-comments-form {
+  margin-bottom: var(--spacing-2xl);
+}
+
+/* ========================================
+   Tablet (769px - 1024px)
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .project-detail-container {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .project-detail-thumbnail {
+    height: 300px;
+  }
+
+  .project-detail-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .project-detail-description {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ========================================
+   Mobile (<= 768px)
+   ======================================== */
+
+@media (max-width: 768px) {
+  .project-detail-container {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  /* Header */
+  .project-detail-header {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .project-detail-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .project-detail-description {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-md);
+  }
+
+  /* Stats & Actions - Stack vertically */
+  .project-detail-stats-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .project-detail-stats {
+    font-size: var(--font-size-xs);
+    gap: var(--spacing-sm);
+  }
+
+  /* Thumbnail - Reduce height */
+  .project-detail-thumbnail {
+    height: 200px;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  /* Tech Stack */
+  .project-detail-tech-section {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .project-detail-tech-title {
+    font-size: var(--font-size-base);
+  }
+
+  .project-detail-tech-list {
+    gap: var(--spacing-xs);
+  }
+
+  /* Links - Stack vertically on small screens */
+  .project-detail-links {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  /* Content */
+  .project-detail-content {
+    padding: var(--spacing-md);
+    font-size: var(--font-size-sm);
+  }
+
+  /* Comments */
+  .project-detail-comments {
+    margin-top: var(--spacing-2xl);
+  }
+
+  .project-detail-comments-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .project-detail-comments-form {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+/* ========================================
+   Small Mobile (<= 480px)
+   ======================================== */
+
+@media (max-width: 480px) {
+  .project-detail-container {
+    padding: var(--spacing-sm) var(--spacing-xs);
+  }
+
+  .project-detail-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .project-detail-thumbnail {
+    height: 180px;
+  }
+
+  .project-detail-content {
+    padding: var(--spacing-sm);
+  }
+}

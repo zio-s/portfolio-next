@@ -1,0 +1,169 @@
+/* 빈 상태 컨테이너 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+
+/* 크기 변형 */
+.empty-state--sm {
+  padding: 2rem 1rem;
+}
+
+.empty-state--md {
+  padding: 3rem 1.5rem;
+}
+
+.empty-state--lg {
+  padding: 4rem 2rem;
+}
+
+/* 아이콘 */
+.empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: #9ca3af;
+}
+
+.empty-state--sm .empty-state__icon {
+  margin-bottom: 1rem;
+}
+
+.empty-state--lg .empty-state__icon {
+  margin-bottom: 2rem;
+}
+
+/* 기본 아이콘 크기 */
+.empty-state--sm .empty-state__default-icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.empty-state--md .empty-state__default-icon {
+  width: 4rem;
+  height: 4rem;
+}
+
+.empty-state--lg .empty-state__default-icon {
+  width: 5rem;
+  height: 5rem;
+}
+
+/* 내용 */
+.empty-state__content {
+  max-width: 28rem;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state--sm .empty-state__content {
+  max-width: 24rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state--lg .empty-state__content {
+  max-width: 32rem;
+  margin-bottom: 2rem;
+}
+
+/* 제목 */
+.empty-state__title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.empty-state--sm .empty-state__title {
+  font-size: 1rem;
+  margin-bottom: 0.375rem;
+}
+
+.empty-state--lg .empty-state__title {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+/* 설명 */
+.empty-state__description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.empty-state--sm .empty-state__description {
+  font-size: 0.8125rem;
+}
+
+.empty-state--lg .empty-state__description {
+  font-size: 1rem;
+}
+
+/* 액션 */
+.empty-state__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* 다크 모드 대응 */
+@media (prefers-color-scheme: dark) {
+  .empty-state__icon {
+    color: #6b7280;
+  }
+
+  .empty-state__title {
+    color: rgba(255, 255, 255, 0.87);
+  }
+
+  .empty-state__description {
+    color: #9ca3af;
+  }
+}
+
+/* 반응형 */
+@media (max-width: 640px) {
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+
+  .empty-state--lg {
+    padding: 3rem 1.5rem;
+  }
+
+  .empty-state__content {
+    max-width: 100%;
+  }
+
+  .empty-state__title {
+    font-size: 1rem;
+  }
+
+  .empty-state__description {
+    font-size: 0.8125rem;
+  }
+
+  .empty-state__action {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .empty-state__action > * {
+    width: 100%;
+  }
+}
+
+/* 접근성: 애니메이션 비활성화 설정 준수 */
+@media (prefers-reduced-motion: reduce) {
+  .empty-state * {
+    animation: none;
+    transition: none;
+  }
+}

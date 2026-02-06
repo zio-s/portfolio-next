@@ -1,0 +1,175 @@
+/* 스피너 컨테이너 */
+.spinner-container {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* 스피너 기본 스타일 */
+.spinner {
+  animation: spinner-rotate 1.4s linear infinite;
+}
+
+.spinner__track {
+  stroke: #e5e7eb;
+}
+
+.spinner__circle {
+  stroke-dasharray: 80, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: spinner-dash 1.4s ease-in-out infinite;
+}
+
+/* 크기 */
+.spinner--xs {
+  width: 1rem;
+  height: 1rem;
+}
+
+.spinner--sm {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.spinner--md {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.spinner--lg {
+  width: 4rem;
+  height: 4rem;
+}
+
+.spinner--xl {
+  width: 6rem;
+  height: 6rem;
+}
+
+/* 색상 */
+.spinner--primary .spinner__circle {
+  stroke: #646cff;
+}
+
+.spinner--secondary .spinner__circle {
+  stroke: #6b7280;
+}
+
+.spinner--white .spinner__circle {
+  stroke: white;
+}
+
+.spinner--white .spinner__track {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.spinner--current .spinner__circle {
+  stroke: currentColor;
+}
+
+.spinner--current .spinner__track {
+  stroke: currentColor;
+  opacity: 0.2;
+}
+
+/* 로딩 텍스트 */
+.spinner-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* 전체 화면 스피너 */
+.spinner-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.spinner-fullscreen--overlay {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.spinner-fullscreen .spinner-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 애니메이션 */
+@keyframes spinner-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinner-dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 100, 200;
+    stroke-dashoffset: -15;
+  }
+  100% {
+    stroke-dasharray: 100, 200;
+    stroke-dashoffset: -125;
+  }
+}
+
+/* 접근성: 스크린 리더 전용 텍스트 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* 다크 모드 대응 */
+@media (prefers-color-scheme: dark) {
+  .spinner__track {
+    stroke: #374151;
+  }
+
+  .spinner-text {
+    color: #9ca3af;
+  }
+
+  .spinner-fullscreen--overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .spinner-fullscreen .spinner-container {
+    background-color: #1f2937;
+  }
+}
+
+/* 애니메이션 비활성화 설정 준수 */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+
+  .spinner__circle {
+    animation: none;
+    stroke-dasharray: 60, 200;
+  }
+}

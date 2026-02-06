@@ -1,0 +1,238 @@
+/* 에러 경계 컨테이너 */
+.error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  background-color: #fef2f2;
+}
+
+.error-boundary__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 42rem;
+  text-align: center;
+}
+
+/* 에러 아이콘 */
+.error-boundary__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: #dc2626;
+}
+
+.error-boundary__icon svg {
+  width: 4rem;
+  height: 4rem;
+}
+
+/* 에러 내용 */
+.error-boundary__content {
+  margin-bottom: 2rem;
+}
+
+.error-boundary__title {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.error-boundary__description {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #7f1d1d;
+  line-height: 1.6;
+}
+
+/* 에러 상세 정보 (개발 환경) */
+.error-boundary__details {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: white;
+  border: 1px solid #fecaca;
+  border-radius: 0.375rem;
+  text-align: left;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.error-boundary__summary {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #991b1b;
+  cursor: pointer;
+  user-select: none;
+}
+
+.error-boundary__summary:hover {
+  color: #7f1d1d;
+}
+
+.error-boundary__error {
+  margin: 0.75rem 0 0 0;
+  padding: 1rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75rem;
+  color: #7f1d1d;
+  background-color: #fef2f2;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.error-boundary__error code {
+  font-family: inherit;
+}
+
+/* 액션 버튼 */
+.error-boundary__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.error-boundary__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.error-boundary__button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.error-boundary__button--primary {
+  background-color: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.error-boundary__button--primary:hover {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.error-boundary__button--primary:active {
+  background-color: #991b1b;
+}
+
+.error-boundary__button--secondary {
+  background-color: white;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.error-boundary__button--secondary:hover {
+  background-color: #fef2f2;
+}
+
+.error-boundary__button--secondary:active {
+  background-color: #fee2e2;
+}
+
+/* 다크 모드 대응 */
+@media (prefers-color-scheme: dark) {
+  .error-boundary {
+    background-color: rgba(220, 38, 38, 0.1);
+  }
+
+  .error-boundary__icon {
+    color: #fca5a5;
+  }
+
+  .error-boundary__title {
+    color: #fca5a5;
+  }
+
+  .error-boundary__description {
+    color: rgba(255, 255, 255, 0.87);
+  }
+
+  .error-boundary__details {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+
+  .error-boundary__summary {
+    color: #fca5a5;
+  }
+
+  .error-boundary__summary:hover {
+    color: #fef2f2;
+  }
+
+  .error-boundary__error {
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #374151;
+  }
+
+  .error-boundary__button--primary {
+    background-color: #dc2626;
+    color: white;
+  }
+
+  .error-boundary__button--primary:hover {
+    background-color: #b91c1c;
+  }
+
+  .error-boundary__button--secondary {
+    background-color: transparent;
+    color: #fca5a5;
+    border-color: #fca5a5;
+  }
+
+  .error-boundary__button--secondary:hover {
+    background-color: rgba(220, 38, 38, 0.1);
+  }
+}
+
+/* 반응형 */
+@media (max-width: 640px) {
+  .error-boundary {
+    min-height: 300px;
+    padding: 1.5rem;
+  }
+
+  .error-boundary__icon svg {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .error-boundary__title {
+    font-size: 1.25rem;
+  }
+
+  .error-boundary__description {
+    font-size: 0.875rem;
+  }
+
+  .error-boundary__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .error-boundary__button {
+    width: 100%;
+  }
+
+  .error-boundary__error {
+    font-size: 0.6875rem;
+  }
+}

@@ -1,0 +1,23 @@
+/**
+ * Global Base Styles
+ * Minimal reset - Tailwind handles the rest
+ */
+
+/** {*/
+/*  margin: 0;*/
+/*  padding: 0;*/
+/*}*/
+
+/*html {*/
+/*  -webkit-font-smoothing: antialiased;*/
+/*  -moz-osx-font-smoothing: grayscale;*/
+/*}*/
+
+/*body {*/
+/*  min-width: 320px;*/
+/*  overflow-x: hidden;*/
+/*}*/
+
+/*#root {*/
+/*  min-height: 100vh;*/
+/*}*/
