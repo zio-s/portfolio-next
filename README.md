@@ -2,7 +2,7 @@
 
 Next.js 16 기반 포트폴리오 & 블로그 CMS
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/zio-s/portfolio-next)
+**Live**: https://semincode.com
 
 ## Tech Stack
 
@@ -71,44 +71,12 @@ src/
 └── views/                 # 페이지 뷰 컴포넌트
 ```
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- Supabase 프로젝트
-
-### Installation
+## Development
 
 ```bash
-# Clone
-git clone https://github.com/zio-s/portfolio-next.git
-cd portfolio-next
-
-# Install dependencies
-npm install
-
-# Environment variables
-cp .env.example .env.local
-
-# Run development server
-npm run dev
-```
-
-### Environment Variables
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-## Scripts
-
-```bash
-npm run dev      # 개발 서버 실행
+npm run dev      # 개발 서버
 npm run build    # 프로덕션 빌드
-npm run start    # 프로덕션 서버 실행
-npm run lint     # ESLint 검사
+npm run start    # 프로덕션 서버
 ```
 
 ## Deployment
