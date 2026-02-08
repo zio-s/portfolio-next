@@ -28,7 +28,7 @@ Next.js 16 기반 포트폴리오 & 블로그 CMS
 - 마크다운 기반 블로그
 - 태그 필터링
 - 댓글 시스템 (대댓글 지원)
-- n8n 연동 자동 포스팅
+- Supabase Edge Functions + Gemini AI 자동 포스팅
 
 ### Guestbook
 - 방명록 작성/삭제
