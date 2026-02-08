@@ -162,6 +162,44 @@ export const postsApi = createApi({
     }),
 
     /**
+     * post_number로 게시글 조회
+     */
+    getPostByNumber: builder.query<Post, number>({
+      async queryFn(postNumber, _api, _extraOptions, baseQuery) {
+        try {
+          const userIdentifier = getUserIdentifier();
+
+          const { data, error } = await baseQuery(
+            buildSupabaseQuery.rpc('get_post_by_number_with_user_data', {
+              p_post_number: postNumber,
+              p_user_identifier: userIdentifier,
+            })
+          );
+
+          if (error) throw error;
+
+          const post = data as any;
+
+          if (!post) {
+            return { error: { status: 404, data: { message: '게시글을 찾을 수 없습니다' } } };
+          }
+
+          return {
+            data: {
+              ...post,
+              createdAt: post.created_at || post.createdAt,
+              updatedAt: post.updated_at || post.updatedAt,
+              publishedAt: post.published_at || post.publishedAt,
+            },
+          };
+        } catch (error: any) {
+          return { error: { status: 500, data: { message: error.message } } };
+        }
+      },
+      providesTags: (result) => result ? [{ type: 'Post', id: result.id }] : [],
+    }),
+
+    /**
      * 게시글 생성
      */
     createPost: builder.mutation<Post, Partial<Post>>({
@@ -278,6 +316,7 @@ export const postsApi = createApi({
 export const {
   useGetPostsQuery,
   useGetPostByIdQuery,
+  useGetPostByNumberQuery,
   useCreatePostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,

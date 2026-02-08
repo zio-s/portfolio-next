@@ -34,6 +34,7 @@ const initializeSamplePosts = (): Post[] => {
   const samplePosts: Post[] = [
     {
       id: '1',
+      post_number: 1,
       title: 'React와 TypeScript로 CMS 만들기',
       content: '이 프로젝트는 React와 TypeScript를 사용하여 만든 포트폴리오용 CMS입니다.\n\n## 주요 기능\n\n- 게시글 CRUD (생성, 조회, 수정, 삭제)\n- 사용자 관리 시스템\n- Redux Toolkit을 활용한 상태 관리\n- localStorage 기반 데이터 저장\n\n## 기술 스택\n\n- React 18\n- TypeScript\n- Redux Toolkit\n- React Router v6\n- Vite',
       excerpt: 'React와 TypeScript를 사용한 포트폴리오 CMS 프로젝트입니다.',
@@ -47,6 +48,7 @@ const initializeSamplePosts = (): Post[] => {
     },
     {
       id: '2',
+      post_number: 2,
       title: 'Redux Toolkit 완벽 가이드',
       content: 'Redux Toolkit은 Redux를 더 쉽게 사용할 수 있게 해주는 공식 도구입니다.\n\n## 주요 특징\n\n### 1. createSlice\n간편한 리듀서 작성이 가능합니다.\n\n### 2. createAsyncThunk\n비동기 처리를 쉽게 할 수 있습니다.\n\n### 3. Immer 내장\n불변성 관리를 자동으로 해줍니다.',
       excerpt: 'Redux Toolkit 사용법과 주요 기능을 소개합니다.',
@@ -60,6 +62,7 @@ const initializeSamplePosts = (): Post[] => {
     },
     {
       id: '3',
+      post_number: 3,
       title: '[임시 저장] Vite vs Create React App',
       content: 'Vite와 CRA의 차이점을 비교하는 글입니다.\n\n## 개요\n\n아직 작성 중인 글입니다...\n\n- TODO: Vite 장점 정리\n- TODO: CRA 비교\n- TODO: 성능 벤치마크',
       excerpt: 'Vite와 Create React App을 비교 분석합니다.',

@@ -333,7 +333,7 @@ const PostsPage = () => {
                   {recentPosts.map((post) => (
                     <li key={post.id}>
                       <Link
-                        to={routeHelpers.blogDetail(post.id)}
+                        to={routeHelpers.blogDetail(post.post_number)}
                         className="text-sm text-muted-foreground hover:text-accent transition-colors line-clamp-1 block py-1"
                       >
                         {post.title}
@@ -356,7 +356,7 @@ const PostsPage = () => {
                         {index + 1}
                       </span>
                       <Link
-                        to={routeHelpers.blogDetail(post.id)}
+                        to={routeHelpers.blogDetail(post.post_number)}
                         className="text-sm text-muted-foreground hover:text-accent transition-colors line-clamp-1"
                       >
                         {post.title}
@@ -451,7 +451,7 @@ const PostsPage = () => {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.05 }}
-                          onClick={() => navigate(routeHelpers.blogDetail(post.id))}
+                          onClick={() => navigate(routeHelpers.blogDetail(post.post_number))}
                           className="group bg-card border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-200 hover:shadow-md cursor-pointer"
                         >
                           {/* Header: Title & Status */}

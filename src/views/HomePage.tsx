@@ -500,7 +500,7 @@ const HomePage = () => {
                   return (
                     <Link
                       key={post.id}
-                      to={`/blog/${post.id}`}
+                      to={`/blog/${post.post_number}`}
                       className="block"
                     >
                       <div className="py-2 px-3 rounded border border-transparent hover:border-border/50 hover:bg-card/20 transition-all cursor-pointer group">

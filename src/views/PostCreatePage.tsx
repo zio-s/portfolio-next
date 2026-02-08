@@ -64,8 +64,8 @@ const PostCreatePage = () => {
         message: `게시글이 ${status === 'published' ? '발행' : '임시저장'}되었습니다!`,
         type: 'success',
         onConfirm: () => {
-          // 생성된 게시글 상세 페이지로 이동
-          navigate(routeHelpers.blogDetail(result.id));
+          // 생성된 게시글 상세 페이지로 이동 (post_number 사용)
+          navigate(routeHelpers.blogDetail(result.post_number));
         },
       });
     } catch {

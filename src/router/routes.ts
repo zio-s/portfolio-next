@@ -54,14 +54,14 @@ export const ROUTES = {
 export const routeHelpers = {
   /**
    * 블로그 상세 페이지 경로 생성
-   * @param id - 게시글 ID
+   * @param postNumber - 게시글 순차 번호
    * @returns 블로그 상세 페이지 경로
    */
-  blogDetail: (id: string): string => `/blog/${id}`,
+  blogDetail: (postNumber: number): string => `/blog/${postNumber}`,
 
   /**
    * 게시글 수정 페이지 경로 생성
-   * @param id - 게시글 ID
+   * @param id - 게시글 UUID
    * @returns 게시글 수정 페이지 경로
    */
   blogEdit: (id: string): string => `/blog/${id}/edit`,

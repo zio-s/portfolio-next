@@ -93,6 +93,7 @@ export {
 export {
   useGetPostsQuery,
   useGetPostByIdQuery,
+  useGetPostByNumberQuery,
   useCreatePostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,

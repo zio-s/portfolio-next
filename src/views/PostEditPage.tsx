@@ -89,8 +89,8 @@ const PostEditPage = () => {
         message: '게시글이 수정되었습니다!',
         type: 'success',
         onConfirm: () => {
-          // 게시글 상세 페이지로 이동
-          navigate(routeHelpers.blogDetail(id));
+          // 게시글 상세 페이지로 이동 (post_number 사용)
+          navigate(routeHelpers.blogDetail(post!.post_number));
         },
       });
     } catch {
@@ -138,11 +138,11 @@ const PostEditPage = () => {
               </div>
               <Button
                 variant="outline"
-                onClick={() => navigate(routeHelpers.blogDetail(id!))}
+                onClick={() => navigate('/blog')}
                 className="w-full"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                게시글로 돌아가기
+                목록으로 돌아가기
               </Button>
             </motion.div>
           </Container>
@@ -193,7 +193,7 @@ const PostEditPage = () => {
         <Container>
           <Button
             variant="ghost"
-            onClick={() => navigate(routeHelpers.blogDetail(id!))}
+            onClick={() => navigate(routeHelpers.blogDetail(post.post_number))}
             className="group -ml-2 mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -383,7 +383,7 @@ const PostEditPage = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate(routeHelpers.blogDetail(id!))}
+                  onClick={() => navigate(routeHelpers.blogDetail(post.post_number))}
                   disabled={loading || updating}
                   size="lg"
                   className="flex-1"

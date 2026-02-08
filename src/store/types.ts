@@ -18,6 +18,7 @@ export interface AuthState {
 // Posts Types
 export interface Post {
   id: string; // UUID
+  post_number: number; // 순차 번호 (URL용)
   title: string;
   content: string;
   excerpt: string;

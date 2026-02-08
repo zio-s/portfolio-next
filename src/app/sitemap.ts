@@ -49,15 +49,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // 블로그 동적 페이지
+  // 블로그 동적 페이지 (post_number로 URL 생성)
   const { data: posts } = await supabase
     .from('posts')
-    .select('id, updated_at')
+    .select('post_number, updated_at')
     .eq('status', 'published')
-    .order('created_at', { ascending: false });
+    .order('post_number', { ascending: true });
 
   const blogPages: MetadataRoute.Sitemap = (posts || []).map((post) => ({
-    url: `${baseUrl}/blog/${post.id}`,
+    url: `${baseUrl}/blog/${post.post_number}`,
     lastModified: new Date(post.updated_at),
     changeFrequency: 'monthly' as const,
     priority: 0.7,

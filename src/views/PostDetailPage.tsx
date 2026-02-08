@@ -17,7 +17,7 @@ import { ROUTES, routeHelpers } from '../router/routes';
 import {
   useAppSelector,
   selectUser,
-  useGetPostByIdQuery,
+  useGetPostByNumberQuery,
   useDeletePostMutation,
   useToggleLikeMutation,
   useIncrementViewMutation,
@@ -57,9 +57,12 @@ const PostDetailPage = () => {
   const isAdmin = !!user;
   const backPath = '/blog';
 
-  // RTK Query hooks
-  const { data: post, isLoading: loading, error } = useGetPostByIdQuery(id || '', {
-    skip: !id,
+  // URL 파라미터를 숫자로 변환 (post_number)
+  const postNumber = id ? Number(id) : NaN;
+
+  // RTK Query hooks - post_number로 조회
+  const { data: post, isLoading: loading, error } = useGetPostByNumberQuery(postNumber, {
+    skip: isNaN(postNumber),
   });
   const [deletePostMutation] = useDeletePostMutation();
   const [toggleLike, { isLoading: isLikeLoading }] = useToggleLikeMutation();
@@ -68,17 +71,17 @@ const PostDetailPage = () => {
   // 좋아요 처리 중 플래그 (추가 보호)
   const [isLikeProcessing, setIsLikeProcessing] = useState(false);
 
-  // 조회수 자동 증가 (페이지 진입 시 1회만)
+  // 조회수 자동 증가 (페이지 진입 시 1회만, post 로드 후 UUID로 호출)
   useEffect(() => {
-    if (id) {
-      incrementView(id);
+    if (post?.id) {
+      incrementView(post.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]); // id가 변경될 때만 실행 (post 제거로 중복 호출 방지)
+  }, [post?.id]); // post.id(UUID)가 확정된 후 1회 실행
 
   // 게시글 삭제
   const handleDelete = async () => {
-    if (!id || !post) return;
+    if (!post) return;
 
     showConfirm({
       title: '삭제 확인',
@@ -88,7 +91,7 @@ const PostDetailPage = () => {
       cancelText: '취소',
       onConfirm: async () => {
         try {
-          await deletePostMutation(id).unwrap();
+          await deletePostMutation(post.id).unwrap();
           showAlert({
             title: '완료',
             message: '게시글이 삭제되었습니다',
@@ -110,11 +113,11 @@ const PostDetailPage = () => {
 
   // 좋아요 토글
   const handleLike = async () => {
-    if (!id || isLikeLoading || isLikeProcessing) return;
+    if (!post?.id || isLikeLoading || isLikeProcessing) return;
 
     setIsLikeProcessing(true);
     try {
-      await toggleLike(id).unwrap();
+      await toggleLike(post.id).unwrap();
     } catch {
       console.error('좋아요 처리 실패');
     } finally {
@@ -246,7 +249,7 @@ const PostDetailPage = () => {
       <SEO
         title={`${post.title} | Blog`}
         description={post.excerpt || post.content.slice(0, 160)}
-        url={`https://semincode.com/blog/${post.id}`}
+        url={`https://semincode.com/blog/${post.post_number}`}
         type="article"
         publishedTime={post.publishedAt || post.createdAt}
         modifiedTime={post.updatedAt}
@@ -256,7 +259,7 @@ const PostDetailPage = () => {
       <ArticleJsonLd
         title={post.title}
         description={post.excerpt || post.content.slice(0, 160)}
-        url={`https://semincode.com/blog/${post.id}`}
+        url={`https://semincode.com/blog/${post.post_number}`}
         datePublished={post.publishedAt || post.createdAt}
         dateModified={post.updatedAt}
         keywords={post.tags}
@@ -268,7 +271,7 @@ const PostDetailPage = () => {
         items={[
           { name: '홈', url: '/' },
           { name: '블로그', url: '/blog' },
-          { name: post.title, url: `/blog/${post.id}` },
+          { name: post.title, url: `/blog/${post.post_number}` },
         ]}
       />
 
@@ -495,7 +498,7 @@ const PostDetailPage = () => {
             {/* Comment Form */}
             <div className="mb-8">
               <PostCommentForm
-                postId={id!}
+                postId={post.id}
                 onSuccess={() => {
                   // Comments will auto-refresh via RTK Query
                 }}
@@ -504,7 +507,7 @@ const PostDetailPage = () => {
             </div>
 
             {/* Comment List */}
-            <PostCommentList postId={id!} />
+            <PostCommentList postId={post.id} />
           </motion.div>
         </Container>
       </Section>
