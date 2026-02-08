@@ -20,7 +20,9 @@ import {
 } from '../api/commentsApi';
 import { CommentForm } from './CommentForm';
 import type { CommentTreeItem } from '../types/Comment';
-import { useAppSelector, selectUser } from '../../../store';
+import { useAppSelector, selectUser, selectIsAdmin } from '../../../store';
+import { useAlertModal } from '@/components/modal/hooks/use-alert-modal';
+import { useConfirmModal } from '@/components/modal/hooks/use-confirm-modal';
 
 interface CommentItemProps {
   comment: CommentTreeItem;
@@ -40,6 +42,13 @@ export const CommentItem = ({
   // Redux Selector 패턴 사용 (Best Practice)
   const currentUser = useAppSelector(selectUser);
   const isOwner = currentUser && currentUser.id === comment.userId;
+  const isAdmin = useAppSelector(selectIsAdmin);
+  const canDelete = isAdmin || isOwner;
+  const isAdminComment = currentUser && comment.authorEmail === currentUser.email && isAdmin;
+
+  // 모달 시스템
+  const { showAlert } = useAlertModal();
+  const { showConfirm } = useConfirmModal();
 
   // RTK Query mutations
   const [deleteComment, { isLoading: isDeleting }] = useDeleteCommentMutation();
@@ -119,14 +128,25 @@ export const CommentItem = ({
   /**
    * 삭제 핸들러
    */
-  const handleDelete = async () => {
-    if (!confirm('정말 이 댓글을 삭제하시겠습니까?')) return;
-
-    try {
-      await deleteComment(comment.id).unwrap();
-    } catch {
-      alert('댓글 삭제에 실패했습니다.');
-    }
+  const handleDelete = () => {
+    showConfirm({
+      title: '댓글 삭제',
+      message: '정말 이 댓글을 삭제하시겠습니까?',
+      type: 'danger',
+      confirmText: '삭제',
+      cancelText: '취소',
+      onConfirm: async () => {
+        try {
+          await deleteComment(comment.id).unwrap();
+        } catch {
+          showAlert({
+            title: '삭제 실패',
+            message: '댓글 삭제에 실패했습니다.',
+            type: 'error',
+          });
+        }
+      },
+    });
   };
 
   /**
@@ -222,6 +242,20 @@ export const CommentItem = ({
             >
               {comment.authorName}
             </span>
+            {isAdminComment && (
+              <span
+                style={{
+                  padding: '1px 6px',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  background: 'hsl(var(--accent) / 0.2)',
+                  color: 'hsl(var(--accent))',
+                  borderRadius: '4px',
+                }}
+              >
+                ADMIN
+              </span>
+            )}
             <span
               style={{
                 fontSize: '12px',
@@ -317,38 +351,40 @@ export const CommentItem = ({
                 </button>
               )}
 
-              {/* 수정/삭제 버튼 (본인 댓글만) */}
+              {/* 수정 버튼 (본인 댓글만) */}
               {isOwner && (
-                <>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    style={{
-                      padding: '4px 8px',
-                      border: 'none',
-                      background: 'transparent',
-                      color: 'var(--text-secondary)',
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    수정
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    style={{
-                      padding: '4px 8px',
-                      border: 'none',
-                      background: 'transparent',
-                      color: '#ef4444',
-                      fontSize: '13px',
-                      cursor: isDeleting ? 'not-allowed' : 'pointer',
-                      opacity: isDeleting ? 0.6 : 1,
-                    }}
-                  >
-                    {isDeleting ? '삭제 중...' : '삭제'}
-                  </button>
-                </>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  style={{
+                    padding: '4px 8px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'var(--text-secondary)',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  수정
+                </button>
+              )}
+
+              {/* 삭제 버튼 (본인 댓글 또는 관리자) */}
+              {canDelete && (
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  style={{
+                    padding: '4px 8px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#ef4444',
+                    fontSize: '13px',
+                    cursor: isDeleting ? 'not-allowed' : 'pointer',
+                    opacity: isDeleting ? 0.6 : 1,
+                  }}
+                >
+                  {isDeleting ? '삭제 중...' : '삭제'}
+                </button>
               )}
 
               {/* 답글 토글 버튼 (대댓글이 있는 경우) */}

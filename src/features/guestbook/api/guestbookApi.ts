@@ -170,32 +170,30 @@ export const guestbookApi = createApi({
      * 관리자 답글 작성
      */
     addAdminReply: builder.mutation<Guestbook, GuestbookAdminReplyData>({
-      async queryFn({ id, adminReply }) {
-        // Get current user
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+      async queryFn({ id, adminReply }, { getState }) {
+        // HttpOnly 쿠키 기반: API Route를 통해 인증된 Supabase로 처리
+        const state = getState() as { auth: { user: { id: string } | null } };
+        const user = state.auth.user;
 
-        if (!user) {
-          return { error: { status: 401, data: { message: 'Unauthorized' } } };
-        }
-
-        const { data, error } = await supabase
-          .from('guestbook')
-          .update({
+        const response = await fetch('/api/admin/guestbook', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            id,
             admin_reply: adminReply,
             admin_replied_at: new Date().toISOString(),
-            admin_user_id: user.id,
-          })
-          .eq('id', id)
-          .select()
-          .single();
+            admin_user_id: user?.id || null,
+          }),
+        });
 
-        if (error) {
-          return { error: { status: 400, data: { message: error.message } } };
+        const result = await response.json();
+
+        if (!response.ok) {
+          return { error: { status: response.status, data: { message: result.error } } };
         }
 
-        return { data: transformGuestbookFromDB(data as GuestbookDB) };
+        return { data: transformGuestbookFromDB(result.data as GuestbookDB) };
       },
       invalidatesTags: (result, error, { id }) => [{ type: TAG_TYPES.GUESTBOOK, id }],
     }),
@@ -204,8 +202,12 @@ export const guestbookApi = createApi({
      * 방문록 항목 업데이트 (관리자)
      */
     updateGuestbookEntry: builder.mutation<Guestbook, GuestbookUpdateData>({
-      async queryFn({ id, ...updates }) {
-        const dbUpdates: Partial<GuestbookDB> = {};
+      async queryFn({ id, ...updates }, { getState }) {
+        // HttpOnly 쿠키 기반: API Route를 통해 인증된 Supabase로 처리
+        const state = getState() as { auth: { user: { id: string } | null } };
+        const user = state.auth.user;
+
+        const dbUpdates: Record<string, unknown> = {};
 
         if (updates.isApproved !== undefined) {
           dbUpdates.is_approved = updates.isApproved;
@@ -216,28 +218,23 @@ export const guestbookApi = createApi({
         if (updates.adminReply !== undefined) {
           dbUpdates.admin_reply = updates.adminReply;
           dbUpdates.admin_replied_at = new Date().toISOString();
-
-          // Get current user for admin reply
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
-          if (user) {
-            dbUpdates.admin_user_id = user.id;
-          }
+          dbUpdates.admin_user_id = user?.id || null;
         }
 
-        const { data, error } = await supabase
-          .from('guestbook')
-          .update(dbUpdates)
-          .eq('id', id)
-          .select()
-          .single();
+        const response = await fetch('/api/admin/guestbook', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ id, ...dbUpdates }),
+        });
 
-        if (error) {
-          return { error: { status: 400, data: { message: error.message } } };
+        const result = await response.json();
+
+        if (!response.ok) {
+          return { error: { status: response.status, data: { message: result.error } } };
         }
 
-        return { data: transformGuestbookFromDB(data as GuestbookDB) };
+        return { data: transformGuestbookFromDB(result.data as GuestbookDB) };
       },
       invalidatesTags: (result, error, { id }) => [
         { type: TAG_TYPES.GUESTBOOK, id },
@@ -249,15 +246,20 @@ export const guestbookApi = createApi({
     /**
      * 방문록 항목 삭제 (관리자)
      */
-    deleteGuestbookEntry: builder.mutation<void, string>({
+    deleteGuestbookEntry: builder.mutation<null, string>({
       async queryFn(id) {
-        const { error } = await supabase.from('guestbook').delete().eq('id', id);
+        // HttpOnly 쿠키 기반: API Route를 통해 인증된 Supabase로 처리
+        const response = await fetch(`/api/admin/guestbook?id=${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
 
-        if (error) {
-          return { error: { status: 400, data: { message: error.message } } };
+        if (!response.ok) {
+          const result = await response.json();
+          return { error: { status: response.status, data: { message: result.error } } };
         }
 
-        return { data: undefined };
+        return { data: null };
       },
       invalidatesTags: (result, error, id) => [
         { type: TAG_TYPES.GUESTBOOK, id },

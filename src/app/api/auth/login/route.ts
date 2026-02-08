@@ -51,12 +51,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Admin 권한 확인 (admin_users 테이블)
+    // Admin 권한 확인 (admin_users 테이블 - email로 매칭)
     const { data: adminUser, error: adminError } = await supabase
       .from('admin_users')
       .select('*')
-      .eq('user_id', data.user.id)
-      .eq('is_active', true)
+      .eq('email', data.user.email)
       .single();
 
     if (adminError || !adminUser) {
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
         id: data.user.id,
         email: data.user.email,
         name: adminUser.name || data.user.email?.split('@')[0],
-        role: adminUser.role,
+        role: 'admin',
       },
     });
   } catch (error) {

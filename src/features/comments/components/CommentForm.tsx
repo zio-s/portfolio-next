@@ -12,12 +12,13 @@
  */
 
 import { useState, useEffect } from 'react';
+import { Shield } from 'lucide-react';
 import {
   useAddCommentMutation,
   useUpdateCommentMutation,
 } from '../api/commentsApi';
 import type { Comment } from '../types/Comment';
-import { useAppSelector, selectUser } from '../../../store';
+import { useAppSelector, selectUser, selectIsAdmin } from '../../../store';
 
 interface CommentFormProps {
   projectId: string;
@@ -46,6 +47,7 @@ export const CommentForm = ({
   // Redux Selector 패턴 사용 (Best Practice)
   const currentUser = useAppSelector(selectUser);
   const isLoggedIn = !!currentUser;
+  const isAdmin = useAppSelector(selectIsAdmin);
 
   // RTK Query mutations
   const [addComment, { isLoading: isAdding }] = useAddCommentMutation();
@@ -153,6 +155,16 @@ export const CommentForm = ({
         border: parentId ? '1px solid var(--border-color)' : 'none',
       }}
     >
+      {/* 관리자 표시 */}
+      {isAdmin && !isEditMode && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent/10 border border-accent/20">
+          <Shield className="w-4 h-4 text-accent" />
+          <span className="text-sm font-semibold text-accent">{currentUser?.name}</span>
+          <span className="px-1.5 py-0.5 text-[10px] font-bold bg-accent/20 text-accent rounded">ADMIN</span>
+          <span className="text-xs text-muted-foreground">으로 댓글 작성</span>
+        </div>
+      )}
+
       {/* 비로그인 사용자 정보 입력 */}
       {!isLoggedIn && !isEditMode && (
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>

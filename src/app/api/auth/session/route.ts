@@ -71,11 +71,11 @@ export async function GET() {
       return response;
     }
 
-    // Admin 정보 가져오기
+    // Admin 정보 가져오기 (email로 매칭)
     const { data: adminUser } = await supabase
       .from('admin_users')
-      .select('name, role')
-      .eq('user_id', user.id)
+      .select('name')
+      .eq('email', user.email)
       .single();
 
     return NextResponse.json({
@@ -83,7 +83,7 @@ export async function GET() {
         id: user.id,
         email: user.email,
         name: adminUser?.name || user.user_metadata?.name || user.email?.split('@')[0],
-        role: adminUser?.role || 'user',
+        role: adminUser ? 'admin' : 'user',
       },
     });
   } catch (error) {

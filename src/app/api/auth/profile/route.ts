@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest) {
       const { error: updateError } = await supabase
         .from('admin_users')
         .update(updateData)
-        .eq('user_id', user.id);
+        .eq('email', user.email);
 
       if (updateError) {
         console.error('Profile update error:', updateError);
@@ -58,11 +58,11 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // 업데이트된 사용자 정보 가져오기
+    // 업데이트된 사용자 정보 가져오기 (email로 매칭)
     const { data: adminUser } = await supabase
       .from('admin_users')
-      .select('name, role')
-      .eq('user_id', user.id)
+      .select('name')
+      .eq('email', user.email)
       .single();
 
     return NextResponse.json({
@@ -70,7 +70,7 @@ export async function PUT(request: NextRequest) {
         id: user.id,
         email: user.email,
         name: adminUser?.name || name || user.email?.split('@')[0],
-        role: adminUser?.role || 'user',
+        role: adminUser ? 'admin' : 'user',
       },
     });
   } catch (error) {

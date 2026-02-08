@@ -4,7 +4,7 @@
  * 로그인한 관리자의 프로필 정보를 확인하고 수정하는 페이지입니다.
  */
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { selectUser, selectAuthLoading, updateProfile, logout } from '../store/slices/authSlice';
@@ -22,9 +22,15 @@ const ProfilePage = () => {
   const { showConfirm } = useConfirmModal();
   const { showAlert } = useAlertModal();
 
+  const [mounted, setMounted] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [loading, setLoading] = useState(false);
+
+  // Hydration 안전: 클라이언트 마운트 후에만 Redux 상태 반영
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -78,25 +84,12 @@ const ProfilePage = () => {
     });
   };
 
-  // 로딩 중
-  if (authLoading) {
+  // 로딩 중 또는 마운트 전 (hydration 안전)
+  if (!mounted || authLoading || !user) {
     return (
       <AdminLayout>
         <div className="flex justify-center items-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-accent" />
-        </div>
-      </AdminLayout>
-    );
-  }
-
-  // 사용자 정보 없음
-  if (!user) {
-    return (
-      <AdminLayout>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-          <User className="w-16 h-16 text-muted-foreground mb-4" />
-          <h1 className="text-xl font-semibold mb-2">프로필 정보를 불러올 수 없습니다</h1>
-          <p className="text-muted-foreground">다시 로그인해주세요.</p>
         </div>
       </AdminLayout>
     );

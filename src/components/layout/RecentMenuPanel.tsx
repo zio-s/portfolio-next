@@ -88,7 +88,7 @@ export const RecentMenuPanel = () => {
 
     const query = searchQuery.toLowerCase();
     return recentItems.filter(
-      item =>
+      (item: RecentMenuItem) =>
         item.title.toLowerCase().includes(query) ||
         item.description?.toLowerCase().includes(query)
     );

@@ -18,6 +18,7 @@ import {
   selectRecentItemsCount,
   clearRecentItems,
   removeRecentItem,
+  type RecentMenuItem,
 } from '../../store/slices/recentMenuSlice';
 import { useConfirmModal } from '@/components/modal/hooks';
 import './recentMenu.css';
@@ -164,7 +165,7 @@ export const RecentMenuDropdown = () => {
               <p className="recent-menu__empty-text">최근 방문한 항목이 없습니다</p>
             </div>
           ) : (
-            recentItems.map(item => (
+            recentItems.map((item: RecentMenuItem) => (
               <Link
                 key={item.id}
                 to={item.path}

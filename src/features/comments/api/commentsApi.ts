@@ -121,13 +121,13 @@ export const commentsApi = createApi({
       invalidatesTags: (result, error, id) => [{ type: TAG_TYPES.COMMENT, id }],
     }),
 
-    likeComment: builder.mutation<void, string>({
+    likeComment: builder.mutation<null, string>({
       async queryFn(id) {
         const { error } = await supabase.rpc('increment_comment_likes', { comment_uuid: id });
         if (error) {
           return { error: { status: 400, data: { message: error.message } } };
         }
-        return { data: undefined };
+        return { data: null };
       },
       // Optimistic update: 댓글 목록의 likes 즉시 증가
       async onQueryStarted(commentId, { dispatch, queryFulfilled, getState }) {
@@ -165,13 +165,13 @@ export const commentsApi = createApi({
       },
     }),
 
-    unlikeComment: builder.mutation<void, string>({
+    unlikeComment: builder.mutation<null, string>({
       async queryFn(id) {
         const { error } = await supabase.rpc('decrement_comment_likes', { comment_uuid: id });
         if (error) {
           return { error: { status: 400, data: { message: error.message } } };
         }
-        return { data: undefined };
+        return { data: null };
       },
       // Optimistic update: 댓글 목록의 likes 즉시 감소
       async onQueryStarted(commentId, { dispatch, queryFulfilled, getState }) {

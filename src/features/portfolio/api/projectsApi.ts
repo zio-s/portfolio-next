@@ -338,7 +338,7 @@ export const projectsApi = createApi({
     /**
      * 프로젝트 조회수 증가
      */
-    incrementViews: builder.mutation<void, string>({
+    incrementViews: builder.mutation<null, string>({
       async queryFn(id) {
         try {
           // Call Supabase RPC function
@@ -355,7 +355,7 @@ export const projectsApi = createApi({
             };
           }
 
-          return { data: undefined };
+          return { data: null };
         } catch (error: unknown) {
           const errorMessage = error && typeof error === 'object' && 'message' in error && typeof (error as { message?: string }).message === 'string'
             ? (error as { message: string }).message
@@ -378,7 +378,7 @@ export const projectsApi = createApi({
     /**
      * 프로젝트 좋아요
      */
-    likeProject: builder.mutation<void, string>({
+    likeProject: builder.mutation<null, string>({
       async queryFn(id) {
         try {
           // Call Supabase RPC function
@@ -395,7 +395,7 @@ export const projectsApi = createApi({
             };
           }
 
-          return { data: undefined };
+          return { data: null };
         } catch (error: unknown) {
           const errorMessage = error && typeof error === 'object' && 'message' in error && typeof (error as { message?: string }).message === 'string'
             ? (error as { message: string }).message
@@ -452,7 +452,7 @@ export const projectsApi = createApi({
     /**
      * 프로젝트 좋아요 취소
      */
-    unlikeProject: builder.mutation<void, string>({
+    unlikeProject: builder.mutation<null, string>({
       async queryFn(id) {
         try {
           // Call Supabase RPC function
@@ -469,7 +469,7 @@ export const projectsApi = createApi({
             };
           }
 
-          return { data: undefined };
+          return { data: null };
         } catch (error: unknown) {
           const errorMessage = error && typeof error === 'object' && 'message' in error && typeof (error as { message?: string }).message === 'string'
             ? (error as { message: string }).message
@@ -678,7 +678,7 @@ export const projectsApi = createApi({
     /**
      * 프로젝트 정렬 순서 업데이트 (Admin)
      */
-    updateProjectsOrder: builder.mutation<void, { id: string; sortOrder: number }[]>({
+    updateProjectsOrder: builder.mutation<null, { id: string; sortOrder: number }[]>({
       async queryFn(updates) {
         try {
           // 각 프로젝트의 sort_order를 업데이트
@@ -698,7 +698,7 @@ export const projectsApi = createApi({
             }
           }
 
-          return { data: undefined };
+          return { data: null };
         } catch (error: unknown) {
           const errorMessage = error && typeof error === 'object' && 'message' in error && typeof (error as { message?: string }).message === 'string'
             ? (error as { message: string }).message
