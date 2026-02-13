@@ -36,19 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // 프로젝트 동적 페이지
-  const { data: projects } = await supabase
-    .from('projects')
-    .select('id, updated_at')
-    .order('display_order', { ascending: true });
-
-  const projectPages: MetadataRoute.Sitemap = (projects || []).map((project) => ({
-    url: `${baseUrl}/projects/${project.id}`,
-    lastModified: new Date(project.updated_at),
-    changeFrequency: 'monthly' as const,
-    priority: 0.8,
-  }));
-
   // 블로그 동적 페이지 (post_number로 URL 생성)
   const { data: posts } = await supabase
     .from('posts')
@@ -63,5 +50,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...projectPages, ...blogPages];
+  return [...staticPages, ...blogPages];
 }
