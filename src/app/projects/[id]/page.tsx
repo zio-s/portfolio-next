@@ -1,7 +1,5 @@
-'use client';
-
-import ProjectDetailPage from '@/views/ProjectDetailPage';
+import { redirect } from 'next/navigation';
 
 export default function ProjectDetail() {
-  return <ProjectDetailPage />;
+  redirect('/projects');
 }
