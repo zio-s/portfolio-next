@@ -6,10 +6,12 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Reply, Trash2 } from 'lucide-react';
+import { MessageCircle, Reply, Trash2, Shield } from 'lucide-react';
 import { useGetPostCommentsQuery, useDeletePostCommentMutation } from '../../../store/api/postCommentsApi';
 import { PostCommentForm } from './PostCommentForm';
 import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
+import { useAppSelector } from '../../../store';
+import { selectIsAdmin, selectUser } from '../../../store/slices/authSlice';
 import type { PostComment } from '../../../store/types';
 
 interface PostCommentListProps {
@@ -19,6 +21,8 @@ interface PostCommentListProps {
 
 export const PostCommentList = ({ postId, maxDepth = 3 }: PostCommentListProps) => {
   const { data, isLoading, error, refetch } = useGetPostCommentsQuery(postId);
+  const isAdmin = useAppSelector(selectIsAdmin);
+  const currentUser = useAppSelector(selectUser);
 
   /**
    * Loading Skeleton
@@ -101,6 +105,8 @@ export const PostCommentList = ({ postId, maxDepth = 3 }: PostCommentListProps) 
             depth={0}
             maxDepth={maxDepth}
             isLast={index === data.length - 1}
+            isAdmin={isAdmin}
+            adminEmail={currentUser?.email}
           />
         ))}
       </div>
@@ -117,19 +123,27 @@ interface CommentItemProps {
   depth: number;
   maxDepth: number;
   isLast?: boolean;
+  isAdmin?: boolean;
+  adminEmail?: string;
 }
 
-const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false }: CommentItemProps) => {
+const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false, isAdmin = false, adminEmail }: CommentItemProps) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [deleteComment, { isLoading: isDeleting }] = useDeletePostCommentMutation();
   const { showAlert } = useAlertModal();
   const { showConfirm } = useConfirmModal();
+
+  // 이 댓글이 관리자가 작성한 댓글인지 확인
+  const isAdminComment = adminEmail && comment.author_email === adminEmail;
 
   // localStorage에서 본인 댓글인지 확인
   const isMyComment = () => {
     const myComments = JSON.parse(localStorage.getItem('myComments') || '[]');
     return myComments.includes(comment.id);
   };
+
+  // 삭제 가능 여부: 본인 댓글 또는 관리자
+  const canDelete = isAdmin || isMyComment();
 
   const handleReplySuccess = () => {
     setShowReplyForm(false);
@@ -194,16 +208,32 @@ const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false }: Comme
       >
         {/* 아바타 */}
         <div className="shrink-0">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center text-accent font-semibold text-sm border-2 border-accent/10">
-            {comment.author_name.charAt(0).toUpperCase()}
-          </div>
+          {isAdminComment ? (
+            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-xl border border-accent/30">
+              👨‍💻
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center text-accent font-semibold text-sm border-2 border-accent/10">
+              {comment.author_name.charAt(0).toUpperCase()}
+            </div>
+          )}
         </div>
 
         {/* 댓글 내용 */}
         <div className="flex-1 min-w-0">
           {/* 작성자 & 날짜 */}
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="font-semibold text-foreground">{comment.author_name}</span>
+            {isAdminComment ? (
+              <>
+                <span className="font-semibold text-sm text-accent">{comment.author_name}</span>
+                <span className="px-2 py-0.5 text-[10px] font-semibold bg-accent/20 text-accent rounded inline-flex items-center gap-1">
+                  <Shield className="w-2.5 h-2.5" />
+                  ADMIN
+                </span>
+              </>
+            ) : (
+              <span className="font-semibold text-foreground">{comment.author_name}</span>
+            )}
             <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
           </div>
 
@@ -224,8 +254,8 @@ const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false }: Comme
               </button>
             )}
 
-            {/* 본인 댓글일 때만 삭제 버튼 표시 */}
-            {isMyComment() && (
+            {/* 본인 댓글 또는 관리자일 때 삭제 버튼 표시 */}
+            {canDelete && (
               <button
                 onClick={handleDeleteClick}
                 disabled={isDeleting}
@@ -271,6 +301,8 @@ const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false }: Comme
               depth={depth + 1}
               maxDepth={maxDepth}
               isLast={index === comment.replies!.length - 1 && isLast}
+              isAdmin={isAdmin}
+              adminEmail={adminEmail}
             />
           ))}
         </div>
