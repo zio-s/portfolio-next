@@ -75,13 +75,24 @@ export const postCommentsApi = createApi({
           return { error: { status: 500, data: { message: error.message } } };
         }
       },
-      providesTags: (result, _error, postId) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({ type: 'PostComment' as const, id })),
-              { type: 'PostComment', id: `POST_${postId}` },
-            ]
-          : [{ type: 'PostComment', id: `POST_${postId}` }],
+      providesTags: (result, _error, postId) => {
+        if (!result) return [{ type: 'PostComment' as const, id: `POST_${postId}` }];
+
+        // 루트 댓글 + 모든 대댓글 ID 수집 (삭제 시 캐시 무효화 보장)
+        const allIds: string[] = [];
+        const collectIds = (comments: import('../types').PostComment[]) => {
+          for (const c of comments) {
+            allIds.push(c.id);
+            if (c.replies?.length) collectIds(c.replies);
+          }
+        };
+        collectIds(result);
+
+        return [
+          ...allIds.map((id) => ({ type: 'PostComment' as const, id })),
+          { type: 'PostComment' as const, id: `POST_${postId}` },
+        ];
+      },
     }),
 
     /**

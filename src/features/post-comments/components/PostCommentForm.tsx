@@ -6,9 +6,9 @@
 
 import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Send, X, User, Mail, Loader2 } from 'lucide-react';
+import { Send, X, User, Mail, Loader2, Shield } from 'lucide-react';
 import { useAppSelector } from '../../../store';
-import { selectUser } from '../../../store/slices/authSlice';
+import { selectUser, selectIsAdmin } from '../../../store/slices/authSlice';
 import { useCreatePostCommentMutation } from '../../../store/api/postCommentsApi';
 
 interface PostCommentFormProps {
@@ -28,6 +28,7 @@ export const PostCommentForm = ({
 }: PostCommentFormProps) => {
   const currentUser = useAppSelector(selectUser);
   const isLoggedIn = !!currentUser;
+  const isAdmin = useAppSelector(selectIsAdmin);
 
   const [content, setContent] = useState('');
   const [authorName, setAuthorName] = useState('');
@@ -112,15 +113,14 @@ export const PostCommentForm = ({
       }`}
     >
       {/* 로그인 사용자 표시 */}
-      {isLoggedIn && !parentId && (
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-white text-xs font-semibold">
-            {currentUser!.name.charAt(0).toUpperCase()}
-          </div>
-          <span className="text-sm font-semibold text-foreground">
-            {currentUser!.name}
-          </span>
-          <span className="text-xs text-muted-foreground">본 댓글 작성</span>
+      {isLoggedIn && (
+        <div className="flex items-center gap-2 mb-1 px-3 py-2 rounded-lg bg-accent/10 border border-accent/20">
+          <Shield className="w-4 h-4 text-accent" />
+          <span className="text-sm font-semibold text-accent">{currentUser!.name}</span>
+          {isAdmin && (
+            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-accent/20 text-accent rounded">ADMIN</span>
+          )}
+          <span className="text-xs text-muted-foreground">으로 {parentId ? '답글' : '댓글'} 작성</span>
         </div>
       )}
 
