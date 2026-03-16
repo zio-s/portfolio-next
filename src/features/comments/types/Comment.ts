@@ -22,6 +22,9 @@ export interface Comment {
   replies?: Comment[]; // 자식 댓글 (프론트엔드에서 트리 구조로 변환)
   createdAt: string;
   updatedAt: string;
+  // 관리자 페이지용
+  sourceType?: 'project' | 'blog';
+  sourceTitle?: string;
 }
 
 /**
