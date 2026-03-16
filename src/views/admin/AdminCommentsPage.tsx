@@ -12,6 +12,8 @@ import { useConfirmModal } from '@/components/modal/hooks/use-confirm-modal';
 import { useGetAllCommentsQuery, useDeleteCommentMutation, useAddCommentMutation } from '../../features/comments/api/commentsApi';
 import { useCreatePostCommentMutation } from '../../store/api/postCommentsApi';
 import { Loader2, Trash2, Heart, MessageCircle, Reply, Send, X } from 'lucide-react';
+import { useAppSelector } from '../../store';
+import { selectUser } from '../../store/slices/authSlice';
 import type { Comment } from '../../features/comments/types/Comment';
 
 /**
@@ -22,11 +24,13 @@ const AdminReplyForm = ({
   onSubmit,
   onCancel,
   isLoading,
+  adminName,
 }: {
   comment: Comment;
   onSubmit: (content: string) => void;
   onCancel: () => void;
   isLoading: boolean;
+  adminName: string;
 }) => {
   const [content, setContent] = useState('');
 
@@ -41,11 +45,11 @@ const AdminReplyForm = ({
       <td colSpan={6} className="px-6 py-3 bg-accent/5">
         <form onSubmit={handleSubmit} className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
-            S
+            {adminName[0]}
           </div>
           <div className="flex-1 space-y-2">
             <div className="text-xs text-muted-foreground">
-              <span className="font-medium text-accent">SEM</span>으로 <span className="font-medium">{comment.authorName}</span>에게 답글
+              <span className="font-medium text-accent">{adminName}</span>으로 <span className="font-medium">{comment.authorName}</span>에게 답글
             </div>
             <textarea
               value={content}
@@ -89,6 +93,7 @@ export const AdminCommentsPage = () => {
   const [addBlogComment, { isLoading: isAddingBlogComment }] = useCreatePostCommentMutation();
   const { showAlert } = useAlertModal();
   const { showConfirm } = useConfirmModal();
+  const currentUser = useAppSelector(selectUser);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
   const comments = data?.items || [];
@@ -100,15 +105,15 @@ export const AdminCommentsPage = () => {
         await addBlogComment({
           post_id: comment.projectId,
           content,
-          author_name: 'SEM',
-          author_email: 'admin@admin.com',
+          author_name: currentUser?.name || 'admin',
+          author_email: currentUser?.email || 'admin@admin.com',
           parent_id: comment.id,
         }).unwrap();
       } else {
         await addProjectComment({
           projectId: comment.projectId,
           content,
-          authorName: 'SEM',
+          authorName: currentUser?.name || 'admin',
           parentId: comment.id,
         }).unwrap();
       }
@@ -337,6 +342,7 @@ export const AdminCommentsPage = () => {
                         onSubmit={(content) => handleReply(comment, content)}
                         onCancel={() => setReplyingTo(null)}
                         isLoading={isReplying}
+                        adminName={currentUser?.name || 'admin'}
                       />
                     )}
                   </Fragment>
@@ -442,7 +448,7 @@ export const AdminCommentsPage = () => {
                     className="space-y-2"
                   >
                     <div className="text-xs text-muted-foreground">
-                      <span className="font-medium text-accent">SEM</span>으로 답글 작성
+                      <span className="font-medium text-accent">{currentUser?.name || 'admin'}</span>으로 답글 작성
                     </div>
                     <textarea
                       placeholder="답글을 작성하세요..."
