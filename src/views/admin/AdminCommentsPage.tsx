@@ -41,11 +41,11 @@ const AdminReplyForm = ({
       <td colSpan={6} className="px-6 py-3 bg-accent/5">
         <form onSubmit={handleSubmit} className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
-            B
+            S
           </div>
           <div className="flex-1 space-y-2">
             <div className="text-xs text-muted-foreground">
-              <span className="font-medium text-accent">B.SM</span>으로 <span className="font-medium">{comment.authorName}</span>에게 답글
+              <span className="font-medium text-accent">SEM</span>으로 <span className="font-medium">{comment.authorName}</span>에게 답글
             </div>
             <textarea
               value={content}
@@ -100,7 +100,7 @@ export const AdminCommentsPage = () => {
         await addBlogComment({
           post_id: comment.projectId,
           content,
-          author_name: 'B.SM',
+          author_name: 'SEM',
           author_email: 'admin@admin.com',
           parent_id: comment.id,
         }).unwrap();
@@ -108,7 +108,7 @@ export const AdminCommentsPage = () => {
         await addProjectComment({
           projectId: comment.projectId,
           content,
-          authorName: 'B.SM',
+          authorName: 'SEM',
           parentId: comment.id,
         }).unwrap();
       }
@@ -442,7 +442,7 @@ export const AdminCommentsPage = () => {
                     className="space-y-2"
                   >
                     <div className="text-xs text-muted-foreground">
-                      <span className="font-medium text-accent">B.SM</span>으로 답글 작성
+                      <span className="font-medium text-accent">SEM</span>으로 답글 작성
                     </div>
                     <textarea
                       placeholder="답글을 작성하세요..."
