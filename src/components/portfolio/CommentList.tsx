@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useGetCommentsQuery, useCreateCommentMutation } from '@/features/portfolio/api/projectsApi';
 import { useAlertModal } from '@/components/modal/hooks/use-alert-modal';
 import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '@/store/slices/authSlice';
+import { selectIsAuthenticated, selectUser } from '@/store/slices/authSlice';
 import { filterProfanity, filterNickname, hasProfanity } from '@/utils/profanityFilter';
 import type { Database } from '@/lib/database.types';
 
@@ -36,6 +36,8 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
 
   // Check if user is authenticated (admin)
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const currentUser = useSelector(selectUser);
+  const adminName = currentUser?.name || 'admin';
 
   // Format relative time
   const formatRelativeTime = (dateString: string) => {
@@ -75,7 +77,7 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
 
       // 관리자 전용 닉네임 차단
       const lowerNickname = nickname.trim().toLowerCase();
-      if (lowerNickname === 'admin' || lowerNickname === 'sem' || nickname.trim() === 'SEM') {
+      if (lowerNickname === 'admin' || lowerNickname === adminName.toLowerCase() || nickname.trim() === adminName) {
         showAlert({
           title: '사용 불가능한 닉네임',
           message: '해당 닉네임은 관리자 전용입니다.',
@@ -86,7 +88,7 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
     }
 
     // 욕설 필터 적용
-    const filteredName = isAuthenticated ? 'SEM' : filterNickname(nickname.trim());
+    const filteredName = isAuthenticated ? adminName : filterNickname(nickname.trim());
     const filteredContent = filterProfanity(commentText.trim());
 
     // 욕설이 감지되었는지 확인
@@ -155,7 +157,7 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
 
       // 관리자 전용 닉네임 차단
       const lowerReplyNickname = replyNickname.trim().toLowerCase();
-      if (lowerReplyNickname === 'admin' || lowerReplyNickname === 'sem' || replyNickname.trim() === 'SEM') {
+      if (lowerReplyNickname === 'admin' || lowerReplyNickname === adminName.toLowerCase() || replyNickname.trim() === adminName) {
         showAlert({
           title: '사용 불가능한 닉네임',
           message: '해당 닉네임은 관리자 전용입니다.',
@@ -166,7 +168,7 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
     }
 
     // 욕설 필터 적용
-    const filteredName = isAuthenticated ? 'SEM' : filterNickname(replyNickname.trim());
+    const filteredName = isAuthenticated ? adminName : filterNickname(replyNickname.trim());
     const filteredContent = filterProfanity(replyText.trim());
 
     // 욕설이 감지되었는지 확인
@@ -287,7 +289,7 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                     <User className="w-5 h-5 text-muted-foreground" />
                   </div>
-                  {comment.author_name === 'SEM' && (
+                  {comment.author_name === adminName && (
                     <span className="text-[10px] font-semibold text-accent">admin</span>
                   )}
                 </div>
@@ -295,7 +297,7 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 mb-1">
-                    <span className={`text-sm font-medium ${comment.author_name === 'SEM' ? 'text-accent' : ''}`}>
+                    <span className={`text-sm font-medium ${comment.author_name === adminName ? 'text-accent' : ''}`}>
                       {comment.author_name}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -383,7 +385,7 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
                         <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                           <User className="w-4 h-4 text-muted-foreground" />
                         </div>
-                        {reply.author_name === 'SEM' && (
+                        {reply.author_name === adminName && (
                           <span className="text-[9px] font-semibold text-accent">admin</span>
                         )}
                       </div>
@@ -391,7 +393,7 @@ export const CommentList: React.FC<CommentListProps> = ({ projectId, className }
                       {/* Reply Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-2 mb-1">
-                          <span className={`text-sm font-medium ${reply.author_name === 'SEM' ? 'text-accent' : ''}`}>
+                          <span className={`text-sm font-medium ${reply.author_name === adminName ? 'text-accent' : ''}`}>
                             {reply.author_name}
                           </span>
                           <span className="text-xs text-muted-foreground">
