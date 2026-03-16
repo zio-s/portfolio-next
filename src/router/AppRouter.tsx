@@ -23,6 +23,7 @@ const HomePage = lazy(() => import('../views/HomePage'));
 const ProjectsPage = lazy(() => import('../views/ProjectsPage'));
 const ProjectDetailPage = lazy(() => import('../views/ProjectDetailPage'));
 const GuestbookPage = lazy(() => import('../views/GuestbookPage'));
+const LottoPage = lazy(() => import('../views/LottoPage'));
 
 // 보호된 페이지
 const DashboardPage = lazy(() => import('../views/DashboardPage'));
@@ -98,6 +99,9 @@ export const AppRouter = () => {
 
           {/* 방문록 라우트 - 공개 */}
           <Route path="/guestbook" element={<GuestbookPage />} />
+
+          {/* 개인 유틸 */}
+          <Route path={ROUTES.LOTTO} element={<LottoPage />} />
 
           {/* 블로그 라우트 - 공개 (로그인 시 관리 기능 표시) */}
           <Route path="/blog" element={<PostsPage />} />

@@ -22,6 +22,8 @@ export const PUBLIC_ROUTES = {
   LOGIN: '/login',
   /** 회원가입 페이지 */
   REGISTER: '/register',
+  /** 개인 유틸 */
+  LOTTO: '/u/rng-42',
 } as const;
 
 /**
