@@ -61,20 +61,56 @@ export const commentsApi = createApi({
     }),
 
     /**
-     * 전체 댓글 조회 (관리자용)
+     * 전체 댓글 조회 (관리자용) - 프로젝트 + 블로그 댓글 통합
      */
     getAllComments: builder.query<CommentsResponse, void>({
       async queryFn() {
-        const { data, error } = await supabase
+        // 1. 프로젝트 댓글 (프로젝트 제목 join)
+        const { data: projectComments, error: pcError } = await supabase
           .from('comments')
-          .select('*')
+          .select('*, projects(title)')
           .order('created_at', { ascending: false });
 
-        if (error) {
-          return { error: { status: 400, data: { message: error.message } } };
+        if (pcError) {
+          return { error: { status: 400, data: { message: pcError.message } } };
         }
 
-        return { data: { items: (data || []).map(transformComment), total: data?.length || 0 } };
+        const transformedProjectComments = (projectComments || []).map((row) => ({
+          ...transformComment(row),
+          sourceType: 'project' as const,
+          sourceTitle: (row as unknown as { projects: { title: string } | null }).projects?.title || '알 수 없는 프로젝트',
+        }));
+
+        // 2. 블로그 댓글 (게시글 제목 join) - post_comments는 database.types에 없으므로 any 사용
+        const { data: blogComments, error: bcError } = await (supabase as any)
+          .from('post_comments')
+          .select('*, posts(title)')
+          .order('created_at', { ascending: false });
+
+        if (bcError) {
+          return { error: { status: 400, data: { message: bcError.message } } };
+        }
+
+        const transformedBlogComments = ((blogComments || []) as any[]).map((row) => ({
+          id: row.id,
+          projectId: row.post_id,
+          parentId: row.parent_id ?? undefined,
+          authorName: row.author_name,
+          authorEmail: row.author_email ?? undefined,
+          authorAvatar: undefined,
+          content: row.content,
+          likes: row.likes ?? 0,
+          createdAt: row.created_at ?? new Date().toISOString(),
+          updatedAt: row.updated_at ?? new Date().toISOString(),
+          sourceType: 'blog' as const,
+          sourceTitle: row.posts?.title || '알 수 없는 게시글',
+        } as Comment));
+
+        // 3. 합치고 날짜순 정렬
+        const allComments = [...transformedProjectComments, ...transformedBlogComments]
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        return { data: { items: allComments, total: allComments.length } };
       },
       providesTags: (result) =>
         result

@@ -292,7 +292,7 @@ const PostsPage = () => {
               transition={{ duration: 0.5 }}
             >
               <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">
-                Blog
+                배우고 기록합니다
               </h1>
               <p className="text-muted-foreground">
                 전체 <span className="font-semibold text-accent">{totalCount}</span>개의 게시글
