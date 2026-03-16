@@ -19,7 +19,7 @@ import {
   useCreateProjectMutation,
   useUpdateProjectsOrderMutation,
 } from '../../features/portfolio/api/projectsApi';
-import { Loader2, Plus, Edit2, Trash2, Star, Eye, Heart, MessageCircle } from 'lucide-react';
+import { Loader2, Plus, Edit2, Trash2, Star, Eye, Heart, MessageCircle, EyeOff } from 'lucide-react';
 
 /**
  * 순번 편집 Input 컴포넌트
@@ -88,6 +88,7 @@ interface TableRowProps {
   onEdit: (project: Project) => void;
   onDelete: (id: string, title: string) => void;
   onToggleFeatured: (id: string, featured: boolean) => void;
+  onToggleHidden: (id: string, hidden: boolean) => void;
   onOrderClick: () => void;
   onOrderSave: (newOrder: number) => void;
   onOrderCancel: () => void;
@@ -101,12 +102,13 @@ const TableRow = ({
   onEdit,
   onDelete,
   onToggleFeatured,
+  onToggleHidden,
   onOrderClick,
   onOrderSave,
   onOrderCancel,
 }: TableRowProps) => {
   return (
-    <div className="grid grid-cols-[60px_1fr_100px_100px_120px_100px] items-center border-b border-border hover:bg-muted/30 transition-all">
+    <div className={`grid grid-cols-[50px_1fr_90px_80px_80px_110px_90px] items-center border-b border-border hover:bg-muted/30 transition-all ${project.hidden ? 'opacity-50' : ''}`}>
       {/* Order Number */}
       <div className="px-3 py-4 text-center">
         {isEditingOrder ? (
@@ -145,19 +147,32 @@ const TableRow = ({
       </div>
 
       {/* Featured Toggle */}
-      <div className="px-4 py-4 text-center">
+      <div className="px-2 py-4 text-center">
         <button
           onClick={() => onToggleFeatured(project.id, project.featured)}
-          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+          className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
             project.featured
               ? 'bg-accent text-white hover:bg-accent/90'
               : 'bg-muted text-muted-foreground hover:bg-muted/80'
           }`}
+          title={project.featured ? '대표 해제' : '대표로 설정'}
         >
-          <Star
-            className={`w-3 h-3 ${project.featured ? 'fill-current' : ''}`}
-          />
-          {project.featured ? '대표' : '일반'}
+          <Star className={`w-4 h-4 ${project.featured ? 'fill-current' : ''}`} />
+        </button>
+      </div>
+
+      {/* Hidden Toggle */}
+      <div className="px-2 py-4 text-center">
+        <button
+          onClick={() => onToggleHidden(project.id, project.hidden)}
+          className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
+            project.hidden
+              ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+              : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'
+          }`}
+          title={project.hidden ? '클릭하여 공개' : '클릭하여 숨기기'}
+        >
+          {project.hidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
 
@@ -213,6 +228,7 @@ interface MobileCardProps {
   onEdit: (project: Project) => void;
   onDelete: (id: string, title: string) => void;
   onToggleFeatured: (id: string, featured: boolean) => void;
+  onToggleHidden: (id: string, hidden: boolean) => void;
   onOrderClick: () => void;
   onOrderSave: (newOrder: number) => void;
   onOrderCancel: () => void;
@@ -226,12 +242,13 @@ const MobileCard = ({
   onEdit,
   onDelete,
   onToggleFeatured,
+  onToggleHidden,
   onOrderClick,
   onOrderSave,
   onOrderCancel,
 }: MobileCardProps) => {
   return (
-    <div className="p-4 rounded-lg border bg-card border-border space-y-3">
+    <div className={`p-4 rounded-lg border bg-card border-border space-y-3 ${project.hidden ? 'opacity-50' : ''}`}>
       {/* Header with Order */}
       <div className="flex items-start justify-between gap-2">
         {isEditingOrder ? (
@@ -295,7 +312,18 @@ const MobileCard = ({
           }`}
         >
           <Star className={`w-3 h-3 ${project.featured ? 'fill-current' : ''}`} />
-          {project.featured ? '대표 프로젝트' : '일반 프로젝트'}
+          {project.featured ? '대표' : '일반'}
+        </button>
+        <button
+          onClick={() => onToggleHidden(project.id, project.hidden)}
+          className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+            project.hidden
+              ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          }`}
+        >
+          <EyeOff className="w-3 h-3" />
+          {project.hidden ? '숨김' : '공개'}
         </button>
         <button
           onClick={() => onEdit(project)}
@@ -324,7 +352,7 @@ export const AdminProjectsPage = () => {
   const { showConfirm } = useConfirmModal();
 
   // RTK Query hooks
-  const { data, isLoading: loading, error } = useGetProjectsQuery({ limit: 100, sort: 'default' });
+  const { data, isLoading: loading, error } = useGetProjectsQuery({ limit: 100, sort: 'default', includeHidden: true });
   const [deleteProject] = useDeleteProjectMutation();
   const [updateProject] = useUpdateProjectMutation();
   const [createProject] = useCreateProjectMutation();
@@ -415,6 +443,29 @@ export const AdminProjectsPage = () => {
       showAlert({
         title: 'Featured 설정 실패',
         message: 'Featured 상태 변경에 실패했습니다.',
+        type: 'error',
+      });
+    }
+  };
+
+  const toggleHidden = async (id: string, currentHidden: boolean) => {
+    try {
+      await updateProject({
+        id,
+        hidden: !currentHidden,
+      }).unwrap();
+
+      showAlert({
+        title: currentHidden ? '공개 전환' : '숨김 처리',
+        message: currentHidden
+          ? '프로젝트가 공개되었습니다.'
+          : '프로젝트가 숨김 처리되었습니다.',
+        type: 'success',
+      });
+    } catch {
+      showAlert({
+        title: '숨김 설정 실패',
+        message: '숨김 상태 변경에 실패했습니다.',
         type: 'error',
       });
     }
@@ -528,7 +579,7 @@ export const AdminProjectsPage = () => {
         {/* Projects Grid - Desktop */}
         <div className="hidden md:block overflow-hidden rounded-lg border border-border bg-card">
           {/* Header */}
-          <div className="grid grid-cols-[60px_1fr_100px_100px_120px_100px] items-center border-b border-border bg-muted/50">
+          <div className="grid grid-cols-[50px_1fr_90px_80px_80px_110px_90px] items-center border-b border-border bg-muted/50">
             <div className="px-3 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center">
               순번
             </div>
@@ -538,8 +589,11 @@ export const AdminProjectsPage = () => {
             <div className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               카테고리
             </div>
-            <div className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center">
-              Featured
+            <div className="px-2 py-3 text-xs font-semibold text-muted-foreground tracking-wider text-center">
+              대표
+            </div>
+            <div className="px-2 py-3 text-xs font-semibold text-muted-foreground tracking-wider text-center">
+              노출
             </div>
             <div className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center">
               통계
@@ -560,6 +614,7 @@ export const AdminProjectsPage = () => {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onToggleFeatured={toggleFeatured}
+                onToggleHidden={toggleHidden}
                 onOrderClick={() => setEditingOrderId(project.id)}
                 onOrderSave={(newOrder) => handleOrderChange(project.id, newOrder)}
                 onOrderCancel={() => setEditingOrderId(null)}
@@ -580,6 +635,7 @@ export const AdminProjectsPage = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onToggleFeatured={toggleFeatured}
+              onToggleHidden={toggleHidden}
               onOrderClick={() => setEditingOrderId(project.id)}
               onOrderSave={(newOrder) => handleOrderChange(project.id, newOrder)}
               onOrderCancel={() => setEditingOrderId(null)}

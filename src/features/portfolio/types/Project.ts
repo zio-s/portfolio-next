@@ -53,6 +53,7 @@ export interface Project {
 
   status: ProjectStatus;
   featured: boolean; // 메인 페이지에 강조 표시
+  hidden: boolean; // 프로젝트 숨김 여부
   stats: ProjectStats;
   sortOrder: number; // 정렬 순서
   createdAt: string;
@@ -73,6 +74,7 @@ export interface ProjectFilters {
   page?: number;
   limit?: number;
   sort?: 'default' | 'recent' | 'popular' | 'views' | 'likes';
+  includeHidden?: boolean;
 }
 
 /**
@@ -110,6 +112,7 @@ export interface CreateProjectDto {
   solutions?: string[];
   status: ProjectStatus;
   featured?: boolean;
+  hidden?: boolean;
 }
 
 /**
@@ -135,6 +138,7 @@ export interface UpdateProjectDto {
   solutions?: string[];
   status?: ProjectStatus;
   featured?: boolean;
+  hidden?: boolean;
 }
 
 /**

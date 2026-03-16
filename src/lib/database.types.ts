@@ -107,6 +107,7 @@ export type Database = {
           duration: string
           featured: boolean | null
           github_url: string | null
+          hidden: boolean
           id: string
           images: string[] | null
           likes: number | null
@@ -133,6 +134,7 @@ export type Database = {
           duration: string
           featured?: boolean | null
           github_url?: string | null
+          hidden?: boolean
           id?: string
           images?: string[] | null
           likes?: number | null
@@ -159,6 +161,7 @@ export type Database = {
           duration?: string
           featured?: boolean | null
           github_url?: string | null
+          hidden?: boolean
           id?: string
           images?: string[] | null
           likes?: number | null
