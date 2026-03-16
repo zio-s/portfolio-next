@@ -34,6 +34,7 @@ const transformProject = (row: Database['public']['Tables']['projects']['Row']):
   liveUrl: row.demo_url ?? undefined,
   status: 'public' as const,
   featured: row.featured ?? false,
+  hidden: (row as Record<string, unknown>).hidden as boolean ?? false,
   duration: row.duration,
   teamSize: row.team_size,
   role: row.role,
@@ -75,6 +76,11 @@ export const projectsApi = createApi({
         try {
           const actualFilters = filters || {};
           let query = supabase.from('projects').select('*', { count: 'exact' });
+
+          // Hide hidden projects unless explicitly included
+          if (!actualFilters.includeHidden) {
+            query = query.eq('hidden', false);
+          }
 
           // Apply filters
           if (actualFilters.category) {
@@ -288,6 +294,7 @@ export const projectsApi = createApi({
           if (data.githubUrl !== undefined) updateData.github_url = data.githubUrl;
           if (data.liveUrl !== undefined) updateData.demo_url = data.liveUrl;
           if (data.images !== undefined) updateData.images = data.images;
+          if (data.hidden !== undefined) (updateData as Record<string, unknown>).hidden = data.hidden;
 
           const { data: result, error } = await supabase
             .from('projects')
