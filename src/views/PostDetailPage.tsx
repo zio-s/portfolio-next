@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * 게시글 상세 페이지
  *
@@ -27,8 +29,6 @@ import { Container } from '@/components/ui/container';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { SEO } from '@/components/common/SEO';
-import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/common/JsonLd';
 import { PostCommentList } from '@/features/post-comments/components/PostCommentList';
 import { PostCommentForm } from '@/features/post-comments/components/PostCommentForm';
 import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
@@ -44,8 +44,13 @@ import {
   MessageCircle,
   Eye,
 } from 'lucide-react';
+import type { Post } from '@/store/types';
 
-const PostDetailPage = () => {
+interface PostDetailPageProps {
+  initialPost?: Post;
+}
+
+const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showAlert } = useAlertModal();
@@ -58,12 +63,15 @@ const PostDetailPage = () => {
   const backPath = '/blog';
 
   // URL 파라미터를 숫자로 변환 (post_number)
-  const postNumber = id ? Number(id) : NaN;
+  const postNumber = initialPost?.post_number ?? (id ? Number(id) : NaN);
 
-  // RTK Query hooks - post_number로 조회
-  const { data: post, isLoading: loading, error } = useGetPostByNumberQuery(postNumber, {
+  // RTK Query hooks - post_number로 조회 (클라이언트에서 유저별 데이터 갱신)
+  const { data: clientPost, isLoading: loading, error } = useGetPostByNumberQuery(postNumber, {
     skip: isNaN(postNumber),
   });
+
+  // 서버 데이터 우선 사용, 클라이언트 데이터로 전환 (is_liked 등 반영)
+  const post = clientPost ?? initialPost;
   const [deletePostMutation] = useDeletePostMutation();
   const [toggleLike, { isLoading: isLikeLoading }] = useToggleLikeMutation();
   const [incrementView] = useIncrementViewMutation();
@@ -168,8 +176,8 @@ const PostDetailPage = () => {
     }
   };
 
-  // 로딩 상태
-  if (loading) {
+  // 로딩 상태 (initialPost가 있으면 스피너 생략)
+  if (loading && !post) {
     return (
       <MainLayout>
         <Section className="py-20">
@@ -246,35 +254,6 @@ const PostDetailPage = () => {
 
   return (
     <MainLayout>
-      <SEO
-        title={`${post.title} | Blog`}
-        description={post.excerpt || post.content.slice(0, 160)}
-        url={`https://semincode.com/blog/${post.post_number}`}
-        type="article"
-        publishedTime={post.publishedAt || post.createdAt}
-        modifiedTime={post.updatedAt}
-      />
-
-      {/* JSON-LD 구조화 데이터 - 구글 리치 결과용 */}
-      <ArticleJsonLd
-        title={post.title}
-        description={post.excerpt || post.content.slice(0, 160)}
-        url={`https://semincode.com/blog/${post.post_number}`}
-        datePublished={post.publishedAt || post.createdAt}
-        dateModified={post.updatedAt}
-        keywords={post.tags}
-        articleBody={post.content}
-      />
-
-      {/* 브레드크럼 - 구글 검색에서 경로 표시 */}
-      <BreadcrumbJsonLd
-        items={[
-          { name: '홈', url: '/' },
-          { name: '블로그', url: '/blog' },
-          { name: post.title, url: `/blog/${post.post_number}` },
-        ]}
-      />
-
       {/* Back Button */}
       <Section className="pt-8 pb-4">
         <Container>
