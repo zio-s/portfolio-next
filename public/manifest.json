@@ -1,0 +1,27 @@
+{
+  "name": "변세민 | 프론트엔드 개발자 포트폴리오",
+  "short_name": "SeminCode",
+  "description": "React, TypeScript, Next.js로 사용자 경험 중심의 웹 서비스를 개발하는 프론트엔드 개발자 변세민의 포트폴리오입니다.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "lang": "ko",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["portfolio", "technology"]
+}
