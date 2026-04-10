@@ -10,8 +10,11 @@
  */
 
 import { useEffect, useRef, useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
+
+const HeroCanvas = dynamic(() => import('@/components/three/HeroCanvas'), { ssr: false });
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Github, MessageCircle, Mail, ArrowRight, ChevronRight } from 'lucide-react';
@@ -122,8 +125,7 @@ const BackgroundParticles = () => {
 };
 
 const HomePage = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const skillsRef = useRef<HTMLDivElement>(null);
+  const skillsRef     = useRef<HTMLDivElement>(null);
 
   // RTK Query로 프로젝트 목록 조회 (홈페이지에서는 featured만)
   const { data: projectsData } = useGetProjectsQuery({
@@ -141,9 +143,6 @@ const HomePage = () => {
     status: 'published',
   });
 
-  const { scrollYProgress } = useScroll();
-  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
   useEffect(() => {
     // 스킬 섹션 스크롤 애니메이션
@@ -213,24 +212,27 @@ const HomePage = () => {
         description="프론트엔드 개발자 변세민의 포트폴리오입니다. React, TypeScript, Redux를 활용한 웹 애플리케이션 개발 프로젝트를 소개합니다."
       />
 
-      {/* Hero Section with Parallax & 3D */}
-      <motion.section
-        ref={heroRef}
-        style={{ opacity, scale }}
-        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-24 sm:pt-0 sm:pb-28"
+      {/* Hero Section — Three.js 파티클 구 배경 */}
+      <section
+        id="hero"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden select-none"
       >
-        {/* Animated background particles - SSR safe with fixed positions */}
-        <BackgroundParticles />
+        {/* Three.js 캔버스 (절대 위치로 배경 차지) */}
+        <HeroCanvas />
 
-        {/* Hero Content */}
-        <motion.div
-          className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 text-center"
-        >
+        {/* 하단 페이드 — 다음 섹션으로 자연스럽게 이어짐 */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-10"
+          style={{ background: 'linear-gradient(to bottom, transparent, var(--color-background))' }}
+        />
+
+
+        {/* Hero 텍스트 콘텐츠 — 캔버스 위에 표시 */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 text-center pointer-events-none">
           <motion.h1
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-accent/60 via-accent to-purple-500 bg-clip-text text-transparent"
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400/80 via-indigo-400 to-purple-400 bg-clip-text text-transparent"
           >
             Frontend Developer
           </motion.h1>
@@ -238,8 +240,8 @@ const HomePage = () => {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-muted-foreground mb-8 sm:mb-12 font-light"
+            transition={{ duration: 0.8, delay: 1.0 }}
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/70 mb-8 sm:mb-12 font-light"
           >
             사용자 경험을 최우선으로 생각하는 개발자
           </motion.p>
@@ -247,8 +249,8 @@ const HomePage = () => {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-sm sm:text-base md:text-lg text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4"
+            transition={{ duration: 0.8, delay: 1.2 }}
+            className="text-sm sm:text-base md:text-lg text-white/50 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4"
           >
             React와 TypeScript로 견고한 웹 애플리케이션을 만들고,
             <br className="hidden sm:block" />
@@ -259,17 +261,17 @@ const HomePage = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-wrap gap-3 sm:gap-4 justify-center mb-8 sm:mb-12"
+            transition={{ duration: 0.8, delay: 1.35 }}
+            className="flex flex-wrap gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 pointer-events-auto"
           >
             <Link to={ROUTES.PROJECTS}>
-              <Button size="lg" className="shadow-lg hover:shadow-xl transition-all text-sm sm:text-base">
+              <Button size="lg" className="bg-accent hover:bg-accent/85 text-white shadow-lg shadow-accent/30 text-sm sm:text-base border-0">
                 View Projects
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </Link>
             <Link to={ROUTES.BLOG}>
-              <Button variant="outline" size="lg" className="text-sm sm:text-base">
+              <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10 text-sm sm:text-base">
                 Read Blog
               </Button>
             </Link>
@@ -279,8 +281,8 @@ const HomePage = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex gap-4 justify-center"
+            transition={{ duration: 0.8, delay: 1.5 }}
+            className="flex gap-4 justify-center pointer-events-auto"
           >
             {[
               { icon: Github, href: 'https://github.com/zio-s', label: '깃허브' },
@@ -292,33 +294,33 @@ const HomePage = () => {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-lg bg-card flex hover:bg-accent/10 transition-colors border border-border"
-                  whileHover={{ y: 3 }}
+                  className="p-3 rounded-lg bg-white/5 flex hover:bg-white/15 transition-colors border border-white/10"
+                  whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.95 }}
                   aria-label={label}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5 text-white/80" />
                 </motion.a>
               </Tooltip>
             ))}
           </motion.div>
-        </motion.div>
+        </div>
 
-        {/* Scroll indicator */}
+        {/* 스크롤 인디케이터 */}
         <motion.div
-          className="absolute bottom-24 sm:bottom-25 left-1/2 -translate-x-1/2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <div className="w-6 h-10 border-2 border-border rounded-full p-1">
+          <div className="w-6 h-10 border-2 border-white/20 rounded-full p-1">
             <motion.div
-              className="w-1.5 h-1.5 bg-accent rounded-full mx-auto"
+              className="w-1.5 h-1.5 bg-white/60 rounded-full mx-auto"
               animate={{ y: [0, 20, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             />
           </div>
         </motion.div>
-      </motion.section>
+      </section>
 
       {/* Skills Section */}
       <section ref={skillsRef} className="py-32 px-8 relative fade-in-section bg-card/30">
