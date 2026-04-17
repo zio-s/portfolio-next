@@ -134,9 +134,11 @@ export default function HeroCanvas() {
 
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
+    // 저DPR(일반 모니터)에선 Bloom이 과포화되어 보여 완화
+    const isLowDpr = Math.min(window.devicePixelRatio, 2) < 1.5;
     composer.addPass(new EffectPass(camera, new BloomEffect({
-      intensity: 0.45,
-      luminanceThreshold: 0.28,
+      intensity: isLowDpr ? 0.22 : 0.45,
+      luminanceThreshold: isLowDpr ? 0.45 : 0.28,
       luminanceSmoothing: 0.88,
       mipmapBlur: true,
     })));

@@ -220,6 +220,15 @@ const HomePage = () => {
         {/* Three.js 캔버스 (절대 위치로 배경 차지) */}
         <HeroCanvas />
 
+        {/* 중앙 비네트 — 파티클과 텍스트가 겹치는 영역만 살짝 어둡게 */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[5]"
+          style={{
+            background:
+              'radial-gradient(ellipse 55% 50% at 50% 45%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 45%, transparent 75%)',
+          }}
+        />
+
         {/* 하단 페이드 — 다음 섹션으로 자연스럽게 이어짐 */}
         <div className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-10"
           style={{ background: 'linear-gradient(to bottom, transparent, var(--color-background))' }}
@@ -241,7 +250,7 @@ const HomePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.0 }}
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/70 mb-8 sm:mb-12 font-light"
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/95 mb-8 sm:mb-12 font-light [text-shadow:0_0_20px_rgba(0,0,0,0.85),0_2px_8px_rgba(0,0,0,0.7)]"
           >
             사용자 경험을 최우선으로 생각하는 개발자
           </motion.p>
@@ -250,12 +259,12 @@ const HomePage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 1.2 }}
-            className="text-sm sm:text-base md:text-lg text-white/50 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4"
+            className="text-sm sm:text-base md:text-lg text-white/85 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4 [text-shadow:0_0_16px_rgba(0,0,0,0.85),0_2px_6px_rgba(0,0,0,0.7)]"
           >
-            React와 TypeScript로 견고한 웹 애플리케이션을 만들고,
+            <span className="text-white font-medium">React</span>와 <span className="text-white font-medium">TypeScript</span>로 견고한 웹 애플리케이션을 만들고,
             <br className="hidden sm:block" />
             <span className="sm:hidden"> </span>
-            세심한 애니메이션으로 사용자에게 즐거움을 전달합니다.
+            세심한 애니메이션으로 <span className="text-white font-medium">사용자에게 즐거움</span>을 전달합니다.
           </motion.p>
 
           <motion.div
