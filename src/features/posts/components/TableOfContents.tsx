@@ -64,21 +64,60 @@ export function TableOfContents({
     setItems(list);
 
     if (list.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length > 0) {
-          visible.sort((a, b) => (a.target as HTMLElement).offsetTop - (b.target as HTMLElement).offsetTop);
-          setActiveId(visible[0].target.id);
+
+    // scroll-margin-top과 동일한 offset (헤더 60 + 여유 24)
+    const HEADER_OFFSET = 84;
+
+    /**
+     * Active 결정: 헤더 라인(viewport top + HEADER_OFFSET) 위로 올라간 마지막 heading.
+     * 즉 "현재 화면에 보이는 가장 최근 섹션의 heading".
+     * IntersectionObserver는 heading 자체의 visibility만 보므로
+     * 1번 heading 클릭 후 즉시 viewport에 들어오는 2번 heading을 잘못 잡을 수 있음.
+     */
+    let raf = 0;
+    const update = () => {
+      const threshold = HEADER_OFFSET + 1;
+      let current = list[0]?.id ?? '';
+      for (const it of list) {
+        const el = document.getElementById(it.id);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top;
+        if (top <= threshold) {
+          current = it.id;
+        } else {
+          break;
         }
-      },
-      { rootMargin: '-80px 0px -70% 0px' }
-    );
-    headings.forEach((h) => observer.observe(h));
-    return () => observer.disconnect();
+      }
+      setActiveId(current);
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, [containerSelector, contentKey]);
 
   if (items.length < minItems) return null;
+
+  // 앵커 클릭 → smooth scroll. scroll-margin-top 84px가 자동 적용됨.
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const target = document.getElementById(id);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // URL hash 갱신 (history에는 안 쌓이게 replace)
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#${id}`);
+    }
+    setActiveId(id);
+  };
 
   if (variant === 'inline') {
     return (
@@ -100,6 +139,7 @@ export function TableOfContents({
               <a
                 key={it.id}
                 href={`#${it.id}`}
+                onClick={(e) => handleAnchorClick(e, it.id)}
                 className="block py-0.5"
                 style={{
                   color: active ? 'var(--blog-accent)' : 'var(--blog-fg-muted)',
@@ -127,6 +167,7 @@ export function TableOfContents({
             <li key={it.id}>
               <a
                 href={`#${it.id}`}
+                onClick={(e) => handleAnchorClick(e, it.id)}
                 className="block py-0.5 transition-colors"
                 style={{
                   color: active ? 'var(--blog-accent)' : 'var(--blog-fg-muted)',

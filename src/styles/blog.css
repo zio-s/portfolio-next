@@ -96,6 +96,8 @@
   letter-spacing: -0.02em;
   margin: 2.5em 0 1em;
   color: var(--blog-fg);
+  /* TOC 앵커 점프 시 sticky 헤더(60px)에 가리지 않도록 offset */
+  scroll-margin-top: 84px;
 }
 .blog-article h3 {
   font-size: 20px;
@@ -103,6 +105,7 @@
   letter-spacing: -0.015em;
   margin: 2em 0 0.8em;
   color: var(--blog-fg);
+  scroll-margin-top: 84px;
 }
 .blog-article a {
   color: var(--blog-accent);
