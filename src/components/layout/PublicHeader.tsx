@@ -42,7 +42,7 @@ export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode
   return (
     <>
       <header
-        className="fixed top-0 left-0 right-0 h-[60px] z-[1020] flex items-center px-4 lg:px-8"
+        className="fixed top-0 left-0 right-0 h-14 lg:h-[60px] z-[1020] flex items-center px-4 lg:px-8"
         style={{
           background: 'rgba(10, 10, 15, 0.8)',
           backdropFilter: 'blur(12px)',

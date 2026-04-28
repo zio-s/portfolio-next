@@ -76,7 +76,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
-          className="flex-1 pt-16"
+          className="flex-1 pt-14 lg:pt-[60px]"
           variants={pageVariants}
           initial="initial"
           animate="animate"
