@@ -15,12 +15,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, X } from 'lucide-react';
+import { LayoutDashboard, LogOut, PenSquare, Search, X } from 'lucide-react';
 import { useAppDispatch, useGetPostsQuery } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { openCommandPalette } from './GlobalCommandPalette';
 import { aggregateCategories, aggregateTags } from '@/lib/blog';
 import { PROFILE } from '@/config/profile';
+import { ROUTES } from '@/router/routes';
 import type { MenuItem } from '@/components/layout/Header';
 
 const OPEN_EVENT = 'open-mobile-drawer';
@@ -296,20 +297,43 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
 
         <div className="flex-1" />
 
-        {/* Footer (login/logout) */}
+        {/* User menu (인라인 expanded — DESIGN_RESPONSE_R3.md §5) */}
         <div className="pt-3" style={{ borderTop: '1px solid var(--blog-border)' }}>
           {user ? (
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-[12px]"
-              style={{ color: 'var(--blog-fg-muted)' }}
-            >
-              {user.name} · 로그아웃
-            </button>
+            <div className="flex flex-col">
+              <div className="px-2 pb-2.5 mb-1" style={{ borderBottom: '1px solid var(--blog-border)' }}>
+                <div className="text-[13px] font-semibold truncate" style={{ color: 'var(--blog-fg)' }}>{user.name}</div>
+                <div className="blog-mono text-[11px] mt-0.5 truncate" style={{ color: 'var(--blog-fg-subtle)' }}>{user.email}</div>
+              </div>
+              <Link
+                to={ROUTES.DASHBOARD}
+                className="flex items-center gap-2.5 px-2 py-2 text-[13px] rounded-md hover:bg-[var(--blog-accent-soft)] transition-colors"
+                style={{ color: 'var(--blog-fg)' }}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" style={{ color: 'var(--blog-fg-muted)' }} />
+                <span>관리자 대시보드</span>
+              </Link>
+              <Link
+                to={ROUTES.BLOG_CREATE}
+                className="flex items-center gap-2.5 px-2 py-2 text-[13px] rounded-md hover:bg-[var(--blog-accent-soft)] transition-colors"
+                style={{ color: 'var(--blog-fg)' }}
+              >
+                <PenSquare className="w-3.5 h-3.5" style={{ color: 'var(--blog-fg-muted)' }} />
+                <span>새 글 작성</span>
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="mt-1 flex items-center gap-2.5 px-2 py-2 text-[13px] rounded-md hover:bg-[var(--blog-accent-soft)] transition-colors"
+                style={{ color: 'var(--blog-heart)', borderTop: '1px solid var(--blog-border)' }}
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>로그아웃</span>
+              </button>
+            </div>
           ) : (
-            <Link to="/login" className="text-[12px]" style={{ color: 'var(--blog-fg-muted)' }}>
-              로그인
+            <Link to="/login" className="text-[13px] inline-flex items-center gap-1.5" style={{ color: 'var(--blog-fg-muted)' }}>
+              로그인 →
             </Link>
           )}
         </div>

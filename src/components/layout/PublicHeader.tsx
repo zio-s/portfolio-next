@@ -11,12 +11,11 @@
  * - 햄버거 → 좌측 drawer (네비)
  */
 
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Menu, Search } from 'lucide-react';
-import { useAppDispatch } from '@/store';
-import { logout } from '@/store/slices/authSlice';
+import { useLocation, Link } from 'react-router-dom';
+import { Menu, Search, ArrowRight } from 'lucide-react';
 import { openCommandPalette } from '@/features/posts/components/GlobalCommandPalette';
 import { openMobileDrawer, MobileDrawer } from '@/features/posts/components/MobileDrawer';
+import { UserMenu } from './UserMenu';
 import type { MenuItem } from './Header';
 
 interface PublicHeaderProps {
@@ -27,17 +26,8 @@ interface PublicHeaderProps {
 
 export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode' }: PublicHeaderProps) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   const isActive = (href: string) => href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
-
-  const handleLogout = async () => {
-    try {
-      await dispatch(logout()).unwrap();
-      navigate('/');
-    } catch { /* silent */ }
-  };
 
   return (
     <>
@@ -109,32 +99,18 @@ export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode
           <Search className="w-5 h-5" style={{ color: 'var(--blog-fg)' }} />
         </button>
 
-        {/* 데스크톱 — 아바타 또는 프로필 inline */}
+        {/* 데스크톱 — 사용자 메뉴 dropdown 또는 로그인 링크 */}
         {user ? (
-          <div className="hidden lg:flex items-center gap-3 ml-1">
-            <div
-              className="w-7 h-7 rounded-full grid place-items-center text-[11px] font-bold text-white"
-              style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}
-              title={user.name}
-            >
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-[12px] hover:text-[var(--blog-fg)] transition-colors"
-              style={{ color: 'var(--blog-fg-muted)' }}
-            >
-              로그아웃
-            </button>
+          <div className="hidden lg:block">
+            <UserMenu user={user} />
           </div>
         ) : (
           <Link
             to="/login"
-            className="hidden lg:inline-block text-[12px] px-2.5 py-1.5"
+            className="hidden lg:inline-flex items-center gap-1.5 text-[12px] px-2.5 py-1.5 transition-colors hover:text-[var(--blog-fg)]"
             style={{ color: 'var(--blog-fg-muted)' }}
           >
-            로그인
+            로그인 <ArrowRight className="w-3 h-3" />
           </Link>
         )}
       </header>
