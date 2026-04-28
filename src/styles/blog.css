@@ -1,0 +1,229 @@
+/**
+ * Blog Section Tokens & Utilities
+ *
+ * blog-n/SPEC.md 기반 블로그 전용 스타일 토큰
+ * - dark first, accent purple #8b5cf6
+ * - Linear / overreacted.io 무드 (단정한 다크, 글에 집중)
+ *
+ * 적용 범위: /blog, /blog/[id], /blog/create, /blog/edit/[id]
+ * 컴포넌트는 .bm 클래스 또는 CSS 변수(--blog-*)로 접근
+ */
+
+:root {
+  /* Blog colors (light mode default - 토큰만 정의, 다크 우선) */
+  --blog-bg: #0a0a0f;
+  --blog-bg-soft: #0d1118;
+  --blog-card: #131824;
+  --blog-card-hover: #171d2c;
+  --blog-border: #202d3f;
+  --blog-border-soft: #1a2433;
+  --blog-fg: #f8f9fb;
+  --blog-fg-muted: #94a3b8;
+  --blog-fg-subtle: #64748b;
+  --blog-accent: #8b5cf6;
+  --blog-accent-soft: rgba(139, 92, 246, 0.12);
+  --blog-heart: #f43f5e;
+
+  --blog-font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, system-ui, sans-serif;
+  --blog-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+}
+
+/* ===== Blog mono / label primitives ===== */
+.blog-mono {
+  font-family: var(--blog-font-mono);
+  font-feature-settings: 'tnum';
+}
+
+.blog-uppercase-label {
+  font-family: var(--blog-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blog-fg-muted);
+}
+
+/* ===== Keyboard chip (⌘K, esc, ↵) ===== */
+.blog-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: #1e293b;
+  border: 1px solid var(--blog-border);
+  font-family: var(--blog-font-mono);
+  font-size: 10px;
+  color: var(--blog-fg-muted);
+  font-weight: 500;
+}
+
+/* ===== Reading progress bar (page top) ===== */
+.blog-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--blog-border-soft);
+  z-index: 1031;
+  pointer-events: none;
+}
+.blog-progress-fill {
+  height: 100%;
+  background: var(--blog-accent);
+  box-shadow: 0 0 6px var(--blog-accent);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* ===== Markdown article tweaks ===== */
+.blog-article h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-top: 40px;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+  color: var(--blog-fg);
+}
+.blog-article h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  letter-spacing: -0.015em;
+  color: var(--blog-fg);
+}
+.blog-article p,
+.blog-article ul,
+.blog-article ol {
+  color: var(--blog-fg-muted);
+  line-height: 1.75;
+}
+.blog-article :where(p, ul, ol, blockquote) + :where(p, ul, ol) {
+  margin-top: 16px;
+}
+.blog-article blockquote {
+  border-left: 2px solid var(--blog-accent);
+  padding-left: 20px;
+  margin: 24px 0;
+  color: var(--blog-fg-muted);
+  font-style: italic;
+}
+.blog-article :not(pre) > code {
+  background: var(--blog-card);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: var(--blog-font-mono);
+  font-size: 13px;
+  color: var(--blog-accent);
+  border: 1px solid var(--blog-border);
+}
+
+/* ===== Tag chip (mono small) ===== */
+.blog-tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: var(--blog-card);
+  border: 1px solid var(--blog-border);
+  border-radius: 4px;
+  color: var(--blog-fg-muted);
+  font-family: var(--blog-font-mono);
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease, border-color 100ms ease;
+}
+.blog-tag:hover {
+  background: var(--blog-accent-soft);
+  color: var(--blog-accent);
+  border-color: var(--blog-accent);
+}
+
+/* ===== Sidebar category row ===== */
+.blog-cat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--blog-fg);
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+.blog-cat-row:hover {
+  background: var(--blog-accent-soft);
+}
+.blog-cat-row[data-active='true'] {
+  background: var(--blog-accent-soft);
+  color: var(--blog-accent);
+  font-weight: 600;
+}
+
+/* ===== Row item hover (post list) ===== */
+.blog-row {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--blog-border);
+  cursor: pointer;
+}
+.blog-row:last-child {
+  border-bottom: none;
+}
+.blog-row:hover .blog-row-title {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--blog-fg-muted);
+}
+
+/* ===== Heart pulse animation (like button) ===== */
+@keyframes blog-heart-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.blog-heart-pulse {
+  animation: blog-heart-pulse 200ms ease-out;
+}
+
+/* ===== Command palette ===== */
+.blog-cmd-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1040;
+}
+.blog-cmd-modal {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(640px, calc(100vw - 32px));
+  background: var(--blog-card);
+  border: 1px solid var(--blog-border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  z-index: 1050;
+}
+.blog-cmd-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+}
+.blog-cmd-row[data-active='true'] {
+  background: var(--blog-accent-soft);
+  border-left-color: var(--blog-accent);
+}
+.blog-cmd-row mark {
+  background: var(--blog-accent-soft);
+  color: var(--blog-accent);
+  padding: 0 2px;
+  border-radius: 2px;
+}
