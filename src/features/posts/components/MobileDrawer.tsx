@@ -297,9 +297,9 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
 
         <div className="flex-1" />
 
-        {/* User menu (인라인 expanded — DESIGN_RESPONSE_R3.md §5) */}
-        <div className="pt-3" style={{ borderTop: '1px solid var(--blog-border)' }}>
-          {user ? (
+        {/* User menu — 관리자만 노출 (일반 사용자는 로그인 진입점 없음) */}
+        {user && (
+          <div className="pt-3" style={{ borderTop: '1px solid var(--blog-border)' }}>
             <div className="flex flex-col">
               <div className="px-2 pb-2.5 mb-1" style={{ borderBottom: '1px solid var(--blog-border)' }}>
                 <div className="text-[13px] font-semibold truncate" style={{ color: 'var(--blog-fg)' }}>{user.name}</div>
@@ -331,12 +331,8 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
                 <span>로그아웃</span>
               </button>
             </div>
-          ) : (
-            <Link to="/login" className="text-[13px] inline-flex items-center gap-1.5" style={{ color: 'var(--blog-fg-muted)' }}>
-              로그인 →
-            </Link>
-          )}
-        </div>
+          </div>
+        )}
       </aside>
     </>
   );

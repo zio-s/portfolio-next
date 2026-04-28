@@ -12,7 +12,7 @@
  */
 
 import { useLocation, Link } from 'react-router-dom';
-import { Menu, Search, ArrowRight } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { openCommandPalette } from '@/features/posts/components/GlobalCommandPalette';
 import { openMobileDrawer, MobileDrawer } from '@/features/posts/components/MobileDrawer';
 import { UserMenu } from './UserMenu';
@@ -99,19 +99,11 @@ export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode
           <Search className="w-5 h-5" style={{ color: 'var(--blog-fg)' }} />
         </button>
 
-        {/* 데스크톱 — 사용자 메뉴 dropdown 또는 로그인 링크 */}
-        {user ? (
+        {/* 데스크톱 — 관리자 사용자만 메뉴 노출 (일반 사용자는 로그인 진입점 없음) */}
+        {user && (
           <div className="hidden lg:block">
             <UserMenu user={user} />
           </div>
-        ) : (
-          <Link
-            to="/login"
-            className="hidden lg:inline-flex items-center gap-1.5 text-[12px] px-2.5 py-1.5 transition-colors hover:text-[var(--blog-fg)]"
-            style={{ color: 'var(--blog-fg-muted)' }}
-          >
-            로그인 <ArrowRight className="w-3 h-3" />
-          </Link>
         )}
       </header>
 
