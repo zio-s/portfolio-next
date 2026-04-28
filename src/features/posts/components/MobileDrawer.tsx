@@ -231,17 +231,19 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
           </button>
         </div>
 
-        {/* search trigger */}
-        <button
-          type="button"
-          onClick={() => { handleClose(); openCommandPalette(); }}
-          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] transition-colors"
-          style={{ background: 'var(--blog-card)', border: '1px solid var(--blog-border)', color: 'var(--blog-fg-muted)' }}
-        >
-          <Search className="w-3.5 h-3.5" />
-          <span className="flex-1 text-left">전체 검색…</span>
-          <span className="blog-kbd">⌘K</span>
-        </button>
+        {/* search trigger — 블로그 라우트에서만 노출 (블로그 전용 검색이므로) */}
+        {onBlogRoute && (
+          <button
+            type="button"
+            onClick={() => { handleClose(); openCommandPalette(); }}
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] transition-colors"
+            style={{ background: 'var(--blog-card)', border: '1px solid var(--blog-border)', color: 'var(--blog-fg-muted)' }}
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span className="flex-1 text-left">전체 검색…</span>
+            <span className="blog-kbd">⌘K</span>
+          </button>
+        )}
 
         {/* nav */}
         <nav className="flex flex-col gap-0.5">

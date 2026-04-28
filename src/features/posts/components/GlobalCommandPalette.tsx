@@ -12,6 +12,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useGetPostsQuery } from '@/store';
 import { CommandPalette, useCommandPaletteShortcut } from './CommandPalette';
 
@@ -28,21 +29,32 @@ export function GlobalCommandPalette() {
   const [open, setOpen] = useState(false);
   // 한 번이라도 open된 적 있으면 fetch 유지 (이후 캐시 hit)
   const [hasOpened, setHasOpened] = useState(false);
+  const location = useLocation();
+  const onBlogRoute = location.pathname.startsWith('/blog');
 
   const handleOpen = useCallback(() => {
     setOpen(true);
     setHasOpened(true);
   }, []);
 
-  // ⌘K / Ctrl+K
-  useCommandPaletteShortcut(open, () => (open ? setOpen(false) : handleOpen()));
+  // ⌘K / Ctrl+K — 블로그 라우트에서만 (블로그 전용 검색이므로)
+  // 단, 모달이 이미 열려있으면 어디서든 toggle 가능 (열었을 때 페이지 이동했어도 닫힘 보장)
+  useCommandPaletteShortcut(open, () => {
+    if (open) setOpen(false);
+    else if (onBlogRoute) handleOpen();
+  });
 
-  // 커스텀 이벤트 (사이드바 검색 trigger 등에서 dispatch)
+  // 커스텀 이벤트 — 라우트 가드 없이 (호출하는 쪽에서 이미 가드)
   useEffect(() => {
     const onOpen = () => handleOpen();
     window.addEventListener(OPEN_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_EVENT, onOpen);
   }, [handleOpen]);
+
+  // 라우트 변경으로 blog 떠나면 자동 close
+  useEffect(() => {
+    if (!onBlogRoute && open) setOpen(false);
+  }, [onBlogRoute, open]);
 
   // lazy fetch — open된 적 없으면 skip
   const { data } = useGetPostsQuery(
