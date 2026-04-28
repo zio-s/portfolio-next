@@ -1,16 +1,19 @@
 'use client';
 
 import { useNavigate } from 'react-router-dom';
-import { Clock, Eye, Heart, MessageCircle } from 'lucide-react';
+import { Clock, Edit, Eye, Heart, MessageCircle, Trash2 } from 'lucide-react';
 import type { Post } from '@/store/types';
 import { routeHelpers } from '@/router/routes';
 import { calcReadMinutes, deriveCategory, formatBlogDate, isNewPost } from '@/lib/blog';
 
 interface PostListItemProps {
   post: Post;
+  /** 관리자: status 뱃지 + 우측 상단 수정/삭제 아이콘 노출 */
+  isAdmin?: boolean;
+  onDelete?: (post: Post) => void;
 }
 
-export function PostListItem({ post }: PostListItemProps) {
+export function PostListItem({ post, isAdmin = false, onDelete }: PostListItemProps) {
   const navigate = useNavigate();
   const cat = deriveCategory(post);
   const readMin = calcReadMinutes(post.content);
@@ -22,12 +25,12 @@ export function PostListItem({ post }: PostListItemProps) {
   return (
     <article
       onClick={onClick}
-      className="blog-row group"
+      className="blog-row group relative"
       role="link"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }}
     >
-      {/* Category + new dot */}
+      {/* Category + new dot + status badge (admin) + admin actions */}
       <div className="flex items-center gap-2 mb-3">
         <span
           className="blog-mono text-[11px] font-semibold uppercase tracking-[0.08em]"
@@ -41,6 +44,54 @@ export function PostListItem({ post }: PostListItemProps) {
             style={{ background: 'var(--blog-accent)', boxShadow: '0 0 8px var(--blog-accent)' }}
             aria-label="새 글"
           />
+        )}
+        {isAdmin && post.status !== 'published' && (
+          <span
+            className="blog-mono text-[10px] uppercase tracking-[0.06em] px-1.5 py-0.5 rounded"
+            style={{
+              background: post.status === 'draft' ? 'rgba(148,163,184,0.12)' : 'rgba(244,63,94,0.12)',
+              color: post.status === 'draft' ? 'var(--blog-fg-muted)' : 'var(--blog-heart)',
+              border: `1px solid ${post.status === 'draft' ? 'var(--blog-border)' : 'rgba(244,63,94,0.3)'}`,
+            }}
+          >
+            {post.status === 'draft' ? '초안' : post.status === 'archived' ? '보관' : post.status}
+          </span>
+        )}
+
+        {/* Admin actions — 항상 노출, 미니멀 (수정 / 삭제) */}
+        {isAdmin && (
+          <div className="ml-auto flex items-center gap-0.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(routeHelpers.blogEdit(post.id));
+              }}
+              aria-label="수정"
+              title="수정"
+              className="inline-flex items-center justify-center w-7 h-7 rounded transition-colors hover:bg-white/5"
+              style={{ color: 'var(--blog-fg-subtle)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--blog-accent)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--blog-fg-subtle)'; }}
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(post);
+              }}
+              aria-label="삭제"
+              title="삭제"
+              className="inline-flex items-center justify-center w-7 h-7 rounded transition-colors hover:bg-white/5"
+              style={{ color: 'var(--blog-fg-subtle)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--blog-heart)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--blog-fg-subtle)'; }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         )}
       </div>
 

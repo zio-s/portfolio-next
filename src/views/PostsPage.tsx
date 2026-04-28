@@ -17,11 +17,14 @@ import {
   useAppSelector,
   selectUser,
   useGetPostsQuery,
+  useDeletePostMutation,
 } from '../store';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/components/common/SEO';
 import { CollectionPageJsonLd, BreadcrumbJsonLd } from '@/components/common/JsonLd';
+import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
+import type { Post } from '@/store/types';
 import { PenSquare, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BlogSidebar } from '@/features/posts/components/BlogSidebar';
 import { PostListItem } from '@/features/posts/components/PostListItem';
@@ -42,6 +45,27 @@ const PostsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const user = useAppSelector(selectUser);
   const isAdmin = !!user;
+  const [deletePost] = useDeletePostMutation();
+  const { showAlert } = useAlertModal();
+  const { showConfirm } = useConfirmModal();
+
+  const handleDelete = (post: Post) => {
+    showConfirm({
+      title: '삭제 확인',
+      message: `"${post.title}" 게시글을 삭제하시겠습니까?`,
+      type: 'danger',
+      confirmText: '삭제',
+      cancelText: '취소',
+      onConfirm: async () => {
+        try {
+          await deletePost(post.id).unwrap();
+          showAlert({ title: '완료', message: '게시글이 삭제되었습니다', type: 'success' });
+        } catch {
+          showAlert({ title: '오류', message: '삭제에 실패했습니다', type: 'error' });
+        }
+      },
+    });
+  };
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const cat = searchParams.get('cat') ?? 'all';
@@ -221,7 +245,7 @@ const PostsPage = () => {
           {!loading && !error && pagePosts.length > 0 && (
             <div>
               {pagePosts.map((p) => (
-                <PostListItem key={p.id} post={p} />
+                <PostListItem key={p.id} post={p} isAdmin={isAdmin} onDelete={handleDelete} />
               ))}
             </div>
           )}
