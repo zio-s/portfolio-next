@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { RecentMenuPanel } from './RecentMenuPanel';
 import { MobileSidebar } from './MobileSidebar';
+import { PublicHeader } from './PublicHeader';
 import { useAppDispatch } from '../../store';
 import { logout } from '../../store/slices/authSlice';
 import './layout.css';
@@ -60,6 +61,11 @@ export const Header = ({
   logoText = 'Portfolio CMS',
   publicMenuItems = [],
 }: HeaderProps) => {
+  // Public 모드는 새 디자인(PublicHeader)으로 분기 (DESIGN_RESPONSE.md §3.10)
+  if (mode === 'public') {
+    return <PublicHeader user={user} publicMenuItems={publicMenuItems} logoText={logoText === 'Portfolio CMS' ? 'semincode' : logoText} />;
+  }
+
   // Redux 및 라우터
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -171,35 +177,17 @@ export const Header = ({
           <span className="header__logo-text">{logoText}</span>
         </Link>
 
-        {/* Public 모드: 데스크톱 네비게이션 메뉴 */}
-        {mode === 'public' && publicMenuItems.length > 0 && (
-          <nav className="header__nav header__nav--desktop">
-            {publicMenuItems.map((item) => (
-              <Link
-                key={item.id}
-                to={item.href}
-                className={`header__nav-item ${
-                  isActiveNavItem(item.href) ? 'header__nav-item--active' : ''
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        )}
       </div>
 
       {/* 오른쪽 영역: 최근 방문 + 프로필 + 모바일 사이드바 */}
       <div className="header__right">
-        {/* Admin 모드: 최근 방문 사이드 패널 (Desktop) */}
-        {mode === 'admin' && (
-          <div className="header__recent-panel--desktop">
-            <RecentMenuPanel />
-          </div>
-        )}
+        {/* 최근 방문 사이드 패널 (Desktop) */}
+        <div className="header__recent-panel--desktop">
+          <RecentMenuPanel />
+        </div>
 
-        {/* Admin 모드: 프로필 드롭다운 (Desktop) */}
-        {mode === 'admin' && user && (
+        {/* 프로필 드롭다운 (Desktop) */}
+        {user && (
           <div className="header__profile header__profile--desktop" ref={profileRef}>
             <button
               className="header__profile-button"
