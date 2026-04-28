@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
+  // RSS 자동 발견 (DESIGN_RESPONSE_R4.md §5.5)
+  alternates: {
+    types: {
+      'application/rss+xml': [
+        { url: '/feed.xml', title: 'semincode RSS' },
+      ],
+    },
+  },
 };
 
 export default function RootLayout({
