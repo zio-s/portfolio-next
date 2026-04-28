@@ -88,15 +88,19 @@ export function CommandPalette({ open, onClose, posts }: CommandPaletteProps) {
     }
   }, [open]);
 
-  // 모바일: history.pushState로 back 버튼 닫기 연동
+  // 모바일: history.pushState로 back 버튼 닫기 연동 (DESIGN_RESPONSE_R3.md §4 가드 강화)
   useEffect(() => {
     if (!open || !isMobile || typeof window === 'undefined') return;
     window.history.pushState({ commandPalette: true }, '');
-    const onPop = () => onClose();
+    const onPop = (e: PopStateEvent) => {
+      // 우리가 push한 entry로 돌아간 경우는 무시 (다른 navigation이 끼어들었을 때)
+      if (e.state?.commandPalette) return;
+      onClose();
+    };
     window.addEventListener('popstate', onPop);
     return () => {
       window.removeEventListener('popstate', onPop);
-      // 모달이 다른 경로로 닫혔다면 (취소 버튼 등) 푸시한 history 정리
+      // 정상 close (취소 버튼 / 결과 클릭 / ESC) 시 우리 history entry 정리
       if (window.history.state?.commandPalette) {
         window.history.back();
       }
