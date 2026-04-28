@@ -9,9 +9,12 @@ export const PROFILE = {
   name: '변세민',
   initials: 'SM',
   role: 'Frontend Developer',
-  bio: '사용자에게 즐거움을 주는 인터페이스를 만듭니다. React · TypeScript · Next.js.',
+  location: 'Seoul',
+  bio: '프론트엔드, 디자인, 일상에 대해 씁니다.',
   email: 'popqr1@gmail.com',
   github: 'https://github.com/seming2',
+  twitter: undefined as string | undefined,
+  rss: '/feed.xml',
   url: 'https://semincode.com',
   avatarUrl: undefined as string | undefined,
 } as const;

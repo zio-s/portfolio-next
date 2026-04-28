@@ -303,34 +303,55 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
             onToggle={handleLike}
           />
 
-          {/* About author */}
+          {/* About author (DESIGN_RESPONSE_R3.md §6) */}
           <div
-            className="mt-6 flex items-start gap-4 p-5"
+            className="mt-6 flex items-start gap-4 p-6 sm:p-7"
             style={{ background: 'var(--blog-card)', border: '1px solid var(--blog-border)', borderRadius: 12 }}
           >
             <div
-              className="w-12 h-12 rounded-full grid place-items-center font-bold text-[16px] text-white shrink-0"
+              className="w-14 h-14 rounded-full grid place-items-center font-bold text-[18px] text-white shrink-0"
               style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}
             >
               {PROFILE.initials}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[14px] font-semibold" style={{ color: 'var(--blog-fg)' }}>{PROFILE.name}</span>
-                <span className="blog-mono text-[11px]" style={{ color: 'var(--blog-fg-subtle)' }}>· {PROFILE.role}</span>
+              <div className="text-[16px] font-semibold leading-tight" style={{ color: 'var(--blog-fg)' }}>{PROFILE.name}</div>
+              <div className="text-[13px] mt-1" style={{ color: 'var(--blog-fg-muted)' }}>
+                {PROFILE.role}{PROFILE.location ? ` @ ${PROFILE.location}` : ''}
               </div>
-              <p className="text-[13px] mt-1.5 leading-[1.6]" style={{ color: 'var(--blog-fg-muted)' }}>
+              <p className="text-[14px] mt-3 leading-[1.6]" style={{ color: 'var(--blog-fg-muted)' }}>
                 {PROFILE.bio}
               </p>
-              <div className="mt-2.5 flex items-center gap-3 blog-mono text-[11.5px]">
+              <div className="mt-3 flex items-center gap-3 blog-mono text-[12px]" style={{ color: 'var(--blog-fg-subtle)' }}>
                 {PROFILE.github && (
-                  <a href={PROFILE.github} target="_blank" rel="noreferrer noopener" style={{ color: 'var(--blog-fg-muted)' }}>
-                    GitHub →
+                  <a
+                    href={PROFILE.github}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="transition-colors hover:text-[var(--blog-accent)]"
+                    style={{ color: 'inherit' }}
+                  >
+                    @github
                   </a>
                 )}
-                {PROFILE.email && (
-                  <a href={`mailto:${PROFILE.email}`} style={{ color: 'var(--blog-fg-muted)' }}>
-                    Email →
+                {PROFILE.twitter && (
+                  <a
+                    href={PROFILE.twitter}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="transition-colors hover:text-[var(--blog-accent)]"
+                    style={{ color: 'inherit' }}
+                  >
+                    @twitter
+                  </a>
+                )}
+                {PROFILE.rss && (
+                  <a
+                    href={PROFILE.rss}
+                    className="transition-colors hover:text-[var(--blog-accent)]"
+                    style={{ color: 'inherit' }}
+                  >
+                    RSS
                   </a>
                 )}
               </div>
