@@ -1,49 +1,55 @@
 'use client';
 
 /**
- * 게시글 상세 페이지
+ * 블로그 상세 페이지 (리디자인)
  *
- * Supabase 기반 RTK Query로 게시글 상세 정보를 가져옵니다.
- * 조회수 자동 증가, 좋아요, 댓글 기능을 포함합니다.
+ * blog-n/SPEC.md §5.2:
+ * - 단일 컬럼 720px 센터, 진행률 바(top fixed 2px)
+ * - 우측 floating TOC (xl 이상)
+ * - 좋아요 CTA(54px 원형), 이전/다음 글(2컬럼), 댓글
  */
 
-import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { ROUTES, routeHelpers } from '../router/routes';
-import {
-  useAppSelector,
-  selectUser,
-  useGetPostByNumberQuery,
-  useDeletePostMutation,
-  useToggleLikeMutation,
-  useIncrementViewMutation,
-} from '../store';
-import { MainLayout } from '@/components/layout/MainLayout';
-import { Container } from '@/components/ui/container';
-import { Section } from '@/components/ui/section';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { PostCommentList } from '@/features/post-comments/components/PostCommentList';
-import { PostCommentForm } from '@/features/post-comments/components/PostCommentForm';
-import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
 import {
   ArrowLeft,
-  Calendar,
   Edit,
   Trash2,
   Loader2,
   AlertCircle,
   Clock,
-  Heart,
-  MessageCircle,
   Eye,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
+import { routeHelpers } from '../router/routes';
+import {
+  useAppSelector,
+  selectUser,
+  useGetPostByNumberQuery,
+  useGetPostsQuery,
+  useDeletePostMutation,
+  useToggleLikeMutation,
+  useIncrementViewMutation,
+} from '../store';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { PostCommentList } from '@/features/post-comments/components/PostCommentList';
+import { PostCommentForm } from '@/features/post-comments/components/PostCommentForm';
+import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
+import { ReadingProgress } from '@/features/posts/components/ReadingProgress';
+import { TableOfContents } from '@/features/posts/components/TableOfContents';
+import { LikeCTA } from '@/features/posts/components/LikeCTA';
+import { CommandPalette, useCommandPaletteShortcut } from '@/features/posts/components/CommandPalette';
+import { calcReadMinutes, deriveCategory, formatBlogDate } from '@/lib/blog';
 import type { Post } from '@/store/types';
 
 interface PostDetailPageProps {
@@ -57,40 +63,44 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
   const { showConfirm } = useConfirmModal();
 
   const user = useAppSelector(selectUser);
-
-  // 어드민 권한 확인: 로그인한 사용자
   const isAdmin = !!user;
   const backPath = '/blog';
 
-  // URL 파라미터를 숫자로 변환 (post_number)
   const postNumber = initialPost?.post_number ?? (id ? Number(id) : NaN);
 
-  // RTK Query hooks - post_number로 조회 (클라이언트에서 유저별 데이터 갱신)
   const { data: clientPost, isLoading: loading, error } = useGetPostByNumberQuery(postNumber, {
     skip: isNaN(postNumber),
   });
-
-  // 서버 데이터 우선 사용, 클라이언트 데이터로 전환 (is_liked 등 반영)
   const post = clientPost ?? initialPost;
+
+  // 이전/다음 + ⌘K palette용 전체 목록
+  const { data: allData } = useGetPostsQuery({ status: 'published', page: 1, limit: 200 });
+  const allPosts = allData?.posts ?? [];
+
+  const { prevPost, nextPost } = useMemo(() => {
+    if (!post || allPosts.length === 0) return { prevPost: undefined, nextPost: undefined };
+    const sorted = [...allPosts].sort((a, b) => (a.post_number ?? 0) - (b.post_number ?? 0));
+    const idx = sorted.findIndex((p) => p.id === post.id);
+    return {
+      prevPost: idx > 0 ? sorted[idx - 1] : undefined,
+      nextPost: idx >= 0 && idx < sorted.length - 1 ? sorted[idx + 1] : undefined,
+    };
+  }, [post, allPosts]);
+
   const [deletePostMutation] = useDeletePostMutation();
   const [toggleLike, { isLoading: isLikeLoading }] = useToggleLikeMutation();
   const [incrementView] = useIncrementViewMutation();
-
-  // 좋아요 처리 중 플래그 (추가 보호)
   const [isLikeProcessing, setIsLikeProcessing] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  useCommandPaletteShortcut(paletteOpen, () => setPaletteOpen((o) => !o));
 
-  // 조회수 자동 증가 (페이지 진입 시 1회만, post 로드 후 UUID로 호출)
   useEffect(() => {
-    if (post?.id) {
-      incrementView(post.id);
-    }
+    if (post?.id) incrementView(post.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post?.id]); // post.id(UUID)가 확정된 후 1회 실행
+  }, [post?.id]);
 
-  // 게시글 삭제
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!post) return;
-
     showConfirm({
       title: '삭제 확인',
       message: `"${post.title}" 게시글을 정말 삭제하시겠습니까?`,
@@ -100,396 +110,269 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
       onConfirm: async () => {
         try {
           await deletePostMutation(post.id).unwrap();
-          showAlert({
-            title: '완료',
-            message: '게시글이 삭제되었습니다',
-            type: 'success',
-            onConfirm: () => {
-              navigate(backPath);
-            },
-          });
+          showAlert({ title: '완료', message: '게시글이 삭제되었습니다', type: 'success', onConfirm: () => navigate(backPath) });
         } catch {
-          showAlert({
-            title: '오류',
-            message: '게시글 삭제에 실패했습니다',
-            type: 'error',
-          });
+          showAlert({ title: '오류', message: '게시글 삭제에 실패했습니다', type: 'error' });
         }
       },
     });
   };
 
-  // 좋아요 토글
   const handleLike = async () => {
     if (!post?.id || isLikeLoading || isLikeProcessing) return;
-
     setIsLikeProcessing(true);
     try {
       await toggleLike(post.id).unwrap();
     } catch {
       console.error('좋아요 처리 실패');
     } finally {
-      // 500ms 후 다시 클릭 가능
-      setTimeout(() => {
-        setIsLikeProcessing(false);
-      }, 500);
+      setTimeout(() => setIsLikeProcessing(false), 500);
     }
   };
 
-  // 날짜 포맷팅
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  // 상태 뱃지 스타일
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'published':
-        return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
-      case 'draft':
-        return 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20';
-      case 'archived':
-        return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
-      default:
-        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+      case 'published': return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
+      case 'draft': return 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20';
+      case 'archived': return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
+      default: return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
     }
   };
+  const getStatusText = (status: string) => ({ published: '발행됨', draft: '임시저장', archived: '보관됨' } as const)[status as 'published' | 'draft' | 'archived'] ?? status;
 
-  // 상태 텍스트
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'published':
-        return '발행됨';
-      case 'draft':
-        return '임시저장';
-      case 'archived':
-        return '보관됨';
-      default:
-        return status;
-    }
-  };
-
-  // 로딩 상태 (initialPost가 있으면 스피너 생략)
   if (loading && !post) {
     return (
       <MainLayout>
-        <Section className="py-20">
-          <Container>
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-accent mb-4" />
-              <p className="text-muted-foreground">게시글을 불러오는 중...</p>
-            </div>
-          </Container>
-        </Section>
+        <div className="max-w-[720px] mx-auto py-20 flex flex-col items-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[var(--blog-accent)] mb-3" />
+          <p className="text-[var(--blog-fg-muted)] text-sm">게시글을 불러오는 중…</p>
+        </div>
       </MainLayout>
     );
   }
 
-  // 에러 상태
   if (error) {
     return (
       <MainLayout>
-        <Section className="py-20">
-          <Container>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="max-w-2xl mx-auto"
-            >
-              <div className="p-6 rounded-xl bg-destructive/10 border border-destructive/30 mb-6">
-                <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-3" />
-                <p className="font-medium text-destructive mb-1 text-center">오류가 발생했습니다</p>
-                <p className="text-sm text-muted-foreground text-center">
-                  {'data' in error ? (error.data as any)?.message : '게시글을 불러올 수 없습니다'}
-                </p>
-              </div>
-              <Link to={backPath}>
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  목록으로 돌아가기
-                </Button>
-              </Link>
-            </motion.div>
-          </Container>
-        </Section>
+        <div className="max-w-[720px] mx-auto py-20 px-4">
+          <div className="p-6 rounded-xl border" style={{ background: 'rgba(244,63,94,.06)', borderColor: 'rgba(244,63,94,.3)' }}>
+            <AlertCircle className="w-10 h-10 text-rose-400 mx-auto mb-3" />
+            <p className="font-medium text-rose-400 text-center">오류가 발생했습니다</p>
+            <p className="text-sm text-[var(--blog-fg-muted)] text-center mt-1">
+              {'data' in error ? (error.data as any)?.message : '게시글을 불러올 수 없습니다'}
+            </p>
+          </div>
+          <Link to={backPath}>
+            <Button variant="outline" className="w-full mt-6">
+              <ArrowLeft className="w-4 h-4 mr-2" /> 목록으로 돌아가기
+            </Button>
+          </Link>
+        </div>
       </MainLayout>
     );
   }
 
-  // 게시글이 없는 경우
   if (!post) {
     return (
       <MainLayout>
-        <Section className="py-20">
-          <Container>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-20 max-w-md mx-auto"
-            >
-              <div className="w-24 h-24 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertCircle className="w-12 h-12 text-accent" />
-              </div>
-              <h2 className="text-2xl font-bold mb-3">게시글을 찾을 수 없습니다</h2>
-              <p className="text-muted-foreground mb-8">삭제되었거나 존재하지 않는 게시글입니다</p>
-              <Link to={backPath}>
-                <Button size="lg">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  목록으로 돌아가기
-                </Button>
-              </Link>
-            </motion.div>
-          </Container>
-        </Section>
+        <div className="max-w-[720px] mx-auto py-20 text-center">
+          <div className="w-20 h-20 rounded-full grid place-items-center mx-auto mb-5" style={{ background: 'var(--blog-accent-soft)' }}>
+            <AlertCircle className="w-10 h-10" style={{ color: 'var(--blog-accent)' }} />
+          </div>
+          <h2 className="text-xl font-bold mb-2">게시글을 찾을 수 없습니다</h2>
+          <p className="text-[var(--blog-fg-muted)] mb-6">삭제되었거나 존재하지 않는 게시글입니다</p>
+          <Link to={backPath}>
+            <Button><ArrowLeft className="w-4 h-4 mr-2" />목록으로</Button>
+          </Link>
+        </div>
       </MainLayout>
     );
   }
 
+  const cat = deriveCategory(post);
+  const readMin = calcReadMinutes(post.content);
+  const dateRaw = post.publishedAt || post.published_at || post.createdAt || post.created_at;
+
   return (
     <MainLayout>
-      {/* Back Button */}
-      <Section className="pt-8 pb-4">
-        <Container>
+      <ReadingProgress />
+
+      <div className="max-w-[1280px] mx-auto px-4 xl:flex xl:items-start xl:justify-center">
+        <article className="w-full max-w-[720px] mx-auto pt-8 pb-20">
+          {/* Back */}
           <Link to={backPath}>
-            <Button variant="ghost" className="group -ml-2">
-              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-              목록으로 돌아가기
-            </Button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 text-[13px] mb-8 hover:text-[var(--blog-accent)] transition-colors"
+              style={{ color: 'var(--blog-fg-muted)' }}
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> 목록으로
+            </button>
           </Link>
-        </Container>
-      </Section>
 
-      {/* Article */}
-      <Section className="py-8">
-        <Container>
-          <motion.article
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-4xl mx-auto"
-          >
-            {/* Header */}
-            <header className="mb-12">
-              {/* Title & Status */}
-              <div className="flex flex-col gap-4 mb-8">
-                <div className="flex items-start justify-between gap-4">
-                  <h1 className="text-4xl md:text-5xl font-bold leading-tight flex-1">
-                    {post.title}
-                  </h1>
-                  {isAdmin && (
-                    <Badge
-                      variant="outline"
-                      className={`${getStatusStyle(post.status)} px-3 py-1.5 text-xs font-semibold border shrink-0`}
-                    >
-                      {getStatusText(post.status)}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground pb-8 border-b border-border">
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  {post.status === 'published' && post.publishedAt
-                    ? `발행일: ${formatDate(post.publishedAt)}`
-                    : `작성일: ${formatDate(post.createdAt)}`}
-                </div>
-                {post.updatedAt !== post.createdAt && (
-                  <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-2" />
-                    수정일: {formatDate(post.updatedAt)}
-                  </div>
-                )}
-              </div>
-
-              {/* Excerpt */}
-              {post.excerpt && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="mt-8 p-6 bg-accent/5 dark:bg-accent/10 border-l-4 border-accent rounded-r-lg"
-                >
-                  <p className="text-lg text-muted-foreground italic leading-relaxed">
-                    {post.excerpt}
-                  </p>
-                </motion.div>
+          {/* Header */}
+          <header>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="blog-mono text-[11.5px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'var(--blog-accent)' }}>
+                {cat.label}
+              </span>
+              {isAdmin && (
+                <Badge variant="outline" className={`${getStatusStyle(post.status)} px-2 py-0.5 text-[11px] border`}>
+                  {getStatusText(post.status)}
+                </Badge>
               )}
-            </header>
-
-            {/* Content - Markdown Rendered */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="prose prose-lg prose-invert max-w-none mb-12"
-            >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeRaw]}
-                components={{
-                  code({ className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    const isInline = !match && !className;
-
-                    return isInline ? (
-                      <code className={className} {...props}>
-                        {children}
-                      </code>
-                    ) : (
-                      <SyntaxHighlighter
-                        style={vscDarkPlus}
-                        language={match ? match[1] : 'text'}
-                        showLineNumbers={true}
-                        wrapLongLines={true}
-                        customStyle={{
-                          margin: '1.5rem 0',
-                          borderRadius: '0.5rem',
-                          fontSize: '0.875rem',
-                          lineHeight: '1.6',
-                        }}
-                      >
-                        {String(children).replace(/\n$/, '')}
-                      </SyntaxHighlighter>
-                    );
-                  },
-                }}
-              >
-                {post.content}
-              </ReactMarkdown>
-            </motion.div>
-
-            {/* Tags */}
-            {post.tags.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="pt-8 border-t border-border mb-8"
-              >
-                <h3 className="text-sm font-semibold text-muted-foreground mb-4">태그</h3>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-4 py-2 bg-accent/10 text-accent rounded-full text-sm font-medium hover:bg-accent/20 transition-colors"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Stats Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="pt-8 border-t border-border"
-            >
-              <div className="flex items-center gap-6">
-                {/* Like Button */}
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={handleLike}
-                  disabled={isLikeLoading || isLikeProcessing}
-                  className={`gap-2 transition-all ${
-                    post.is_liked
-                      ? 'text-red-500 border-red-500/50 hover:bg-red-50 dark:hover:bg-red-950'
-                      : 'hover:text-red-500 hover:border-red-500/50'
-                  } ${(isLikeLoading || isLikeProcessing) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <Heart
-                    className={`w-5 h-5 transition-all ${
-                      post.is_liked ? 'fill-current' : ''
-                    }`}
-                  />
-                  <span className="font-semibold">{post.likes_count || 0}</span>
-                </Button>
-
-                {/* Comments Count */}
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MessageCircle className="w-5 h-5" />
-                  <span className="text-sm font-medium">{post.comments_count || 0}개의 댓글</span>
-                </div>
-
-                {/* Views Count */}
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Eye className="w-5 h-5" />
-                  <span className="text-sm font-medium">{post.views_count || 0}회 조회</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Action Buttons */}
-            {isAdmin && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="flex gap-3 pt-8 border-t border-border"
-              >
-                <Link to={routeHelpers.blogEdit(post.id)} className="flex-1">
-                  <Button variant="outline" className="w-full group">
-                    <Edit className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
-                    수정
-                  </Button>
-                </Link>
-
-                <Button
-                  variant="outline"
-                  onClick={handleDelete}
-                  className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10 group"
-                >
-                  <Trash2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                  삭제
-                </Button>
-              </motion.div>
-            )}
-          </motion.article>
-        </Container>
-      </Section>
-
-      {/* Comments Section */}
-      <Section className="py-12 bg-accent/5 dark:bg-accent/10">
-        <Container>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
-            className="max-w-4xl mx-auto"
-          >
-            <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
-              <MessageCircle className="w-6 h-6 text-accent" />
-              댓글
-            </h2>
-
-            {/* Comment Form */}
-            <div className="mb-8">
-              <PostCommentForm
-                postId={post.id}
-                onSuccess={() => {
-                  // Comments will auto-refresh via RTK Query
-                }}
-                placeholder="댓글을 작성해주세요..."
-              />
             </div>
+            <h1 className="text-[32px] sm:text-[40px] md:text-[44px] font-bold leading-[1.15] tracking-[-0.025em] m-0">
+              {post.title}
+            </h1>
+            <div
+              className="blog-mono flex items-center flex-wrap gap-3 text-[12px] mt-6 pb-6"
+              style={{ color: 'var(--blog-fg-muted)', borderBottom: '1px solid var(--blog-border)' }}
+            >
+              <span>{formatBlogDate(dateRaw)}</span>
+              <span style={{ color: 'var(--blog-border)' }}>·</span>
+              <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" /> {readMin}분 읽기</span>
+              <span style={{ color: 'var(--blog-border)' }}>·</span>
+              <span className="inline-flex items-center gap-1"><Eye className="w-3 h-3" /> {(post.views_count ?? 0).toLocaleString()}</span>
+              <span style={{ color: 'var(--blog-border)' }}>·</span>
+              <span className="inline-flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.comments_count ?? 0}</span>
+            </div>
+          </header>
 
-            {/* Comment List */}
-            <PostCommentList postId={post.id} />
+          {/* Excerpt */}
+          {post.excerpt && (
+            <p className="mt-8 text-[16px] leading-[1.7]" style={{ color: 'var(--blog-fg-muted)' }}>
+              {post.excerpt}
+            </p>
+          )}
+
+          {/* Body */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="blog-article prose prose-invert max-w-none mt-10 text-[15px]"
+            style={{ color: 'var(--blog-fg)' }}
+          >
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={{
+                code({ className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || '');
+                  const isInline = !match && !className;
+                  return isInline ? (
+                    <code className={className} {...props}>{children}</code>
+                  ) : (
+                    <SyntaxHighlighter
+                      style={vscDarkPlus}
+                      language={match ? match[1] : 'text'}
+                      showLineNumbers
+                      wrapLongLines
+                      customStyle={{ margin: '1.5rem 0', borderRadius: '0.5rem', fontSize: '0.875rem', lineHeight: '1.6' }}
+                    >
+                      {String(children).replace(/\n$/, '')}
+                    </SyntaxHighlighter>
+                  );
+                },
+              }}
+            >
+              {post.content}
+            </ReactMarkdown>
           </motion.div>
-        </Container>
-      </Section>
+
+          {/* Tags */}
+          {post.tags?.length > 0 && (
+            <div className="mt-12 pt-6" style={{ borderTop: '1px solid var(--blog-border)' }}>
+              <div className="flex flex-wrap gap-1.5">
+                {post.tags.map((t) => (
+                  <Link key={t} to={`/blog?tag=${encodeURIComponent(t)}`}>
+                    <span className="blog-tag">#{t}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Like CTA */}
+          <LikeCTA
+            liked={!!post.is_liked}
+            count={post.likes_count ?? 0}
+            disabled={isLikeLoading || isLikeProcessing}
+            onToggle={handleLike}
+          />
+
+          {/* Prev/Next */}
+          {(prevPost || nextPost) && (
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {prevPost ? (
+                <Link to={routeHelpers.blogDetail(prevPost.post_number)}>
+                  <div
+                    className="p-5 transition-colors hover:border-[var(--blog-accent)]"
+                    style={{ border: '1px solid var(--blog-border)', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    <div className="blog-mono text-[11px] inline-flex items-center gap-1.5" style={{ color: 'var(--blog-fg-subtle)' }}>
+                      <ChevronLeft className="w-3 h-3" /> 이전
+                    </div>
+                    <div className="text-[14px] font-medium mt-2 truncate" style={{ color: 'var(--blog-fg)' }}>
+                      {prevPost.title}
+                    </div>
+                  </div>
+                </Link>
+              ) : <div />}
+              {nextPost ? (
+                <Link to={routeHelpers.blogDetail(nextPost.post_number)}>
+                  <div
+                    className="p-5 transition-colors hover:border-[var(--blog-accent)] text-right"
+                    style={{ border: '1px solid var(--blog-border)', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    <div className="blog-mono text-[11px] inline-flex items-center gap-1.5 justify-end w-full" style={{ color: 'var(--blog-fg-subtle)' }}>
+                      다음 <ChevronRight className="w-3 h-3" />
+                    </div>
+                    <div className="text-[14px] font-medium mt-2 truncate" style={{ color: 'var(--blog-fg)' }}>
+                      {nextPost.title}
+                    </div>
+                  </div>
+                </Link>
+              ) : <div />}
+            </div>
+          )}
+
+          {/* Admin actions */}
+          {isAdmin && (
+            <div className="flex gap-2 mt-8 pt-6" style={{ borderTop: '1px solid var(--blog-border)' }}>
+              <Link to={routeHelpers.blogEdit(post.id)} className="flex-1">
+                <Button variant="outline" className="w-full">
+                  <Edit className="w-4 h-4 mr-2" /> 수정
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                onClick={handleDelete}
+                className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="w-4 h-4 mr-2" /> 삭제
+              </Button>
+            </div>
+          )}
+
+          {/* Comments */}
+          <section className="mt-12 pt-8" style={{ borderTop: '1px solid var(--blog-border)' }}>
+            <h3 className="text-[18px] font-semibold flex items-center gap-2 mb-4">
+              댓글<span className="blog-mono text-[13px] font-normal" style={{ color: 'var(--blog-fg-muted)' }}>{post.comments_count ?? 0}</span>
+            </h3>
+            <div className="mb-6">
+              <PostCommentForm postId={post.id} onSuccess={() => {}} placeholder="댓글을 남겨주세요…" />
+            </div>
+            <PostCommentList postId={post.id} />
+          </section>
+        </article>
+
+        {/* Floating TOC (xl 이상) */}
+        <TableOfContents />
+      </div>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} posts={allPosts} />
     </MainLayout>
   );
 };
