@@ -18,10 +18,8 @@ export const PUBLIC_ROUTES = {
   BLOG: '/blog',
   /** 방명록 페이지 */
   GUESTBOOK: '/guestbook',
-  /** 로그인 페이지 */
+  /** 로그인 페이지 (관리자 전용 — 일반 사용자 진입점 없음) */
   LOGIN: '/login',
-  /** 회원가입 페이지 */
-  REGISTER: '/register',
   /** 개인 유틸 */
   LOTTO: '/u/rng-42',
 } as const;

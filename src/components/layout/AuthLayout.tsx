@@ -98,33 +98,13 @@ export const AuthLayout = ({
 /**
  * 로그인 레이아웃 래퍼
  * 로그인 페이지에 최적화된 기본 설정을 제공합니다.
+ * (관리자 전용 — 회원가입 진입점 없음)
  */
 export const LoginLayout = ({ children }: { children: ReactNode }) => {
   return (
     <AuthLayout
       title="로그인"
       subtitle="계정에 로그인하여 시작하세요"
-      footerText="계정이 없으신가요?"
-      footerLinkText="회원가입"
-      footerLinkPath="/register"
-    >
-      {children}
-    </AuthLayout>
-  );
-};
-
-/**
- * 회원가입 레이아웃 래퍼
- * 회원가입 페이지에 최적화된 기본 설정을 제공합니다.
- */
-export const RegisterLayout = ({ children }: { children: ReactNode }) => {
-  return (
-    <AuthLayout
-      title="회원가입"
-      subtitle="새 계정을 만들어 시작하세요"
-      footerText="이미 계정이 있으신가요?"
-      footerLinkText="로그인"
-      footerLinkPath="/login"
     >
       {children}
     </AuthLayout>

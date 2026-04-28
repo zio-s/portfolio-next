@@ -17,7 +17,6 @@ export type { default as MainLayoutType } from './MainLayout';
 export {
   AuthLayout,
   LoginLayout,
-  RegisterLayout,
   ForgotPasswordLayout,
   ResetPasswordLayout,
 } from './AuthLayout';

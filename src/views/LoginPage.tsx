@@ -156,19 +156,6 @@ const LoginPage = () => {
             </button>
           </form>
 
-          {/* Footer Note */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center">
-              계정이 없으신가요?{' '}
-              <button
-                type="button"
-                onClick={() => navigate(ROUTES.REGISTER)}
-                className="text-accent hover:underline font-medium"
-              >
-                회원가입
-              </button>
-            </p>
-          </div>
         </div>
 
         {/* Home Link */}
