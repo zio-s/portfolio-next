@@ -3,9 +3,11 @@
 /**
  * 본문 markdown의 h2/h3 자동 추출 + 슬러그 id 부여 → 목차
  *
- * variant:
- *  - 'floating' (기본): xl(1280px)+에서만 보이는 우측 sticky 목차
- *  - 'inline': lg 미만에서 본문 위 details accordion (mobile.jsx 참조)
+ * variant (DESIGN_RESPONSE_R3.md §2 — 3-tier 브레이크포인트):
+ *  - 'inline' : 본문 위 details accordion. mobile/tablet/desktop(<1280px)에서 노출 (xl:hidden)
+ *  - 'floating': 우측 sticky 목차. desktop-wide(≥1280px)에서만 노출 (hidden xl:block)
+ *
+ * 두 변형을 모두 마운트해도 OK — Tailwind responsive로 동시에 보이는 일 없음.
  *
  * 3개 미만이면 미표시 (작은 글에는 노이즈).
  *
@@ -81,17 +83,17 @@ export function TableOfContents({
   if (variant === 'inline') {
     return (
       <details
-        className="lg:hidden mt-4 px-3.5 py-2.5"
+        className="xl:hidden mt-4 px-3.5"
         style={{ background: 'var(--blog-card)', border: '1px solid var(--blog-border)', borderRadius: 8 }}
       >
         <summary
-          className="flex items-center justify-between cursor-pointer select-none"
+          className="flex items-center justify-between cursor-pointer select-none h-11"
           style={{ listStyle: 'none' }}
         >
           <span className="blog-uppercase-label text-[10px]">On this page</span>
           <span className="blog-mono text-[12px]" style={{ color: 'var(--blog-fg-muted)' }}>▾ {items.length}</span>
         </summary>
-        <div className="mt-2.5 flex flex-col gap-1.5 text-[12px]">
+        <div className="pb-2.5 flex flex-col gap-1.5 text-[12px]">
           {items.map((it) => {
             const active = activeId === it.id;
             return (
