@@ -251,8 +251,7 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="blog-article prose prose-invert max-w-none mt-10 text-[15px]"
-            style={{ color: 'var(--blog-fg)' }}
+            className="blog-article max-w-none mt-10"
           >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}

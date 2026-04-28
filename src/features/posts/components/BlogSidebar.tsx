@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Heart } from 'lucide-react';
 import type { Post } from '@/store/types';
 import { aggregateCategories, aggregateTags } from '@/lib/blog';
+import { PROFILE } from '@/config/profile';
 
 interface BlogSidebarProps {
   posts: Post[];
@@ -35,11 +36,11 @@ export function BlogSidebar({ posts, onOpenSearch }: BlogSidebarProps) {
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-full grid place-items-center font-bold text-[17px] text-white"
              style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}>
-          SM
+          {PROFILE.initials}
         </div>
         <div className="min-w-0">
-          <div className="text-sm font-semibold tracking-tight">변세민</div>
-          <div className="text-[11.5px] text-[var(--blog-fg-muted)] mt-0.5">Frontend Developer</div>
+          <div className="text-sm font-semibold tracking-tight">{PROFILE.name}</div>
+          <div className="text-[11.5px] text-[var(--blog-fg-muted)] mt-0.5">{PROFILE.role}</div>
         </div>
       </div>
 
