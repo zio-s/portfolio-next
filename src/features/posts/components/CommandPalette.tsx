@@ -13,10 +13,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, FileText, Hash, CornerDownLeft } from 'lucide-react';
+import { Search, FileText, Hash, CornerDownLeft, FolderOpen } from 'lucide-react';
 import type { Post } from '@/store/types';
 import { routeHelpers } from '@/router/routes';
 import { aggregateTags, deriveCategory, formatBlogDate, calcReadMinutes } from '@/lib/blog';
+import { BLOG_CATEGORIES } from '@/config/categories';
 
 interface CommandPaletteProps {
   open: boolean;
@@ -26,7 +27,8 @@ interface CommandPaletteProps {
 
 type Hit =
   | { kind: 'post'; post: Post; href: string; label: string; sub: string }
-  | { kind: 'tag'; tag: string; count: number; href: string; label: string; sub: string };
+  | { kind: 'tag'; tag: string; count: number; href: string; label: string; sub: string }
+  | { kind: 'category'; slug: string; count: number; href: string; label: string; sub: string };
 
 function highlight(text: string, q: string) {
   if (!q) return text;
@@ -96,10 +98,30 @@ export function CommandPalette({ open, onClose, posts }: CommandPaletteProps) {
         label: `#${tag}`,
         sub: `${count}개 글`,
       }));
-    return [...postHits, ...tagHits];
+    const catCounts = posts.reduce<Record<string, number>>((acc, p) => {
+      const c = deriveCategory(p);
+      acc[c.slug] = (acc[c.slug] ?? 0) + 1;
+      return acc;
+    }, {});
+    const categoryHits: Hit[] = BLOG_CATEGORIES
+      .filter((c) =>
+        c.slug.toLowerCase().includes(query) ||
+        c.label.toLowerCase().includes(query)
+      )
+      .slice(0, 4)
+      .map((c) => ({
+        kind: 'category' as const,
+        slug: c.slug,
+        count: catCounts[c.slug] ?? 0,
+        href: `/blog?cat=${encodeURIComponent(c.slug)}`,
+        label: c.label,
+        sub: `${catCounts[c.slug] ?? 0}개 글`,
+      }));
+    return [...postHits, ...categoryHits, ...tagHits];
   }, [posts, tags, q]);
 
   const postHits = hits.filter((h) => h.kind === 'post');
+  const categoryHits = hits.filter((h) => h.kind === 'category');
   const tagHits = hits.filter((h) => h.kind === 'tag');
 
   // active를 hits 길이에 맞게 유지
@@ -166,15 +188,23 @@ export function CommandPalette({ open, onClose, posts }: CommandPaletteProps) {
         {/* results */}
         <div ref={listRef} className="max-h-[480px] overflow-auto py-2">
           {hits.length === 0 && (
-            <div className="px-5 py-12 text-center text-[var(--blog-fg-muted)] text-sm">
-              결과가 없습니다
+            <div className="px-5 py-12 text-center">
+              <div className="blog-mono text-[12.5px]" style={{ color: 'var(--blog-fg-muted)' }}>
+                {q.trim() ? `"${q}"에 대한 결과 없음` : '게시글이 없습니다'}
+              </div>
+              {q.trim() && (
+                <div className="blog-mono text-[11.5px] mt-2" style={{ color: 'var(--blog-fg-subtle)' }}>
+                  태그로 검색: <span style={{ color: 'var(--blog-accent)' }}>#react</span>{' '}
+                  <span style={{ color: 'var(--blog-accent)' }}>#typescript</span>
+                </div>
+              )}
             </div>
           )}
 
           {postHits.length > 0 && (
             <>
               <div className="px-4 pt-2 pb-1">
-                <div className="blog-uppercase-label text-[10px]">Posts · {postHits.length}</div>
+                <div className="blog-uppercase-label text-[10px]">{q.trim() ? `Posts · ${postHits.length}` : 'Recent Posts'}</div>
               </div>
               {postHits.map((h, i) => {
                 const idx = i;
@@ -209,6 +239,41 @@ export function CommandPalette({ open, onClose, posts }: CommandPaletteProps) {
             </>
           )}
 
+          {categoryHits.length > 0 && (
+            <>
+              <div className="h-px mx-4 my-2" style={{ background: 'var(--blog-border-soft)' }} />
+              <div className="px-4 pt-1 pb-1">
+                <div className="blog-uppercase-label text-[10px]">Categories · {categoryHits.length}</div>
+              </div>
+              {categoryHits.map((h, i) => {
+                const idx = postHits.length + i;
+                const isActive = idx === active;
+                return (
+                  <div
+                    key={`c-${h.slug}`}
+                    data-idx={idx}
+                    data-active={isActive}
+                    className="blog-cmd-row"
+                    onMouseEnter={() => setActive(idx)}
+                    onClick={(e) => openHit(h, e.metaKey || e.ctrlKey)}
+                  >
+                    <div
+                      className="w-7 h-7 rounded-md grid place-items-center shrink-0"
+                      style={{ background: 'var(--blog-bg)', border: '1px solid var(--blog-border)', color: 'var(--blog-accent)' }}
+                    >
+                      <FolderOpen className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-[13.5px] font-medium" style={{ color: 'var(--blog-fg)' }}>{highlight(h.label, q)}</div>
+                      <div className="blog-mono text-[11px] mt-0.5" style={{ color: 'var(--blog-fg-subtle)' }}>{h.sub}</div>
+                    </div>
+                    {isActive && <span className="blog-kbd"><CornerDownLeft className="w-3 h-3" /></span>}
+                  </div>
+                );
+              })}
+            </>
+          )}
+
           {tagHits.length > 0 && (
             <>
               <div className="h-px mx-4 my-2" style={{ background: 'var(--blog-border-soft)' }} />
@@ -216,7 +281,7 @@ export function CommandPalette({ open, onClose, posts }: CommandPaletteProps) {
                 <div className="blog-uppercase-label text-[10px]">Tags · {tagHits.length}</div>
               </div>
               {tagHits.map((h, i) => {
-                const idx = postHits.length + i;
+                const idx = postHits.length + categoryHits.length + i;
                 const isActive = idx === active;
                 return (
                   <div

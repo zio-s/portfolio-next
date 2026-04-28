@@ -1,4 +1,5 @@
 import type { Post } from '@/store/types';
+import { BLOG_CATEGORIES, DEFAULT_CATEGORY, getCategoryBySlug, isValidCategorySlug } from '@/config/categories';
 
 const WORDS_PER_MINUTE = 250;
 
@@ -30,15 +31,24 @@ export function extractThumbnail(content: string | undefined | null): string | u
   return undefined;
 }
 
-export function deriveCategory(post: Pick<Post, 'tags'>): { slug: string; label: string } {
-  const tag = post.tags?.[0]?.trim();
-  if (!tag) return { slug: 'misc', label: 'Misc' };
-  return { slug: tag.toLowerCase(), label: capitalize(tag) };
-}
-
-function capitalize(s: string): string {
-  if (!s) return s;
-  return s.charAt(0).toUpperCase() + s.slice(1);
+/**
+ * post.category(정식 컬럼)를 우선 사용. 없거나 잘못된 값이면 tags[0]을 BLOG_CATEGORIES와 매칭 시도.
+ * 마지막 폴백은 DEFAULT_CATEGORY.
+ *
+ * 마이그레이션 완료 후에는 항상 post.category가 있으므로 폴백 분기는 의미 없음.
+ */
+export function deriveCategory(post: Pick<Post, 'category' | 'tags'>): { slug: string; label: string } {
+  if (isValidCategorySlug(post.category)) {
+    const c = getCategoryBySlug(post.category);
+    return { slug: c.slug, label: c.label };
+  }
+  const tagSlug = post.tags?.[0]?.toLowerCase().trim();
+  if (isValidCategorySlug(tagSlug)) {
+    const c = getCategoryBySlug(tagSlug);
+    return { slug: c.slug, label: c.label };
+  }
+  const fallback = getCategoryBySlug(DEFAULT_CATEGORY);
+  return { slug: fallback.slug, label: fallback.label };
 }
 
 export function formatBlogDate(dateString: string | undefined | null): string {
@@ -90,15 +100,18 @@ export function sortPosts(posts: Post[], key: SortKey): Post[] {
   }
 }
 
+/**
+ * BLOG_CATEGORIES 6개 고정 순서로 카운트 집계 + '전체'를 맨 앞에.
+ * count가 0인 카테고리도 표시 (사이드바에서 빈 카테고리 노출 의도).
+ */
 export function aggregateCategories(posts: Post[]): { slug: string; label: string; count: number }[] {
-  const map = new Map<string, { slug: string; label: string; count: number }>();
+  const counts = new Map<string, number>();
   for (const p of posts) {
-    const { slug, label } = deriveCategory(p);
-    const cur = map.get(slug);
-    if (cur) cur.count += 1;
-    else map.set(slug, { slug, label, count: 1 });
+    const { slug } = deriveCategory(p);
+    counts.set(slug, (counts.get(slug) ?? 0) + 1);
   }
-  return [{ slug: 'all', label: '전체', count: posts.length }, ...Array.from(map.values()).sort((a, b) => b.count - a.count)];
+  const ordered = BLOG_CATEGORIES.map((c) => ({ slug: c.slug, label: c.label, count: counts.get(c.slug) ?? 0 }));
+  return [{ slug: 'all', label: '전체', count: posts.length }, ...ordered];
 }
 
 export function aggregateTags(posts: Post[]): { tag: string; count: number }[] {

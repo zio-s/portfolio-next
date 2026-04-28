@@ -27,6 +27,8 @@ export interface Post {
   authorId?: string | null;
   author_id?: string | null; // Supabase snake_case
   author?: User;
+  /** 카테고리 slug. DB 컬럼 도입 후 필수. 마이그레이션 전에는 undefined → tags[0] 기반 폴백. */
+  category?: string;
   tags: string[];
   coverImage?: string;
   createdAt: string;

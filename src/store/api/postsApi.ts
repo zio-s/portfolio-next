@@ -208,6 +208,7 @@ export const postsApi = createApi({
         content: post.content,
         excerpt: post.excerpt || '',
         status: post.status || 'draft',
+        category: post.category || 'daily',
         tags: post.tags || [],
         published_at: post.status === 'published' ? new Date().toISOString() : null,
       }),
@@ -223,6 +224,7 @@ export const postsApi = createApi({
         ...(updates.content && { content: updates.content }),
         ...(updates.excerpt && { excerpt: updates.excerpt }),
         ...(updates.status && { status: updates.status }),
+        ...(updates.category && { category: updates.category }),
         ...(updates.tags && { tags: updates.tags }),
         ...(updates.status === 'published' && !updates.publishedAt && {
           published_at: new Date().toISOString()

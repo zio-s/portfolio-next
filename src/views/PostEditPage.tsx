@@ -19,6 +19,7 @@ import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/components/common/SEO';
 import { useAlertModal } from '@/components/modal/hooks';
+import { BLOG_CATEGORIES, DEFAULT_CATEGORY, isValidCategorySlug, type BlogCategorySlug } from '@/config/categories';
 import {
   ArrowLeft,
   Save,
@@ -27,7 +28,8 @@ import {
   FileText,
   Tag,
   BookOpen,
-  AlertCircle
+  AlertCircle,
+  FolderOpen,
 } from 'lucide-react';
 
 const PostEditPage = () => {
@@ -43,6 +45,7 @@ const PostEditPage = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
+  const [category, setCategory] = useState<BlogCategorySlug>(DEFAULT_CATEGORY);
   const [tags, setTags] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
 
@@ -52,6 +55,7 @@ const PostEditPage = () => {
       setTitle(post.title);
       setContent(post.content);
       setExcerpt(post.excerpt);
+      setCategory(isValidCategorySlug(post.category) ? post.category : DEFAULT_CATEGORY);
       setTags(post.tags.join(', '));
       setStatus(post.status as 'draft' | 'published');
     }
@@ -80,6 +84,7 @@ const PostEditPage = () => {
           content,
           excerpt: finalExcerpt,
           status,
+          category,
           tags: tagArray,
         }
       }).unwrap();
@@ -290,6 +295,30 @@ const PostEditPage = () => {
                     resize-vertical font-mono text-sm
                     transition-all duration-200"
                 />
+              </div>
+
+              {/* Category */}
+              <div className="space-y-2">
+                <label htmlFor="category" className="flex items-center text-sm font-semibold text-foreground">
+                  <FolderOpen className="w-4 h-4 mr-2 text-accent" />
+                  카테고리 <span className="text-destructive ml-1">*</span>
+                </label>
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as BlogCategorySlug)}
+                  disabled={loading || updating}
+                  required
+                  className="w-full px-4 py-3 bg-card border border-border rounded-lg
+                    text-foreground
+                    focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-all duration-200"
+                >
+                  {BLOG_CATEGORIES.map((c) => (
+                    <option key={c.slug} value={c.slug}>{c.label}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Tags */}
