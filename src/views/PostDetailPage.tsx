@@ -48,7 +48,6 @@ import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
 import { ReadingProgress } from '@/features/posts/components/ReadingProgress';
 import { TableOfContents } from '@/features/posts/components/TableOfContents';
 import { LikeCTA } from '@/features/posts/components/LikeCTA';
-import { CommandPalette, useCommandPaletteShortcut } from '@/features/posts/components/CommandPalette';
 import { calcReadMinutes, deriveCategory, formatBlogDate } from '@/lib/blog';
 import type { Post } from '@/store/types';
 
@@ -91,8 +90,6 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
   const [toggleLike, { isLoading: isLikeLoading }] = useToggleLikeMutation();
   const [incrementView] = useIncrementViewMutation();
   const [isLikeProcessing, setIsLikeProcessing] = useState(false);
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  useCommandPaletteShortcut(paletteOpen, () => setPaletteOpen((o) => !o));
 
   useEffect(() => {
     if (post?.id) incrementView(post.id);
@@ -371,7 +368,6 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
         <TableOfContents />
       </div>
 
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} posts={allPosts} />
     </MainLayout>
   );
 };

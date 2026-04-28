@@ -9,7 +9,7 @@
  * - 행(row) 리스트, border-bottom으로만 구분
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ROUTES } from '../router/routes';
@@ -25,7 +25,7 @@ import { CollectionPageJsonLd, BreadcrumbJsonLd } from '@/components/common/Json
 import { PenSquare, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BlogSidebar } from '@/features/posts/components/BlogSidebar';
 import { PostListItem } from '@/features/posts/components/PostListItem';
-import { CommandPalette, useCommandPaletteShortcut } from '@/features/posts/components/CommandPalette';
+import { openCommandPalette } from '@/features/posts/components/GlobalCommandPalette';
 import { deriveCategory, sortPosts, type SortKey } from '@/lib/blog';
 
 const POSTS_PER_PAGE = 8;
@@ -41,8 +41,6 @@ const PostsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const user = useAppSelector(selectUser);
   const isAdmin = !!user;
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  useCommandPaletteShortcut(paletteOpen, () => setPaletteOpen((o) => !o));
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const cat = searchParams.get('cat') ?? 'all';
@@ -124,7 +122,7 @@ const PostsPage = () => {
 
       <div className="max-w-[1280px] mx-auto px-4 lg:px-0 lg:flex">
         {/* Sidebar */}
-        <BlogSidebar posts={allPosts} onOpenSearch={() => setPaletteOpen(true)} />
+        <BlogSidebar posts={allPosts} onOpenSearch={openCommandPalette} />
 
         {/* Main */}
         <main className="flex-1 min-w-0 px-0 lg:px-12 py-8 max-w-[820px]">
@@ -259,7 +257,6 @@ const PostsPage = () => {
         </main>
       </div>
 
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} posts={allPosts} />
     </MainLayout>
   );
 };

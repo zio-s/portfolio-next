@@ -13,6 +13,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import type { MenuItem } from '@/components/layout/Header';
 import { Briefcase, BookOpen, MessageSquare } from 'lucide-react';
+import { GlobalCommandPalette } from '@/features/posts/components/GlobalCommandPalette';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -91,6 +92,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       {/* Scroll to Top Button */}
       <ScrollToTop threshold={300} />
+
+      {/* 전역 ⌘K 모달 (lazy fetch) */}
+      <GlobalCommandPalette />
     </div>
   );
 };
