@@ -124,6 +124,9 @@ export function EditorPage({ mode }: EditorPageProps) {
           onConfirm: () => navigate(routeHelpers.blogDetail(created.post_number)),
         });
       } else if (id) {
+        // 첫 발행(draft → published 또는 publishedAt이 NULL)이면 시점 set, 아니면 보존
+        const isFirstPublish =
+          existing?.status !== 'published' || !(existing?.publishedAt || existing?.published_at);
         await updatePost({
           id,
           updates: {
@@ -133,6 +136,7 @@ export function EditorPage({ mode }: EditorPageProps) {
             category,
             tags,
             status: 'published',
+            ...(isFirstPublish && { publishedAt: new Date().toISOString() }),
           },
         }).unwrap();
         setStatus('published');

@@ -217,18 +217,20 @@ export const postsApi = createApi({
 
     /**
      * 게시글 수정
+     *
+     * published_at은 호출자가 명시적으로 전달한 경우에만 갱신.
+     * 자동저장이나 단순 수정 시 published_at이 덮어씌워지지 않도록 자동 set 제거.
+     * 첫 발행 시점 set은 호출자(EditorPage)가 isFirstPublish 분기로 결정.
      */
     updatePost: builder.mutation<Post, { id: string; updates: Partial<Post> }>({
       query: ({ id, updates }) => buildSupabaseQuery.update('posts', id, {
-        ...(updates.title && { title: updates.title }),
-        ...(updates.content && { content: updates.content }),
-        ...(updates.excerpt && { excerpt: updates.excerpt }),
-        ...(updates.status && { status: updates.status }),
-        ...(updates.category && { category: updates.category }),
-        ...(updates.tags && { tags: updates.tags }),
-        ...(updates.status === 'published' && !updates.publishedAt && {
-          published_at: new Date().toISOString()
-        }),
+        ...(updates.title !== undefined && { title: updates.title }),
+        ...(updates.content !== undefined && { content: updates.content }),
+        ...(updates.excerpt !== undefined && { excerpt: updates.excerpt }),
+        ...(updates.status !== undefined && { status: updates.status }),
+        ...(updates.category !== undefined && { category: updates.category }),
+        ...(updates.tags !== undefined && { tags: updates.tags }),
+        ...(updates.publishedAt !== undefined && { published_at: updates.publishedAt }),
       }),
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Post', id },
