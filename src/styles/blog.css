@@ -79,7 +79,7 @@
   will-change: transform;
 }
 
-/* ===== Markdown article (DESIGN_RESPONSE.md §3.7 사양) ===== */
+/* ===== Markdown article (DESIGN_RESPONSE_R4.md §3 사양 — round 5에서 갱신) ===== */
 .blog-article {
   font-size: 16px;
   line-height: 1.75;
@@ -107,26 +107,43 @@
 .blog-article a {
   color: var(--blog-accent);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  text-decoration-color: rgba(139, 92, 246, 0.4);
+  transition: text-decoration-color 120ms ease;
 }
+.blog-article a:hover {
+  text-decoration-color: var(--blog-accent);
+}
+
+/* inline code (R4 §3.2) */
 .blog-article :not(pre) > code {
   background: var(--blog-card);
-  padding: 2px 6px;
+  padding: 1px 6px;
+  padding-block: 1px;
   border-radius: 3px;
   border: 1px solid var(--blog-border);
   font-family: var(--blog-font-mono);
-  font-size: 0.875em;
+  font-size: 0.9em;
   color: var(--blog-accent);
+  vertical-align: baseline;
 }
+
+/* code block container (R4 §3.1) */
 .blog-article pre {
-  background: #0d1118;
+  background: var(--blog-bg-soft);
   border: 1px solid var(--blog-border);
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px 16px;
   overflow: auto;
+  font-family: var(--blog-font-mono);
   font-size: 13px;
   line-height: 1.7;
   margin: 24px 0;
+  color: var(--blog-fg);
+}
+@media (min-width: 1024px) {
+  .blog-article pre { font-size: 13.5px; }
 }
 .blog-article pre code {
   background: transparent;
@@ -134,20 +151,49 @@
   padding: 0;
   color: var(--blog-fg);
 }
-.blog-article blockquote {
-  border-left: 2px solid var(--blog-accent);
-  padding-left: 20px;
-  margin: 24px 0;
-  color: var(--blog-fg-muted);
-  font-style: italic;
+
+/* highlight.js (github-dark + R4 §3.1 커스텀 토큰) */
+.blog-article .hljs {
+  background: transparent !important;
+  color: var(--blog-fg);
 }
+.blog-article .hljs-keyword,
+.blog-article .hljs-built_in   { color: #c084fc; }   /* purple */
+.blog-article .hljs-string,
+.blog-article .hljs-attr       { color: #86efac; }   /* green */
+.blog-article .hljs-number     { color: #fdba74; }   /* orange-200 */
+.blog-article .hljs-comment    { color: #6c6c70; font-style: italic; }
+.blog-article .hljs-function,
+.blog-article .hljs-title      { color: #93c5fd; }   /* blue */
+.blog-article .hljs-tag,
+.blog-article .hljs-name       { color: #f87171; }   /* red */
+.blog-article .hljs-meta       { color: var(--blog-fg-subtle); }
+
+/* blockquote (R4 §3.4) */
+.blog-article blockquote {
+  border-left: 3px solid var(--blog-accent);
+  padding: 6px 16px;
+  background: var(--blog-card);
+  margin: 18px 0;
+  color: var(--blog-fg-muted);
+  font-style: normal;
+  border-radius: 0 6px 6px 0;
+}
+.blog-article blockquote p {
+  margin: 0.4em 0;
+}
+
+/* ul/ol/li/img/hr (R4 §3.4) */
 .blog-article ul,
 .blog-article ol {
   color: var(--blog-fg-muted);
-  padding-left: 1.5em;
+  padding-left: 24px;
 }
 .blog-article li {
-  margin: 0.4em 0;
+  margin: 4px 0;
+}
+.blog-article li::marker {
+  color: var(--blog-fg-subtle);
 }
 .blog-article img {
   border-radius: 8px;
@@ -158,8 +204,18 @@
 }
 .blog-article hr {
   border: none;
-  border-top: 1px solid var(--blog-border);
+  height: 1px;
+  background: var(--blog-border);
   margin: 32px 0;
+}
+
+/* mark — 본문 (R4 §3.3): underline + soft bg, 텍스트 색은 그대로 */
+.blog-article mark {
+  background: rgba(139, 92, 246, 0.18);
+  color: var(--blog-fg);
+  padding: 0 3px;
+  border-radius: 2px;
+  box-shadow: inset 0 -2px 0 var(--blog-accent);
 }
 
 /* ===== Tag chip (mono small) ===== */
