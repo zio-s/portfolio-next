@@ -121,9 +121,10 @@ const PostsPage = () => {
       />
       <BreadcrumbJsonLd items={[{ name: '홈', url: '/' }, { name: '블로그', url: '/blog' }]} />
 
-      <div className="max-w-[1280px] mx-auto px-4 lg:px-0 lg:flex">
+      <div className="max-w-[1280px] mx-auto px-4 lg:px-0 lg:flex lg:items-start">
         {/* Sidebar (lg 이상만 노출, 모바일은 MobileDrawer + CategoryChips로 대체) */}
-        <div className="hidden lg:block">
+        {/* sticky: 헤더(60px) 아래 고정 + viewport 넘으면 내부 스크롤 */}
+        <div className="hidden lg:block lg:sticky lg:top-[60px] lg:self-start lg:max-h-[calc(100vh-60px)] lg:overflow-y-auto">
           <BlogSidebar posts={allPosts} onOpenSearch={openCommandPalette} />
         </div>
 
