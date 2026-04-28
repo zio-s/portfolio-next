@@ -245,6 +245,9 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
             </p>
           )}
 
+          {/* Mobile TOC accordion (lg 미만) — 본문 위 */}
+          <TableOfContents variant="inline" contentKey={post.id} />
+
           {/* Body */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -401,7 +404,7 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
         </article>
 
         {/* Floating TOC (xl 이상) */}
-        <TableOfContents />
+        <TableOfContents contentKey={post.id} />
       </div>
 
     </MainLayout>
