@@ -1,7 +1,7 @@
 'use client';
 
-import PostCreatePage from '@/views/PostCreatePage';
+import { EditorPage } from '@/features/admin/editor/EditorPage';
 
 export default function BlogCreate() {
-  return <PostCreatePage />;
+  return <EditorPage mode="create" />;
 }

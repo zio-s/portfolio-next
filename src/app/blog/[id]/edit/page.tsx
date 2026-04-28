@@ -1,7 +1,7 @@
 'use client';
 
-import PostEditPage from '@/views/PostEditPage';
+import { EditorPage } from '@/features/admin/editor/EditorPage';
 
 export default function BlogEdit() {
-  return <PostEditPage />;
+  return <EditorPage mode="edit" />;
 }
