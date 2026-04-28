@@ -37,9 +37,83 @@ interface MobileDrawerProps {
   user?: { name: string; email: string; avatar?: string };
 }
 
+type CategoriesSectionProps = {
+  categories: { slug: string; label: string; count: number }[];
+  activeCat: string;
+  setParam: (key: string, value: string | null) => void;
+  navigate: (to: string) => void;
+  onBlogRoute: boolean;
+};
+
+function CategoriesSection({ categories, activeCat, setParam, navigate, onBlogRoute }: CategoriesSectionProps) {
+  return (
+    <div>
+      <div className="blog-uppercase-label mb-2.5">Categories</div>
+      <div className="flex flex-col gap-px">
+        {categories.map((c) => {
+          const isActive = c.slug === activeCat && onBlogRoute;
+          return (
+            <button
+              key={c.slug}
+              type="button"
+              data-active={isActive}
+              onClick={() => {
+                setParam('cat', c.slug);
+                if (!onBlogRoute) navigate(`/blog${c.slug !== 'all' ? `?cat=${c.slug}` : ''}`);
+              }}
+              className="blog-cat-row text-left"
+            >
+              <span>{c.label}</span>
+              <span className="blog-mono text-[11px]" style={{ color: isActive ? 'var(--blog-accent)' : 'var(--blog-fg-subtle)' }}>{c.count}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+type TagsSectionProps = {
+  tags: { tag: string; count: number }[];
+  activeTag: string;
+  setParam: (key: string, value: string | null) => void;
+  navigate: (to: string) => void;
+  onBlogRoute: boolean;
+};
+
+function TagsSection({ tags, activeTag, setParam, navigate, onBlogRoute }: TagsSectionProps) {
+  return (
+    <div>
+      <div className="blog-uppercase-label mb-2.5">Tags</div>
+      <div className="flex flex-wrap gap-1.5">
+        {tags.map(({ tag, count }) => {
+          const isActive = tag === activeTag && onBlogRoute;
+          return (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => {
+                setParam('tag', isActive ? null : tag);
+                if (!onBlogRoute) navigate(`/blog?tag=${encodeURIComponent(tag)}`);
+              }}
+              className="blog-tag"
+              style={isActive ? { background: 'var(--blog-accent-soft)', color: 'var(--blog-accent)', borderColor: 'var(--blog-accent)' } : undefined}
+            >
+              #{tag}
+              <span className="ml-1" style={{ color: isActive ? 'var(--blog-accent)' : 'var(--blog-fg-subtle)' }}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) {
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
+  // 비-블로그 라우트에서 Categories/Tags details를 한 번이라도 expand했는지
+  const [hasExpandedFilters, setHasExpandedFilters] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -80,10 +154,11 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
     return () => window.removeEventListener('keydown', handler);
   }, [open]);
 
-  // lazy fetch posts (drawer 열린 적 없으면 skip)
+  // lazy fetch (DESIGN_RESPONSE_R3.md §3): blog route이거나 비-블로그에서 Categories/Tags expanded일 때만
+  const shouldFetch = hasOpened && (onBlogRoute || hasExpandedFilters);
   const { data } = useGetPostsQuery(
     { status: 'published', page: 1, limit: 200 },
-    { skip: !hasOpened }
+    { skip: !shouldFetch }
   );
   const posts = data?.posts ?? [];
   const categories = aggregateCategories(posts);
@@ -188,59 +263,35 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
           })}
         </nav>
 
-        {/* Categories — drawer가 열린 적 있어 데이터가 있을 때만 */}
-        {posts.length > 0 && (
-          <div>
-            <div className="blog-uppercase-label mb-2.5">Categories</div>
-            <div className="flex flex-col gap-px">
-              {categories.map((c) => {
-                const isActive = c.slug === activeCat && onBlogRoute;
-                return (
-                  <button
-                    key={c.slug}
-                    type="button"
-                    data-active={isActive}
-                    onClick={() => {
-                      setParam('cat', c.slug);
-                      // drawer 열린 채로 카테고리 선택 시 blog 페이지로 이동
-                      if (!onBlogRoute) navigate(`/blog${c.slug !== 'all' ? `?cat=${c.slug}` : ''}`);
-                    }}
-                    className="blog-cat-row text-left"
-                  >
-                    <span>{c.label}</span>
-                    <span className="blog-mono text-[11px]" style={{ color: isActive ? 'var(--blog-accent)' : 'var(--blog-fg-subtle)' }}>{c.count}</span>
-                  </button>
-                );
-              })}
+        {/* Categories + Tags — blog route는 expand, non-blog는 collapsed details (lazy fetch trigger) */}
+        {onBlogRoute ? (
+          <>
+            {posts.length > 0 && <CategoriesSection categories={categories} activeCat={activeCat} setParam={setParam} navigate={navigate} onBlogRoute />}
+            {tags.length > 0 && <TagsSection tags={tags} activeTag={activeTag} setParam={setParam} navigate={navigate} onBlogRoute />}
+          </>
+        ) : (
+          <details
+            onToggle={(e) => { if ((e.currentTarget as HTMLDetailsElement).open) setHasExpandedFilters(true); }}
+            className="px-1"
+          >
+            <summary
+              className="flex items-center justify-between cursor-pointer select-none h-9 px-2 rounded-md"
+              style={{ listStyle: 'none', color: 'var(--blog-fg-muted)' }}
+            >
+              <span className="blog-uppercase-label text-[10px]">Categories · Tags</span>
+              <span className="blog-mono text-[11px]" style={{ color: 'var(--blog-fg-subtle)' }}>▾</span>
+            </summary>
+            <div className="pt-3 flex flex-col gap-5">
+              {posts.length === 0 ? (
+                <div className="text-[12px] px-2" style={{ color: 'var(--blog-fg-subtle)' }}>불러오는 중…</div>
+              ) : (
+                <>
+                  <CategoriesSection categories={categories} activeCat={activeCat} setParam={setParam} navigate={navigate} onBlogRoute={false} />
+                  <TagsSection tags={tags} activeTag={activeTag} setParam={setParam} navigate={navigate} onBlogRoute={false} />
+                </>
+              )}
             </div>
-          </div>
-        )}
-
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div>
-            <div className="blog-uppercase-label mb-2.5">Tags</div>
-            <div className="flex flex-wrap gap-1.5">
-              {tags.map(({ tag, count }) => {
-                const isActive = tag === activeTag && onBlogRoute;
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => {
-                      setParam('tag', isActive ? null : tag);
-                      if (!onBlogRoute) navigate(`/blog?tag=${encodeURIComponent(tag)}`);
-                    }}
-                    className="blog-tag"
-                    style={isActive ? { background: 'var(--blog-accent-soft)', color: 'var(--blog-accent)', borderColor: 'var(--blog-accent)' } : undefined}
-                  >
-                    #{tag}
-                    <span className="ml-1" style={{ color: isActive ? 'var(--blog-accent)' : 'var(--blog-fg-subtle)' }}>{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          </details>
         )}
 
         <div className="flex-1" />
