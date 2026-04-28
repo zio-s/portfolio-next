@@ -26,6 +26,7 @@ import { PenSquare, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'luci
 import { BlogSidebar } from '@/features/posts/components/BlogSidebar';
 import { PostListItem } from '@/features/posts/components/PostListItem';
 import { openCommandPalette } from '@/features/posts/components/GlobalCommandPalette';
+import { CategoryChips } from '@/features/posts/components/CategoryChips';
 import { deriveCategory, sortPosts, type SortKey } from '@/lib/blog';
 
 const POSTS_PER_PAGE = 8;
@@ -127,7 +128,12 @@ const PostsPage = () => {
         </div>
 
         {/* Main */}
-        <main className="flex-1 min-w-0 px-0 lg:px-12 py-8 max-w-[820px]">
+        <main className="flex-1 min-w-0 px-0 lg:px-12 py-6 lg:py-8 max-w-[820px]">
+          {/* Mobile-only category chips (lg 미만) */}
+          <div className="lg:hidden mb-4">
+            <CategoryChips posts={allPosts} />
+          </div>
+
           {/* Page header */}
           <div className="flex items-end justify-between pb-6 border-b border-[var(--blog-border)] mb-2">
             <div>
