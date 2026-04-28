@@ -227,6 +227,21 @@
   animation: blog-heart-pulse 200ms ease-out;
 }
 
+/* ===== Mobile drawer slide-in ===== */
+@keyframes blog-drawer-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* ===== Hide scrollbar (mobile category chips) ===== */
+.blog-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.blog-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* ===== Command palette ===== */
 .blog-cmd-backdrop {
   position: fixed;

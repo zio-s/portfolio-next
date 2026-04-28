@@ -121,8 +121,10 @@ const PostsPage = () => {
       <BreadcrumbJsonLd items={[{ name: '홈', url: '/' }, { name: '블로그', url: '/blog' }]} />
 
       <div className="max-w-[1280px] mx-auto px-4 lg:px-0 lg:flex">
-        {/* Sidebar */}
-        <BlogSidebar posts={allPosts} onOpenSearch={openCommandPalette} />
+        {/* Sidebar (lg 이상만 노출, 모바일은 MobileDrawer + CategoryChips로 대체) */}
+        <div className="hidden lg:block">
+          <BlogSidebar posts={allPosts} onOpenSearch={openCommandPalette} />
+        </div>
 
         {/* Main */}
         <main className="flex-1 min-w-0 px-0 lg:px-12 py-8 max-w-[820px]">

@@ -11,13 +11,12 @@
  * - 햄버거 → 좌측 drawer (네비)
  */
 
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Search, X } from 'lucide-react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { Menu, Search } from 'lucide-react';
 import { useAppDispatch } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { openCommandPalette } from '@/features/posts/components/GlobalCommandPalette';
-import { PROFILE } from '@/config/profile';
+import { openMobileDrawer, MobileDrawer } from '@/features/posts/components/MobileDrawer';
 import type { MenuItem } from './Header';
 
 interface PublicHeaderProps {
@@ -30,28 +29,6 @@ export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // 라우트 변경 시 drawer 자동 닫기
-  useEffect(() => {
-    setDrawerOpen(false);
-  }, [location.pathname]);
-
-  // drawer 열린 동안 body scroll lock
-  useEffect(() => {
-    if (!drawerOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
-  }, [drawerOpen]);
-
-  // ESC로 drawer 닫기
-  useEffect(() => {
-    if (!drawerOpen) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setDrawerOpen(false); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [drawerOpen]);
 
   const isActive = (href: string) => href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
 
@@ -73,10 +50,10 @@ export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode
           borderBottom: '1px solid var(--blog-border)',
         }}
       >
-        {/* 모바일 햄버거 */}
+        {/* 모바일 햄버거 → MobileDrawer */}
         <button
           type="button"
-          onClick={() => setDrawerOpen(true)}
+          onClick={openMobileDrawer}
           className="lg:hidden inline-flex items-center justify-center w-9 h-9 -ml-2 mr-1 rounded-md hover:bg-white/5 transition-colors"
           aria-label="메뉴 열기"
         >
@@ -162,111 +139,8 @@ export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode
         )}
       </header>
 
-      {/* === 모바일 drawer === */}
-      {drawerOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-[1040]"
-            style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-            onClick={() => setDrawerOpen(false)}
-            aria-hidden
-          />
-          <aside
-            className="fixed top-0 left-0 bottom-0 z-[1050] w-[280px] max-w-[85vw] flex flex-col"
-            style={{
-              background: 'var(--blog-bg)',
-              borderRight: '1px solid var(--blog-border)',
-              animation: 'blog-drawer-in 200ms ease-out',
-            }}
-            role="dialog"
-            aria-modal
-            aria-label="메뉴"
-          >
-            <div className="flex items-center justify-between h-[60px] px-4" style={{ borderBottom: '1px solid var(--blog-border)' }}>
-              <span className="font-bold text-[16px]" style={{ color: 'var(--blog-fg)' }}>
-                {logoText}<span style={{ color: 'var(--blog-accent)' }}>.</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => setDrawerOpen(false)}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-md hover:bg-white/5"
-                aria-label="메뉴 닫기"
-              >
-                <X className="w-5 h-5" style={{ color: 'var(--blog-fg-muted)' }} />
-              </button>
-            </div>
-
-            {/* Profile (정적) */}
-            <div className="flex items-center gap-3 px-5 py-5">
-              <div
-                className="w-10 h-10 rounded-full grid place-items-center font-bold text-[15px] text-white"
-                style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}
-              >
-                {PROFILE.initials}
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-semibold" style={{ color: 'var(--blog-fg)' }}>{PROFILE.name}</div>
-                <div className="text-[11.5px]" style={{ color: 'var(--blog-fg-muted)' }}>{PROFILE.role}</div>
-              </div>
-            </div>
-
-            {/* Search */}
-            <button
-              type="button"
-              onClick={() => { setDrawerOpen(false); openCommandPalette(); }}
-              className="mx-5 flex items-center gap-2 px-3 py-2.5 rounded-lg text-[13px]"
-              style={{
-                background: 'var(--blog-card)',
-                border: '1px solid var(--blog-border)',
-                color: 'var(--blog-fg-muted)',
-              }}
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span className="flex-1 text-left">전체 검색…</span>
-              <span className="blog-kbd">⌘K</span>
-            </button>
-
-            {/* Nav */}
-            <nav className="mt-6 flex flex-col">
-              {publicMenuItems.map((item) => (
-                <Link
-                  key={item.id}
-                  to={item.href}
-                  className="px-5 py-3 text-[14px] transition-colors"
-                  style={{
-                    color: isActive(item.href) ? 'var(--blog-accent)' : 'var(--blog-fg)',
-                    background: isActive(item.href) ? 'var(--blog-accent-soft)' : 'transparent',
-                    fontWeight: isActive(item.href) ? 600 : 400,
-                  }}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="flex-1" />
-
-            {/* Footer (login/logout) */}
-            <div className="px-5 py-4" style={{ borderTop: '1px solid var(--blog-border)' }}>
-              {user ? (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="text-[12px]"
-                  style={{ color: 'var(--blog-fg-muted)' }}
-                >
-                  {user.name} · 로그아웃
-                </button>
-              ) : (
-                <Link to="/login" className="text-[12px]" style={{ color: 'var(--blog-fg-muted)' }}>
-                  로그인
-                </Link>
-              )}
-            </div>
-          </aside>
-          <style>{`@keyframes blog-drawer-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }`}</style>
-        </>
-      )}
+      {/* 모바일 drawer (별도 컴포넌트, lazy fetch) */}
+      <MobileDrawer publicMenuItems={publicMenuItems} user={user} />
     </>
   );
 };

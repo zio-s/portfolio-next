@@ -1,0 +1,268 @@
+'use client';
+
+/**
+ * 모바일 좌측 슬라이드 drawer
+ *
+ * blog-n/1/Blog Design.html §5 / mobile.jsx MobileHFDrawer
+ * - 헤더 햄버거가 트리거
+ * - 콘텐츠: 닫기 + 프로필 / 검색 trigger / Nav / Categories / Tags
+ * - 좌측 슬라이드 인 240ms ease-out, backdrop blur(2px) + opacity 0.55
+ * - ESC + 백드롭 클릭 + 라우트 변경 자동 close + body scroll lock
+ *
+ * lazy fetch: open된 적 없으면 useGetPostsQuery skip → categories/tags 비표시
+ * 한 번 열린 후 RTK 캐시 활용
+ */
+
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, X } from 'lucide-react';
+import { useAppDispatch, useGetPostsQuery } from '@/store';
+import { logout } from '@/store/slices/authSlice';
+import { openCommandPalette } from './GlobalCommandPalette';
+import { aggregateCategories, aggregateTags } from '@/lib/blog';
+import { PROFILE } from '@/config/profile';
+import type { MenuItem } from '@/components/layout/Header';
+
+const OPEN_EVENT = 'open-mobile-drawer';
+
+/** 어디서든 호출하면 drawer가 열림 (PublicHeader 햄버거에서 사용) */
+export function openMobileDrawer() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(OPEN_EVENT));
+  }
+}
+
+interface MobileDrawerProps {
+  publicMenuItems?: MenuItem[];
+  user?: { name: string; email: string; avatar?: string };
+}
+
+export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) {
+  const [open, setOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeCat = searchParams.get('cat') ?? 'all';
+  const activeTag = searchParams.get('tag') ?? '';
+  const onBlogRoute = location.pathname.startsWith('/blog');
+
+  const handleOpen = useCallback(() => {
+    setOpen(true);
+    setHasOpened(true);
+  }, []);
+  const handleClose = useCallback(() => setOpen(false), []);
+
+  // 커스텀 이벤트
+  useEffect(() => {
+    const onOpen = () => handleOpen();
+    window.addEventListener(OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_EVENT, onOpen);
+  }, [handleOpen]);
+
+  // 라우트 변경 → 자동 close
+  useEffect(() => { setOpen(false); }, [location.pathname, location.search]);
+
+  // body scroll lock
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  // ESC
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open]);
+
+  // lazy fetch posts (drawer 열린 적 없으면 skip)
+  const { data } = useGetPostsQuery(
+    { status: 'published', page: 1, limit: 200 },
+    { skip: !hasOpened }
+  );
+  const posts = data?.posts ?? [];
+  const categories = aggregateCategories(posts);
+  const tags = aggregateTags(posts).slice(0, 10);
+
+  const setParam = (key: string, value: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (value && value !== 'all') next.set(key, value);
+    else next.delete(key);
+    next.delete('page');
+    setSearchParams(next);
+  };
+
+  const isActiveNav = (href: string) => href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      navigate('/');
+    } catch { /* silent */ }
+  };
+
+  if (!open) return null;
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-[1040]"
+        style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(2px)' }}
+        onClick={handleClose}
+        aria-hidden
+      />
+      <aside
+        className="fixed top-0 left-0 bottom-0 z-[1050] w-[296px] max-w-[85vw] flex flex-col overflow-auto"
+        style={{
+          background: 'var(--blog-bg)',
+          borderRight: '1px solid var(--blog-border)',
+          boxShadow: '8px 0 32px rgba(0,0,0,0.4)',
+          padding: '20px 18px',
+          gap: 22,
+          animation: 'blog-drawer-in 240ms ease-out',
+        }}
+        role="dialog"
+        aria-modal
+        aria-label="메뉴"
+      >
+        {/* close + profile */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-[38px] h-[38px] rounded-full grid place-items-center font-bold text-[14px] text-white"
+              style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}
+            >
+              {PROFILE.initials}
+            </div>
+            <div>
+              <div className="text-[13px] font-semibold" style={{ color: 'var(--blog-fg)' }}>{PROFILE.name}</div>
+              <div className="text-[11px] mt-px" style={{ color: 'var(--blog-fg-muted)' }}>{PROFILE.role}</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="w-8 h-8 rounded-lg grid place-items-center hover:bg-white/5 transition-colors"
+            style={{ background: 'var(--blog-card)', border: '1px solid var(--blog-border)', color: 'var(--blog-fg-muted)' }}
+            aria-label="메뉴 닫기"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* search trigger */}
+        <button
+          type="button"
+          onClick={() => { handleClose(); openCommandPalette(); }}
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] transition-colors"
+          style={{ background: 'var(--blog-card)', border: '1px solid var(--blog-border)', color: 'var(--blog-fg-muted)' }}
+        >
+          <Search className="w-3.5 h-3.5" />
+          <span className="flex-1 text-left">전체 검색…</span>
+          <span className="blog-kbd">⌘K</span>
+        </button>
+
+        {/* nav */}
+        <nav className="flex flex-col gap-0.5">
+          {publicMenuItems.map((n) => {
+            const active = isActiveNav(n.href);
+            return (
+              <Link
+                key={n.id}
+                to={n.href}
+                className="px-3 py-2.5 rounded-md text-[14px] transition-colors"
+                style={{
+                  background: active ? 'var(--blog-accent-soft)' : 'transparent',
+                  color: active ? 'var(--blog-accent)' : 'var(--blog-fg)',
+                  fontWeight: active ? 600 : 400,
+                }}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Categories — drawer가 열린 적 있어 데이터가 있을 때만 */}
+        {posts.length > 0 && (
+          <div>
+            <div className="blog-uppercase-label mb-2.5">Categories</div>
+            <div className="flex flex-col gap-px">
+              {categories.map((c) => {
+                const isActive = c.slug === activeCat && onBlogRoute;
+                return (
+                  <button
+                    key={c.slug}
+                    type="button"
+                    data-active={isActive}
+                    onClick={() => {
+                      setParam('cat', c.slug);
+                      // drawer 열린 채로 카테고리 선택 시 blog 페이지로 이동
+                      if (!onBlogRoute) navigate(`/blog${c.slug !== 'all' ? `?cat=${c.slug}` : ''}`);
+                    }}
+                    className="blog-cat-row text-left"
+                  >
+                    <span>{c.label}</span>
+                    <span className="blog-mono text-[11px]" style={{ color: isActive ? 'var(--blog-accent)' : 'var(--blog-fg-subtle)' }}>{c.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div>
+            <div className="blog-uppercase-label mb-2.5">Tags</div>
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map(({ tag, count }) => {
+                const isActive = tag === activeTag && onBlogRoute;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => {
+                      setParam('tag', isActive ? null : tag);
+                      if (!onBlogRoute) navigate(`/blog?tag=${encodeURIComponent(tag)}`);
+                    }}
+                    className="blog-tag"
+                    style={isActive ? { background: 'var(--blog-accent-soft)', color: 'var(--blog-accent)', borderColor: 'var(--blog-accent)' } : undefined}
+                  >
+                    #{tag}
+                    <span className="ml-1" style={{ color: isActive ? 'var(--blog-accent)' : 'var(--blog-fg-subtle)' }}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1" />
+
+        {/* Footer (login/logout) */}
+        <div className="pt-3" style={{ borderTop: '1px solid var(--blog-border)' }}>
+          {user ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-[12px]"
+              style={{ color: 'var(--blog-fg-muted)' }}
+            >
+              {user.name} · 로그아웃
+            </button>
+          ) : (
+            <Link to="/login" className="text-[12px]" style={{ color: 'var(--blog-fg-muted)' }}>
+              로그인
+            </Link>
+          )}
+        </div>
+      </aside>
+    </>
+  );
+}
