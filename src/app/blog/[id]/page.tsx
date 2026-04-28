@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { generateSEOMetadata } from '@/components/common/SEO';
 import PostDetailPage from '@/views/PostDetailPage';
+import { extractThumbnail } from '@/lib/blog';
 import type { Post } from '@/store/types';
 
 /**
@@ -46,11 +47,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const post = await getPostByNumber(postNumber);
   if (!post) return {};
 
+  // 본문 첫 이미지를 OG 이미지로 사용 (DESIGN_RESPONSE.md §4.1)
+  const ogImage = extractThumbnail(post.content);
+
   return generateSEOMetadata({
     title: `${post.title} | Blog`,
     description: post.excerpt || post.content?.slice(0, 160),
     url: `https://semincode.com/blog/${post.post_number ?? postNumber}`,
     type: 'article',
+    image: ogImage,
     publishedTime: post.publishedAt || post.createdAt,
     modifiedTime: post.updatedAt,
     keywords: post.tags?.join(', '),

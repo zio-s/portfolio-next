@@ -9,7 +9,7 @@
  * - 좋아요 CTA(54px 원형), 이전/다음 글(2컬럼), 댓글
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
@@ -49,6 +49,7 @@ import { ReadingProgress } from '@/features/posts/components/ReadingProgress';
 import { TableOfContents } from '@/features/posts/components/TableOfContents';
 import { LikeCTA } from '@/features/posts/components/LikeCTA';
 import { calcReadMinutes, deriveCategory, formatBlogDate } from '@/lib/blog';
+import { PROFILE } from '@/config/profile';
 import type { Post } from '@/store/types';
 
 interface PostDetailPageProps {
@@ -90,6 +91,7 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
   const [toggleLike, { isLoading: isLikeLoading }] = useToggleLikeMutation();
   const [incrementView] = useIncrementViewMutation();
   const [isLikeProcessing, setIsLikeProcessing] = useState(false);
+  const articleRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (post?.id) incrementView(post.id);
@@ -192,10 +194,10 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
 
   return (
     <MainLayout>
-      <ReadingProgress />
+      <ReadingProgress articleRef={articleRef} />
 
       <div className="max-w-[1280px] mx-auto px-4 xl:flex xl:items-start xl:justify-center">
-        <article className="w-full max-w-[720px] mx-auto pt-8 pb-20">
+        <article ref={articleRef} className="w-full max-w-[720px] mx-auto pt-8 pb-20">
           {/* Back */}
           <Link to={backPath}>
             <button
@@ -297,6 +299,40 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
             disabled={isLikeLoading || isLikeProcessing}
             onToggle={handleLike}
           />
+
+          {/* About author */}
+          <div
+            className="mt-6 flex items-start gap-4 p-5"
+            style={{ background: 'var(--blog-card)', border: '1px solid var(--blog-border)', borderRadius: 12 }}
+          >
+            <div
+              className="w-12 h-12 rounded-full grid place-items-center font-bold text-[16px] text-white shrink-0"
+              style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}
+            >
+              {PROFILE.initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline gap-2">
+                <span className="text-[14px] font-semibold" style={{ color: 'var(--blog-fg)' }}>{PROFILE.name}</span>
+                <span className="blog-mono text-[11px]" style={{ color: 'var(--blog-fg-subtle)' }}>· {PROFILE.role}</span>
+              </div>
+              <p className="text-[13px] mt-1.5 leading-[1.6]" style={{ color: 'var(--blog-fg-muted)' }}>
+                {PROFILE.bio}
+              </p>
+              <div className="mt-2.5 flex items-center gap-3 blog-mono text-[11.5px]">
+                {PROFILE.github && (
+                  <a href={PROFILE.github} target="_blank" rel="noreferrer noopener" style={{ color: 'var(--blog-fg-muted)' }}>
+                    GitHub →
+                  </a>
+                )}
+                {PROFILE.email && (
+                  <a href={`mailto:${PROFILE.email}`} style={{ color: 'var(--blog-fg-muted)' }}>
+                    Email →
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Prev/Next */}
           {(prevPost || nextPost) && (
