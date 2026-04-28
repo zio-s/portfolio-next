@@ -301,13 +301,19 @@
   to { transform: translateX(0); }
 }
 
-/* ===== Hide scrollbar (mobile category chips) ===== */
+/* ===== Hide scrollbar (mobile category chips, sidebar overflow) ===== */
 .blog-scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .blog-scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* ===== Sidebar bottom fade mask — '더 있음' 시그널 ===== */
+.blog-sidebar-fade {
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
 }
 
 /* ===== Command palette ===== */
