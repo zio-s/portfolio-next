@@ -48,6 +48,7 @@ import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
 import { ReadingProgress } from '@/features/posts/components/ReadingProgress';
 import { TableOfContents } from '@/features/posts/components/TableOfContents';
 import { LikeCTA } from '@/features/posts/components/LikeCTA';
+import { RelatedPosts } from '@/features/posts/components/RelatedPosts';
 import { calcReadMinutes, deriveCategory, formatBlogDate } from '@/lib/blog';
 import { PROFILE } from '@/config/profile';
 import type { Post } from '@/store/types';
@@ -357,6 +358,9 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
               </div>
             </div>
           </div>
+
+          {/* Related posts (3개 이상일 때만 노출) */}
+          <RelatedPosts post={post} allPosts={allPosts} />
 
           {/* Prev/Next */}
           {(prevPost || nextPost) && (

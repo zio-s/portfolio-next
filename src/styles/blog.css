@@ -227,6 +227,15 @@
   animation: blog-heart-pulse 200ms ease-out;
 }
 
+/* ===== Related posts card hover ===== */
+.blog-related-card {
+  will-change: transform;
+}
+.blog-related-card:hover {
+  border-color: var(--blog-accent) !important;
+  transform: translateY(-2px);
+}
+
 /* ===== Mobile drawer slide-in ===== */
 @keyframes blog-drawer-in {
   from { transform: translateX(-100%); }

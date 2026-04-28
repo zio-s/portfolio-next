@@ -114,6 +114,31 @@ export function aggregateCategories(posts: Post[]): { slug: string; label: strin
   return [{ slug: 'all', label: '전체', count: posts.length }, ...ordered];
 }
 
+/**
+ * Related posts 알고리즘 (DESIGN_RESPONSE_R4.md §1.2)
+ * score = sameCategory(10) + tagOverlapCount
+ * tie-break: published desc
+ * score 0인 글은 제외
+ */
+export function getRelatedPosts(post: Post, all: Post[], n = 3): Post[] {
+  const others = all.filter((p) => p.id !== post.id && p.status === 'published');
+  return others
+    .map((p) => {
+      const sameCat = (p.category && p.category === post.category) ? 10 : 0;
+      const tagOverlap = (p.tags ?? []).filter((t) => (post.tags ?? []).includes(t)).length;
+      return { post: p, score: sameCat + tagOverlap };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      const da = new Date(a.post.publishedAt || a.post.published_at || a.post.createdAt || 0).getTime();
+      const db = new Date(b.post.publishedAt || b.post.published_at || b.post.createdAt || 0).getTime();
+      return db - da;
+    })
+    .slice(0, n)
+    .map(({ post }) => post);
+}
+
 export function aggregateTags(posts: Post[]): { tag: string; count: number }[] {
   const map = new Map<string, number>();
   for (const p of posts) {
