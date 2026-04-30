@@ -1,8 +1,13 @@
+'use client';
+
 /**
- * 대시보드 페이지 - Modern Tailwind Version
+ * Dashboard — 블로그 디자인 시스템과 통일 (Linear/Vercel 톤)
  *
- * 로그인한 관리자의 메인 대시보드 화면입니다.
- * 주요 통계와 빠른 액션을 제공합니다.
+ * 참조: claudedocs/ADMIN_REDESIGN_SPEC.md §2.3
+ * - 4-stat 한 줄 (그라디언트 X)
+ * - Quick Actions: 카드 X, row 리스트
+ * - Recent Activity: row 리스트 (mono 시간 + 텍스트)
+ * - 이모지 X, lucide 아이콘 단색, 단일 accent
  */
 
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,236 +16,233 @@ import { selectUser } from '../store/slices/authSlice';
 import { ROUTES } from '../router/routes';
 import { useAdminCheck } from '../hooks/useAdminCheck';
 import { useGetAdminStatsQuery } from '../features/admin/api/adminApi';
+import { useGetPostsQuery } from '../store';
 import { AdminLayout } from '../components/layout/AdminLayout';
+import { calcReadMinutes, deriveCategory, formatRelative } from '@/lib/blog';
 import {
   Loader2,
   FolderOpen,
-  MessageCircle,
+  MessageSquare,
   Eye,
   Heart,
-  FileText,
   PenSquare,
-  User,
-  ExternalLink,
   BookOpen,
+  ExternalLink,
+  ArrowUpRight,
+  ChevronRight,
+  FileText,
+  User,
 } from 'lucide-react';
 
-/**
- * 통계 카드 컴포넌트
- */
-interface StatCardProps {
-  title: string;
+// ─── 통계 ──────────────────────────────────────────────
+interface StatProps {
+  label: string;
   value: number | string;
-  icon: React.ReactNode;
-  gradient: string;
-  link?: string;
+  href?: string;
+  loading?: boolean;
 }
 
-const StatCard = ({ title, value, icon, gradient, link }: StatCardProps) => {
+function Stat({ label, value, href, loading }: StatProps) {
   const content = (
-    <div
-      className={`p-5 rounded-xl ${gradient} text-white transition-all hover:scale-[1.02] hover:shadow-lg cursor-pointer`}
-    >
-      <div className="text-3xl mb-2">{icon}</div>
-      <div className="text-sm opacity-90 font-medium mb-1">{title}</div>
-      <div className="text-3xl font-bold">{value}</div>
+    <div className="admin-stat">
+      <div className="admin-stat-label">{label}</div>
+      <div className="admin-stat-value">
+        {loading ? <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--blog-fg-muted)' }} /> : value.toLocaleString()}
+      </div>
     </div>
   );
+  return href ? <Link to={href}>{content}</Link> : content;
+}
 
-  if (link) {
-    return (
-      <Link to={link} className="block">
-        {content}
-      </Link>
-    );
-  }
-
-  return content;
-};
-
-/**
- * 빠른 액션 카드 컴포넌트
- */
-interface ActionCardProps {
-  title: string;
-  description: string;
+// ─── 액션 row ──────────────────────────────────────────
+interface ActionProps {
   icon: React.ReactNode;
-  gradient: string;
+  label: string;
+  hint?: string;
   onClick: () => void;
+  external?: boolean;
 }
 
-const ActionCard = ({ title, description, icon, gradient, onClick }: ActionCardProps) => (
-  <button
-    onClick={onClick}
-    className={`p-5 rounded-xl ${gradient} text-white text-left transition-all hover:scale-[1.02] hover:shadow-lg cursor-pointer w-full`}
-  >
-    <div className="text-2xl mb-2">{icon}</div>
-    <div className="font-semibold mb-1">{title}</div>
-    <div className="text-sm opacity-90">{description}</div>
-  </button>
-);
-
-/**
- * 링크 카드 컴포넌트
- */
-interface LinkCardProps {
-  to: string;
-  title: string;
-  description: string;
-  gradient: string;
+function ActionRow({ icon, label, hint, onClick, external }: ActionProps) {
+  return (
+    <button type="button" className="admin-row" onClick={onClick}>
+      {icon}
+      <span className="flex-1 truncate">{label}</span>
+      {hint && (
+        <span className="blog-mono text-[11px]" style={{ color: 'var(--blog-fg-subtle)' }}>{hint}</span>
+      )}
+      {external ? (
+        <ArrowUpRight className="admin-row-arrow" />
+      ) : (
+        <ChevronRight className="admin-row-arrow" />
+      )}
+    </button>
+  );
 }
 
-const LinkCard = ({ to, title, description, gradient }: LinkCardProps) => (
-  <Link
-    to={to}
-    className={`block p-6 ${gradient} text-white rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg`}
-  >
-    <h2 className="text-2xl font-bold mb-2">{title}</h2>
-    <p className="opacity-90">{description}</p>
-  </Link>
-);
-
+// ─── 메인 컴포넌트 ─────────────────────────────────────
 const DashboardPage = () => {
   const user = useAppSelector(selectUser);
   const { isAdmin } = useAdminCheck();
   const navigate = useNavigate();
 
-  const { data: stats, isLoading: loading } = useGetAdminStatsQuery(undefined, {
-    skip: !isAdmin,
-  });
+  const { data: stats, isLoading: statsLoading } = useGetAdminStatsQuery(undefined, { skip: !isAdmin });
+  const { data: postsData } = useGetPostsQuery({ status: undefined, page: 1, limit: 5 }, { skip: !isAdmin });
+  const recentPosts = postsData?.posts ?? [];
 
   return (
     <AdminLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">대시보드</h1>
-          <p className="text-muted-foreground mt-1">
-            환영합니다, {user?.name || user?.email}님!
+      <div className="max-w-[1200px] mx-auto px-6 lg:px-10 py-8 lg:py-12">
+        {/* Page header */}
+        <header className="mb-10">
+          <div className="blog-uppercase-label text-[10.5px] mb-3" style={{ color: 'var(--blog-fg-subtle)' }}>
+            Overview
+          </div>
+          <h1 className="text-[32px] font-bold tracking-[-0.025em]" style={{ color: 'var(--blog-fg)' }}>
+            대시보드
+          </h1>
+          <p className="text-[13px] mt-1.5" style={{ color: 'var(--blog-fg-muted)' }}>
+            <span className="blog-mono">{user?.email ?? 'admin'}</span> · 환영합니다
           </p>
-        </div>
+        </header>
 
-        {/* Admin Stats Section */}
-        {isAdmin && (
-          <>
-            {/* 통계 */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                📊 통계
-              </h2>
-              {loading ? (
-                <div className="flex justify-center items-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-accent" />
-                  <span className="ml-2 text-muted-foreground">통계 로딩 중...</span>
-                </div>
-              ) : stats ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard
-                    title="전체 프로젝트"
-                    value={stats.totalProjects}
-                    icon={<FolderOpen className="w-8 h-8" />}
-                    gradient="bg-gradient-to-br from-violet-500 to-purple-600"
-                    link="/admin/projects"
-                  />
-                  <StatCard
-                    title="전체 댓글"
-                    value={stats.totalComments}
-                    icon={<MessageCircle className="w-8 h-8" />}
-                    gradient="bg-gradient-to-br from-pink-500 to-rose-500"
-                    link="/admin/comments"
-                  />
-                  <StatCard
-                    title="전체 조회수"
-                    value={stats.totalViews}
-                    icon={<Eye className="w-8 h-8" />}
-                    gradient="bg-gradient-to-br from-blue-500 to-cyan-500"
-                  />
-                  <StatCard
-                    title="전체 좋아요"
-                    value={stats.totalLikes}
-                    icon={<Heart className="w-8 h-8" />}
-                    gradient="bg-gradient-to-br from-orange-500 to-amber-500"
-                  />
-                </div>
-              ) : null}
-            </section>
-
-            {/* 빠른 작업 */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                ⚡ 빠른 작업
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <ActionCard
-                  title="프로젝트 관리"
-                  description="프로젝트 생성, 수정, 삭제"
-                  icon={<FolderOpen className="w-6 h-6" />}
-                  gradient="bg-gradient-to-br from-violet-500 to-purple-600"
-                  onClick={() => navigate('/admin/projects')}
-                />
-                <ActionCard
-                  title="댓글 관리"
-                  description="댓글 모더레이션 및 삭제"
-                  icon={<MessageCircle className="w-6 h-6" />}
-                  gradient="bg-gradient-to-br from-pink-500 to-rose-500"
-                  onClick={() => navigate('/admin/comments')}
-                />
-                <ActionCard
-                  title="방문록 관리"
-                  description="방문록 확인 및 답글 작성"
-                  icon={<BookOpen className="w-6 h-6" />}
-                  gradient="bg-gradient-to-br from-emerald-500 to-teal-500"
-                  onClick={() => navigate('/admin/guestbook')}
-                />
-                <ActionCard
-                  title="공개 페이지 보기"
-                  description="포트폴리오 공개 페이지로 이동"
-                  icon={<ExternalLink className="w-6 h-6" />}
-                  gradient="bg-gradient-to-br from-blue-500 to-cyan-500"
-                  onClick={() => navigate('/projects')}
-                />
-              </div>
-            </section>
-          </>
-        )}
-
-        {/* 주요 메뉴 */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            📂 주요 메뉴
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <LinkCard
-              to="/blog"
-              title="블로그"
-              description="게시글 목록 보기"
-              gradient="bg-gradient-to-br from-blue-500 to-cyan-500"
-            />
-            <LinkCard
-              to={ROUTES.BLOG_CREATE}
-              title="새 게시글"
-              description="게시글 작성하기"
-              gradient="bg-gradient-to-br from-emerald-500 to-teal-500"
-            />
-            <LinkCard
-              to={ROUTES.PROFILE}
-              title="프로필"
-              description="내 정보 관리"
-              gradient="bg-gradient-to-br from-violet-500 to-purple-600"
-            />
+        {/* Stats — 4-stat 한 줄 */}
+        <section className="mb-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Stat label="Projects"  value={stats?.totalProjects ?? 0}  href="/admin/projects" loading={statsLoading} />
+            <Stat label="Comments"  value={stats?.totalComments ?? 0}  href="/admin/comments" loading={statsLoading} />
+            <Stat label="Views"     value={stats?.totalViews ?? 0}     loading={statsLoading} />
+            <Stat label="Likes"     value={stats?.totalLikes ?? 0}     loading={statsLoading} />
           </div>
         </section>
 
-        {/* 최근 활동 */}
-        <section className="p-6 rounded-xl bg-card border border-border">
-          <h3 className="text-lg font-semibold mb-3">최근 활동</h3>
-          <p className="text-muted-foreground text-sm">
-            최근 활동 내역이 여기에 표시됩니다.
-          </p>
-        </section>
+        {/* Two columns: Quick Actions + Recent Posts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Quick Actions */}
+          <section>
+            <div className="admin-section-label">Quick Actions</div>
+            <div className="admin-row-list">
+              <ActionRow
+                icon={<PenSquare />}
+                label="새 게시글 작성"
+                onClick={() => navigate(ROUTES.BLOG_CREATE)}
+              />
+              <ActionRow
+                icon={<FileText />}
+                label="블로그 글 관리"
+                hint={stats?.totalProjects !== undefined ? `${recentPosts.length}+ posts` : undefined}
+                onClick={() => navigate('/admin/posts')}
+              />
+              <ActionRow
+                icon={<FolderOpen />}
+                label="프로젝트 관리"
+                onClick={() => navigate('/admin/projects')}
+              />
+              <ActionRow
+                icon={<MessageSquare />}
+                label="댓글 모더레이션"
+                hint={stats?.totalComments ? `${stats.totalComments}건` : undefined}
+                onClick={() => navigate('/admin/comments')}
+              />
+              <ActionRow
+                icon={<BookOpen />}
+                label="방문록 답글"
+                onClick={() => navigate('/admin/guestbook')}
+              />
+              <ActionRow
+                icon={<User />}
+                label="프로필 설정"
+                onClick={() => navigate(ROUTES.PROFILE)}
+              />
+              <ActionRow
+                icon={<ExternalLink />}
+                label="공개 사이트 보기"
+                onClick={() => window.open('/', '_blank', 'noopener,noreferrer')}
+                external
+              />
+            </div>
+          </section>
+
+          {/* Recent Posts */}
+          <section>
+            <div className="admin-section-label flex items-center justify-between">
+              <span>Recent Posts</span>
+              <Link
+                to="/admin/posts"
+                className="blog-mono text-[10.5px] normal-case tracking-normal"
+                style={{ color: 'var(--blog-fg-subtle)' }}
+              >
+                모두 보기 →
+              </Link>
+            </div>
+            <div className="admin-row-list">
+              {recentPosts.length === 0 ? (
+                <div className="px-4 py-10 text-center">
+                  <div className="blog-mono text-[12px]" style={{ color: 'var(--blog-fg-subtle)' }}>
+                    아직 게시글이 없습니다
+                  </div>
+                </div>
+              ) : (
+                recentPosts.map((p) => {
+                  const cat = deriveCategory(p);
+                  const dateRaw = p.publishedAt || p.published_at || p.createdAt || p.created_at;
+                  return (
+                    <Link
+                      key={p.id}
+                      to={`/blog/${p.post_number}`}
+                      className="admin-row"
+                    >
+                      <span
+                        className="blog-mono text-[10px] uppercase tracking-[0.06em] shrink-0"
+                        style={{ color: 'var(--blog-accent)', minWidth: 60 }}
+                      >
+                        {cat.label.slice(0, 8)}
+                      </span>
+                      <span className="flex-1 truncate text-[13px]" style={{ color: 'var(--blog-fg)' }}>
+                        {p.title}
+                      </span>
+                      <span className="blog-mono text-[10.5px] shrink-0" style={{ color: 'var(--blog-fg-subtle)' }}>
+                        {formatRelative(dateRaw)}
+                      </span>
+                      {p.status === 'draft' && (
+                        <span className="admin-badge" data-tone="muted">초안</span>
+                      )}
+                      <ChevronRight className="admin-row-arrow" />
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* 통계 부가 정보 — 미세하게 */}
+        {stats && (
+          <section className="mt-10 pt-6" style={{ borderTop: '1px solid var(--blog-border)' }}>
+            <div className="admin-section-label">Distribution</div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 blog-mono text-[12px]">
+              <DistRow icon={<FolderOpen />} label="projects" value={stats.totalProjects} />
+              <DistRow icon={<MessageSquare />} label="comments" value={stats.totalComments} />
+              <DistRow icon={<Eye />}     label="views"    value={stats.totalViews} />
+              <DistRow icon={<Heart />}   label="likes"    value={stats.totalLikes} />
+            </div>
+          </section>
+        )}
       </div>
     </AdminLayout>
   );
 };
+
+function DistRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-2 py-1.5" style={{ color: 'var(--blog-fg-muted)' }}>
+      <span className="inline-flex" style={{ width: 12, color: 'var(--blog-fg-subtle)' }}>
+        {icon}
+      </span>
+      <span className="uppercase">{label}</span>
+      <span className="ml-auto" style={{ color: 'var(--blog-fg)' }}>{value.toLocaleString()}</span>
+    </div>
+  );
+}
 
 export default DashboardPage;
