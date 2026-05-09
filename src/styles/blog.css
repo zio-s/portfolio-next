@@ -212,6 +212,62 @@
   margin: 32px 0;
 }
 
+/* table — GFM 테이블 (remark-gfm) */
+/* 데스크톱: 일반 테이블 / 모바일(640 미만): 가로 스크롤로 안전하게 */
+.blog-article table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin: 24px 0;
+  border: 1px solid var(--blog-border);
+  border-radius: 8px;
+  overflow: hidden; /* 모서리 둥글게 */
+}
+.blog-article thead {
+  background: var(--blog-bg-soft);
+}
+.blog-article th {
+  font-family: var(--blog-font-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--blog-fg-muted);
+  text-align: left;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--blog-border);
+}
+.blog-article td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--blog-border-soft);
+  vertical-align: top;
+  color: var(--blog-fg-muted);
+}
+.blog-article tbody tr:last-child td {
+  border-bottom: none;
+}
+.blog-article tbody tr:hover {
+  background: rgba(139, 92, 246, 0.04);
+}
+.blog-article td > code,
+.blog-article th > code {
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+/* 모바일: 컨테이너로 가로 스크롤. 좁은 화면에서 테이블 깨짐 방지 */
+@media (max-width: 640px) {
+  .blog-article table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 13px;
+  }
+  .blog-article th,
+  .blog-article td {
+    white-space: nowrap;
+  }
+}
+
 /* mark — 본문 (R4 §3.3): underline + soft bg, 텍스트 색은 그대로 */
 .blog-article mark {
   background: rgba(139, 92, 246, 0.18);
