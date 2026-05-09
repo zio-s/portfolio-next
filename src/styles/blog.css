@@ -665,3 +665,13 @@
   transition: width 200ms ease-out, opacity 220ms ease-out;
   will-change: width, opacity;
 }
+
+/* ============================================================================
+ * Blog detail SubNav helper — header height variable
+ * 모바일 56 / 데스크톱 60 (PublicHeader와 일치)
+ * BlogDetailSubNav가 sticky top: var(--blog-header-h)로 위치 잡음
+ * ========================================================================= */
+:root { --blog-header-h: 56px; }
+@media (min-width: 1024px) {
+  :root { --blog-header-h: 60px; }
+}

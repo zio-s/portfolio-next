@@ -45,7 +45,7 @@ import { Badge } from '@/components/ui/badge';
 import { PostCommentList } from '@/features/post-comments/components/PostCommentList';
 import { PostCommentForm } from '@/features/post-comments/components/PostCommentForm';
 import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
-import { ReadingProgress } from '@/features/posts/components/ReadingProgress';
+import { BlogDetailSubNav } from '@/features/posts/components/BlogDetailSubNav';
 import { TableOfContents } from '@/features/posts/components/TableOfContents';
 import { LikeCTA } from '@/features/posts/components/LikeCTA';
 import { RelatedPosts } from '@/features/posts/components/RelatedPosts';
@@ -195,21 +195,15 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
 
   return (
     <MainLayout>
-      <ReadingProgress articleRef={articleRef} />
+      {/* Sub-nav (sticky 36px) — ← 목록으로 + 카테고리 + 진행률 % + 하단 progress fill */}
+      <BlogDetailSubNav
+        backHref={backPath}
+        categoryLabel={cat.label}
+        articleRef={articleRef}
+      />
 
       <div className="max-w-[1280px] mx-auto px-4 xl:flex xl:items-start xl:justify-center">
-        <article ref={articleRef} className="w-full max-w-[720px] mx-auto pt-8 pb-20">
-          {/* Back */}
-          <Link to={backPath}>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 text-[13px] mb-8 hover:text-[var(--blog-accent)] transition-colors"
-              style={{ color: 'var(--blog-fg-muted)' }}
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> 목록으로
-            </button>
-          </Link>
-
+        <article ref={articleRef} className="w-full max-w-[720px] mx-auto pt-6 pb-20">
           {/* Header */}
           <header>
             <div className="flex items-center gap-3 mb-4">
