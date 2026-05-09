@@ -649,3 +649,19 @@
 @keyframes blog-spinner-rotate {
   to { transform: rotate(360deg); }
 }
+
+/* ============================================================================
+ * Global Navigation Progress (top 2px) — Linear/Vercel 톤
+ * ========================================================================= */
+.nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--blog-accent);
+  box-shadow: 0 0 8px var(--blog-accent), 0 0 4px var(--blog-accent);
+  z-index: 1100;
+  pointer-events: none;
+  transition: width 200ms ease-out, opacity 220ms ease-out;
+  will-change: width, opacity;
+}

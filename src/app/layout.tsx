@@ -22,6 +22,12 @@ export const metadata: Metadata = {
       ],
     },
   },
+  // 네이버 웹마스터 자격 확인
+  verification: {
+    other: {
+      'naver-site-verification': '43dbc4d8839e76c8f81dc0aa32f98b1532037422',
+    },
+  },
 };
 
 export default function RootLayout({

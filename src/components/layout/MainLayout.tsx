@@ -14,6 +14,7 @@ import { Header } from '@/components/layout/Header';
 import type { MenuItem } from '@/components/layout/Header';
 import { Briefcase, BookOpen, MessageSquare } from 'lucide-react';
 import { GlobalCommandPalette } from '@/features/posts/components/GlobalCommandPalette';
+import { NavigationProgress } from '@/components/common/NavigationProgress';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -60,6 +61,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* 글로벌 라우팅 진행률 (top 2px) */}
+      <NavigationProgress />
+
       {/* 통합 Header (Public 모드) - 애니메이션 제외 */}
       <Header
         mode="public"

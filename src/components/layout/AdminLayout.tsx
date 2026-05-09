@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { AdminSidebar } from './AdminSidebar';
+import { NavigationProgress } from '@/components/common/NavigationProgress';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -23,6 +24,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <div className="admin-root flex">
+      {/* 글로벌 라우팅 진행률 (top 2px) */}
+      <NavigationProgress />
+
       <AdminSidebar isMobileOpen={isMobileOpen} onMobileClose={() => setIsMobileOpen(false)} />
 
       <div className="flex-1 min-w-0 flex flex-col">
