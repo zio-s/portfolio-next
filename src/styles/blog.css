@@ -575,3 +575,21 @@
 .admin-action-icon[data-tone='danger']:hover {
   color: var(--blog-heart);
 }
+
+/* ============================================================================
+ * Blog spinner (loading.tsx 등에서 사용)
+ * 미니멀: 24px conic accent, 1초 회전
+ * ========================================================================= */
+.blog-spinner {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0%, var(--blog-accent) 100%);
+  -webkit-mask: radial-gradient(circle, transparent 8px, #000 9px);
+          mask: radial-gradient(circle, transparent 8px, #000 9px);
+  animation: blog-spinner-rotate 800ms linear infinite;
+}
+
+@keyframes blog-spinner-rotate {
+  to { transform: rotate(360deg); }
+}

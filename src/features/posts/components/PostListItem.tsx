@@ -1,6 +1,6 @@
 'use client';
 
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Clock, Edit, Eye, Heart, MessageCircle, Trash2 } from 'lucide-react';
 import type { Post } from '@/store/types';
 import { routeHelpers } from '@/router/routes';
@@ -14,13 +14,13 @@ interface PostListItemProps {
 }
 
 export function PostListItem({ post, isAdmin = false, onDelete }: PostListItemProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const cat = deriveCategory(post);
   const readMin = calcReadMinutes(post.content);
   const dateRaw = post.publishedAt || post.published_at || post.createdAt || post.created_at;
   const isNew = isNewPost(dateRaw);
 
-  const onClick = () => navigate(routeHelpers.blogDetail(post.post_number));
+  const onClick = () => router.push(routeHelpers.blogDetail(post.post_number));
 
   return (
     <article
@@ -65,7 +65,7 @@ export function PostListItem({ post, isAdmin = false, onDelete }: PostListItemPr
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(routeHelpers.blogEdit(post.id));
+                router.push(routeHelpers.blogEdit(post.id));
               }}
               aria-label="수정"
               title="수정"
