@@ -1,9 +1,4 @@
-/**
- * 파일 업로드 서비스
- *
- * 이미지, 문서 등의 파일 업로드 기능을 제공합니다.
- * 진행률 표시 및 요청 취소를 지원합니다.
- */
+/** 파일 업로드 서비스 (진행률 + cancel token 지원) */
 
 import apiClient, { createCancelToken } from './api';
 import { UPLOAD_ENDPOINTS } from './endpoints';

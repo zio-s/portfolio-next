@@ -1,8 +1,4 @@
-/**
- * 게시글 서비스
- *
- * 게시글 CRUD(생성, 조회, 수정, 삭제) 및 발행 관리 API를 제공합니다.
- */
+/** 게시글 CRUD 서비스 */
 
 import { get, post, put, del } from './api';
 import { POST_ENDPOINTS } from './endpoints';

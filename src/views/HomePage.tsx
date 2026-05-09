@@ -355,12 +355,12 @@ const HomePage = () => {
           <div className="space-y-16">
             {Object.entries(groupedSkills).map(([category, categorySkills]) => {
               const categoryDescriptions: Record<string, string> = {
-                'Frontend': 'React와 TypeScript를 중심으로 컴포넌트 기반 아키텍처를 설계하고, 사용자 중심의 인터페이스를 구현합니다.',
-                'Styling': 'Tailwind CSS와 SCSS로 확장 가능한 스타일 시스템을 구축합니다.',
-                'State': 'Redux Toolkit과 RTK Query로 전역 상태와 서버 데이터를 효율적으로 관리합니다.',
-                'Backend': 'Supabase로 빠른 백엔드 개발과 실시간 데이터 동기화를 구현합니다.',
-                'Animation': 'GSAP과 Framer Motion으로 사용자의 시선을 사로잡는 인터랙티브한 경험을 만듭니다.',
-                'Tools': 'Git, Vite, Vercel을 활용한 효율적인 개발 및 배포 워크플로우를 구축합니다.'
+                'Frontend': 'React, TypeScript, Next.js로 UI를 만듭니다.',
+                'Styling': 'Tailwind CSS, SCSS로 디자인 토큰 기반 스타일을 작성합니다.',
+                'State': 'Redux Toolkit과 RTK Query로 클라이언트·서버 상태를 다룹니다.',
+                'Backend': 'Supabase의 Postgres, Auth, Edge Functions를 사용합니다.',
+                'Animation': 'GSAP, Framer Motion으로 인터랙션과 페이지 전환을 다룹니다.',
+                'Tools': 'Git, Vite, Vercel 환경에서 개발·배포합니다.'
               };
 
               return (

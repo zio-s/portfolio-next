@@ -372,7 +372,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
             {/* Project Content - Structured Sections */}
             <div className="space-y-10">
-              {/* 📝 Overview Section */}
+              {/* Overview */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
@@ -442,7 +442,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* 🎯 Achievements Section */}
+              {/* Achievements */}
               {project.achievements && project.achievements.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-4">
@@ -464,7 +464,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 </div>
               )}
 
-              {/* 💻 Tech Features Section (from techStack) */}
+              {/* Tech Stack */}
               {project.techStack && project.techStack.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-4">
@@ -485,7 +485,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 </div>
               )}
 
-              {/* 💡 Challenges & Solutions Section */}
+              {/* Challenges & Solutions */}
               {project.challenges && project.challenges.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-4">

@@ -1,25 +1,6 @@
 import { useCallback, useState } from 'react';
 
-/**
- * 토글, 설정 및 재설정 기능이 있는 Boolean 상태를 관리합니다.
- *
- * @param initialValue - 초기 Boolean 값 (기본값: false)
- * @returns Boolean 값과 제어 함수들을 포함하는 튜플
- *
- * @example
- * ```tsx
- * const [isOpen, { toggle, setTrue, setFalse, setValue }] = useToggle();
- *
- * return (
- *   <div>
- *     <button onClick={toggle}>토글</button>
- *     <button onClick={setTrue}>열기</button>
- *     <button onClick={setFalse}>닫기</button>
- *     {isOpen && <Modal />}
- *   </div>
- * );
- * ```
- */
+/** Boolean 토글 훅. `[value, { toggle, setTrue, setFalse, setValue }]` 반환 */
 export function useToggle(
   initialValue: boolean = false
 ): [

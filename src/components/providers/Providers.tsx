@@ -1,11 +1,6 @@
 'use client';
 
-/**
- * Providers Component
- *
- * Next.js App Router에서 사용하는 클라이언트 컴포넌트
- * Redux Store와 Theme Context를 제공합니다.
- */
+/** Redux Store + Theme Context Provider (App Router 클라이언트 wrapper) */
 
 import { ReactNode, Suspense, useEffect } from 'react';
 import { Provider, useDispatch } from 'react-redux';

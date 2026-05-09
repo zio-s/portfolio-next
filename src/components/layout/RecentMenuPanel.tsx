@@ -1,16 +1,5 @@
 /**
- * Recent Menu Side Panel Component
- *
- * 드롭다운 대신 사이드 패널 방식으로 최근 방문 항목을 표시합니다.
- *
- * 🎨 차별화 포인트:
- * - 오른쪽에서 슬라이드되는 넓은 패널 (360px)
- * - 타임라인 스타일 시각화
- * - 큰 썸네일 + 상세 정보
- * - 검색 기능
- * - 부드러운 애니메이션 + 오버레이
- *
- * @inspiration Slack, Linear, Notion의 사이드 패널
+ * 최근 방문 항목 사이드 패널 (360px, 우측 슬라이드)
  */
 
 import { useState, useEffect, useMemo } from 'react';

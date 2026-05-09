@@ -572,7 +572,7 @@ export const AdminProjectsPage = () => {
         {/* Order Edit Help */}
         <div className="p-3 rounded-lg bg-muted/50 border border-border">
           <p className="text-xs text-muted-foreground">
-            💡 <strong>순번 변경:</strong> 왼쪽 숫자를 클릭하면 순번을 직접 입력할 수 있습니다. (1 ~ {projects.length})
+            <strong>순번 변경:</strong> 왼쪽 숫자를 클릭하면 순번을 직접 입력할 수 있습니다. (1 ~ {projects.length})
           </p>
         </div>
 

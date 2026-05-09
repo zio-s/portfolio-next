@@ -1,9 +1,4 @@
-/**
- * API 엔드포인트 상수 정의
- *
- * 모든 API 엔드포인트를 중앙 집중식으로 관리합니다.
- * 환경변수를 통해 Base URL을 설정할 수 있습니다.
- */
+/** API 엔드포인트 상수 — Base URL은 NEXT_PUBLIC_API_BASE_URL */
 
 // 환경변수에서 API Base URL 가져오기 (기본값: /api - MSW와 호환)
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';

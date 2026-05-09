@@ -1,52 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 
-/**
- * 비동기 작업의 상태를 관리합니다.
- * 로딩, 에러, 데이터 상태를 자동으로 추적합니다.
- */
 export interface AsyncState<T> {
-  /** 로딩 중 여부 */
   isLoading: boolean;
-  /** 에러 객체 (에러가 없으면 null) */
   error: Error | null;
-  /** 비동기 작업의 결과 데이터 */
   data: T | null;
 }
 
-/**
- * 비동기 함수를 실행하고 그 상태(로딩, 에러, 데이터)를 관리합니다.
- *
- * @template T - 비동기 함수가 반환하는 데이터의 타입
- * @param asyncFunction - 실행할 비동기 함수
- * @param immediate - 컴포넌트 마운트 시 즉시 실행 여부 (기본값: true)
- * @returns 상태 객체와 실행 함수를 포함하는 객체
- *
- * @example
- * ```tsx
- * const fetchUser = async (id: string) => {
- *   const response = await fetch(`/api/users/${id}`);
- *   return response.json();
- * };
- *
- * function UserProfile({ userId }: { userId: string }) {
- *   const { isLoading, error, data, execute } = useAsync(
- *     () => fetchUser(userId),
- *     true
- *   );
- *
- *   if (isLoading) return <div>로딩 중...</div>;
- *   if (error) return <div>에러: {error.message}</div>;
- *   if (!data) return null;
- *
- *   return (
- *     <div>
- *       <h1>{data.name}</h1>
- *       <button onClick={execute}>새로고침</button>
- *     </div>
- *   );
- * }
- * ```
- */
+/** 비동기 함수의 loading/error/data 상태 + execute/reset 헬퍼 */
 export function useAsync<T>(
   asyncFunction: () => Promise<T>,
   immediate: boolean = true

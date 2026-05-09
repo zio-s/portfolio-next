@@ -101,8 +101,8 @@ const DashboardPage = () => {
           <h1 className="text-[32px] font-bold tracking-[-0.025em]" style={{ color: 'var(--blog-fg)' }}>
             대시보드
           </h1>
-          <p className="text-[13px] mt-1.5" style={{ color: 'var(--blog-fg-muted)' }}>
-            <span className="blog-mono">{user?.email ?? 'admin'}</span> · 환영합니다
+          <p className="blog-mono text-[12px] mt-1.5" style={{ color: 'var(--blog-fg-subtle)' }}>
+            {user?.email ?? 'admin'}
           </p>
         </header>
 

@@ -34,54 +34,7 @@ export interface PaginationState {
   endIndex: number;
 }
 
-/**
- * 페이지네이션 로직을 관리합니다.
- * 페이지 이동, 페이지 크기 변경 등의 기능을 제공합니다.
- *
- * @param totalItems - 전체 항목 수
- * @param initialPageSize - 초기 페이지당 항목 수 (기본값: 10)
- * @param initialPage - 초기 페이지 번호 (기본값: 1)
- * @returns 페이지네이션 상태와 제어 함수들
- *
- * @example
- * ```tsx
- * function UserList({ users }: { users: User[] }) {
- *   const pagination = usePagination(users.length, 10);
- *
- *   const visibleUsers = users.slice(
- *     pagination.startIndex,
- *     pagination.endIndex + 1
- *   );
- *
- *   return (
- *     <div>
- *       <ul>
- *         {visibleUsers.map(user => (
- *           <li key={user.id}>{user.name}</li>
- *         ))}
- *       </ul>
- *       <div>
- *         <button
- *           onClick={pagination.previousPage}
- *           disabled={!pagination.hasPreviousPage}
- *         >
- *           이전
- *         </button>
- *         <span>
- *           {pagination.currentPage} / {pagination.totalPages}
- *         </span>
- *         <button
- *           onClick={pagination.nextPage}
- *           disabled={!pagination.hasNextPage}
- *         >
- *           다음
- *         </button>
- *       </div>
- *     </div>
- *   );
- * }
- * ```
- */
+/** 페이지네이션 훅. totalItems / pageSize → currentPage·startIndex·endIndex·next·prev·jumpTo */
 export function usePagination(
   totalItems: number,
   initialPageSize: number = 10,

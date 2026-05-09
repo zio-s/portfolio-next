@@ -34,11 +34,7 @@ const NETWORK_ERROR_MESSAGE = '네트워크 연결을 확인해주세요.';
  */
 const DEFAULT_ERROR_MESSAGE = '알 수 없는 오류가 발생했습니다.';
 
-/**
- * API 에러 클래스
- *
- * AxiosError를 확장하여 추가 정보를 제공합니다.
- */
+/** statusCode / errorCode / validation errors 보강된 API 에러 */
 export class ApiErrorClass extends Error {
   /** HTTP 상태 코드 */
   public statusCode: number;

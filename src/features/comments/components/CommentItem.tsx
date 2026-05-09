@@ -424,7 +424,7 @@ export const CommentItem = ({
         </div>
       </div>
 
-      {/* 재귀적 대댓글 렌더링 ⭐ */}
+      {/* 대댓글 재귀 */}
       {showReplies && comment.replies && comment.replies.length > 0 && (
         <div>
           {comment.replies.map((reply) => (

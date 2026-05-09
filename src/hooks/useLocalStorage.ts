@@ -1,27 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-/**
- * localStorage와 동기화되는 상태를 관리합니다.
- * 타입 안전성을 제공하며 자동으로 JSON 직렬화/역직렬화를 처리합니다.
- *
- * @template T - 저장할 값의 타입
- * @param key - localStorage 키
- * @param initialValue - 초기값 (localStorage에 값이 없을 때 사용)
- * @returns 현재 값과 값을 업데이트하는 함수, 값을 제거하는 함수를 포함하는 튜플
- *
- * @example
- * ```tsx
- * const [theme, setTheme, removeTheme] = useLocalStorage<'light' | 'dark'>('theme', 'light');
- *
- * return (
- *   <div>
- *     <p>현재 테마: {theme}</p>
- *     <button onClick={() => setTheme('dark')}>다크 모드</button>
- *     <button onClick={removeTheme}>초기화</button>
- *   </div>
- * );
- * ```
- */
+/** localStorage 동기 상태 훅. JSON 자동 직렬화. `[value, set, remove]` */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T

@@ -217,7 +217,7 @@ export const ProjectDetailPage = () => {
               <div className="mb-6">
                 {project.featured && (
                   <Badge variant="gradient" size="lg" className="mb-6 shadow-lg shadow-primary/50">
-                    ⭐ Featured Project
+                    Featured
                   </Badge>
                 )}
                 <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight tracking-tight">
