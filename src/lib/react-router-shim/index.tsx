@@ -89,14 +89,24 @@ export { useSearchParamsCompat as useSearchParams };
 
 /**
  * useLocation - react-router-dom 호환
+ *
+ * 주의: next/navigation의 useSearchParams()는 Suspense 경계 없이 호출되면
+ * 해당 서브트리 전체를 정적 렌더링에서 제외(CSR bailout)시킨다.
+ * 이 훅은 MainLayout 등 모든 페이지에서 호출되므로, 여기서 useSearchParams()를
+ * 직접 쓰면 사이트 전체가 크롤러에게 로딩 스피너만 보이는 상태로 캐시된다.
+ * search는 마운트 후 window.location에서 읽어 서버/클라이언트 첫 렌더를 일치시킨다.
  */
 export function useLocation() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [search, setSearch] = React.useState('');
+
+  React.useEffect(() => {
+    setSearch(window.location.search);
+  }, [pathname]);
 
   return {
     pathname: pathname || '/',
-    search: searchParams?.toString() ? `?${searchParams.toString()}` : '',
+    search,
     hash: typeof window !== 'undefined' ? window.location.hash : '',
     state: typeof window !== 'undefined' ? window.history.state : null,
     key: 'default',

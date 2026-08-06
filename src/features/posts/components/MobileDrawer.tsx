@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, LogOut, PenSquare, Search, X } from 'lucide-react';
 import { useAppDispatch, useGetPostsQuery } from '@/store';
 import { logout } from '@/store/slices/authSlice';
@@ -118,7 +118,10 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [searchParams, setSearchParams] = useSearchParams();
+  // 주의: next/navigation의 useSearchParams()는 Suspense 없이 호출 시 페이지 전체를
+  // CSR로 강제 전환시킨다. 이 drawer는 모든 공개 페이지에 마운트되므로
+  // location.search(마운트 후 채워짐)에서 직접 파싱해 그 훅 호출을 피한다.
+  const searchParams = new URLSearchParams(location.search);
   const activeCat = searchParams.get('cat') ?? 'all';
   const activeTag = searchParams.get('tag') ?? '';
   const onBlogRoute = location.pathname.startsWith('/blog');
@@ -170,7 +173,8 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
     if (value && value !== 'all') next.set(key, value);
     else next.delete(key);
     next.delete('page');
-    setSearchParams(next);
+    const qs = next.toString();
+    navigate(`${location.pathname}${qs ? `?${qs}` : ''}`);
   };
 
   const isActiveNav = (href: string) => href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);

@@ -15,11 +15,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 export function NavigationProgress() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [progress, setProgress] = useState(0); // 0 ~ 100
   const [active, setActive] = useState(false);
   const tickRef = useRef<number | null>(null);
@@ -95,11 +94,11 @@ export function NavigationProgress() {
     }
   };
 
-  // 2) pathname / searchParams 변화 → 100% 후 사라짐
+  // 2) pathname 변화 → 100% 후 사라짐 (쿼리만 바뀌는 동일 페이지 이동은 1.5s 안전 timeout이 처리)
   useEffect(() => {
     if (active) finishProgress();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // unmount cleanup
   useEffect(() => () => { cleanupTick(); cleanupTimeout(); }, []);

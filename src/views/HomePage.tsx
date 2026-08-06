@@ -9,7 +9,7 @@
  * - Shields.io badges with tooltips
  */
 
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { Suspense, useEffect, useRef, useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -218,7 +218,10 @@ const HomePage = () => {
         className="relative min-h-screen flex items-center justify-center overflow-hidden select-none"
       >
         {/* Three.js 캔버스 (절대 위치로 배경 차지) */}
-        <HeroCanvas />
+        {/* ssr:false 컴포넌트는 자체 Suspense 경계가 없으면 CSR bailout이 페이지 전체로 전파된다 */}
+        <Suspense fallback={null}>
+          <HeroCanvas />
+        </Suspense>
 
         {/* 중앙 비네트 — 파티클과 텍스트가 겹치는 영역만 살짝 어둡게 */}
         <div
