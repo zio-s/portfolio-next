@@ -21,7 +21,6 @@ import {
 } from '../store';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
-import { SEO } from '@/components/common/SEO';
 import { CollectionPageJsonLd, BreadcrumbJsonLd } from '@/components/common/JsonLd';
 import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
 import type { Post } from '@/store/types';
@@ -133,11 +132,6 @@ const PostsPage = () => {
 
   return (
     <MainLayout>
-      <SEO
-        title="블로그 | 변세민 | 프론트엔드 개발자"
-        description="프론트엔드 개발자 변세민의 기술 블로그입니다. React, TypeScript, 웹 개발 관련 글을 공유합니다."
-        url="https://semincode.com/blog"
-      />
       <CollectionPageJsonLd
         url="https://semincode.com/blog"
         title="블로그 | 변세민 | 프론트엔드 개발자"

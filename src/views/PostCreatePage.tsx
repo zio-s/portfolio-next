@@ -14,7 +14,6 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Container } from '@/components/ui/container';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
-import { SEO } from '@/components/common/SEO';
 import { useAlertModal } from '@/components/modal/hooks';
 import { BLOG_CATEGORIES, DEFAULT_CATEGORY, type BlogCategorySlug } from '@/config/categories';
 import {
@@ -83,10 +82,6 @@ const PostCreatePage = () => {
 
   return (
     <MainLayout>
-      <SEO
-        title="새 게시글 작성 | Blog"
-        description="새로운 블로그 게시글을 작성하세요"
-      />
 
       {/* Header */}
       <Section className="pt-8 pb-4">

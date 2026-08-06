@@ -18,7 +18,6 @@ import { Button } from '@/components/ui/button';
 import { ProjectCard } from '@/components/portfolio/ProjectCard';
 import { Tooltip } from '@/components/ui/tooltip';
 import { Pagination } from '@/components/common/Pagination';
-import { SEO } from '@/components/common/SEO';
 import { CollectionPageJsonLd, BreadcrumbJsonLd } from '@/components/common/JsonLd';
 import { Loader2, Check } from 'lucide-react';
 
@@ -67,11 +66,6 @@ export const ProjectsPage = () => {
 
   return (
     <MainLayout>
-      <SEO
-        title="프로젝트 | 변세민 | 프론트엔드 개발자 포트폴리오"
-        description="React, TypeScript, Redux를 활용한 웹 애플리케이션 개발 프로젝트를 소개합니다. 실무 경험과 학습 과정을 담은 포트폴리오입니다."
-        url="https://semincode.com/projects"
-      />
 
       {/* JSON-LD 구조화 데이터 */}
       <CollectionPageJsonLd

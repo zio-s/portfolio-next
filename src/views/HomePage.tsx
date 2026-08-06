@@ -22,7 +22,6 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Tooltip } from '@/components/ui/tooltip';
 import { ProjectCard } from '@/components/portfolio/ProjectCard';
-import { SEO } from '@/components/common/SEO';
 import { ProfilePageJsonLd } from '@/components/common/JsonLd';
 import {useGetProjectsQuery} from "@/features/portfolio/api/projectsApi";
 import {useGetGuestbookQuery} from "@/features/guestbook/api/guestbookApi";
@@ -203,8 +202,6 @@ const HomePage = () => {
 
   return (
     <MainLayout>
-      <SEO />
-
       {/* JSON-LD 구조화 데이터 - 홈페이지용 ProfilePage 스키마 */}
       <ProfilePageJsonLd
         url="https://semincode.com"

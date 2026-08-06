@@ -84,14 +84,3 @@ export function generateSEOMetadata(props?: SEOProps): Metadata {
     },
   };
 }
-
-/**
- * 레거시 호환을 위한 SEO 컴포넌트
- * Next.js에서는 각 페이지의 metadata export를 사용하세요.
- */
-export function SEO(_props: SEOProps) {
-  // Next.js App Router에서는 metadata export를 사용합니다.
-  // 이 컴포넌트는 호환성을 위해 null을 반환합니다.
-  console.warn('SEO component is deprecated in Next.js. Use metadata export instead.');
-  return null;
-}

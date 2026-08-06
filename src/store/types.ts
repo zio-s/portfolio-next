@@ -45,23 +45,6 @@ export interface Post {
   is_liked?: boolean;
 }
 
-export interface PostsState {
-  posts: Post[];
-  currentPost: Post | null;
-  loading: boolean;
-  error: string | null;
-  filters: {
-    status?: 'draft' | 'published' | 'archived';
-    search?: string;
-    tag?: string;
-  };
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-  };
-}
-
 // Post Comments Types
 export interface PostComment {
   id: string; // UUID

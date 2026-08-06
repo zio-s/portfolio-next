@@ -20,8 +20,6 @@ export const PUBLIC_ROUTES = {
   GUESTBOOK: '/guestbook',
   /** 로그인 페이지 (관리자 전용 — 일반 사용자 진입점 없음) */
   LOGIN: '/login',
-  /** 개인 유틸 */
-  LOTTO: '/u/rng-42',
 } as const;
 
 /**

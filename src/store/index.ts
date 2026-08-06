@@ -23,30 +23,6 @@ export {
   selectIsAdmin,
 } from './slices/authSlice';
 
-// Posts Slice
-export {
-  fetchPosts,
-  fetchPostById,
-  fetchPostBySlug,
-  createPost,
-  updatePost,
-  deletePost,
-  publishPost,
-  clearError as clearPostsError,
-  setCurrentPost,
-  setFilters,
-  clearFilters,
-  setPage,
-  selectPosts,
-  selectCurrentPost,
-  selectPostsLoading,
-  selectPostsError,
-  selectPostsFilters,
-  selectPostsPagination,
-  selectPostById,
-  selectFilteredPosts,
-} from './slices/postsSlice';
-
 // Users Slice
 export {
   fetchUsers,
@@ -106,7 +82,6 @@ export type {
   User,
   AuthState,
   Post,
-  PostsState,
   UsersState,
   UIState,
   Notification,

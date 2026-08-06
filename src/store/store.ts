@@ -1,6 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
-import postsReducer from './slices/postsSlice';
 import usersReducer from './slices/usersSlice';
 import uiReducer from './slices/uiSlice';
 import recentMenuReducer from './slices/recentMenuSlice';
@@ -15,7 +14,6 @@ import { postCommentsApi } from './api/postCommentsApi';
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    posts: postsReducer,
     users: usersReducer,
     ui: uiReducer,
     recentMenu: recentMenuReducer,

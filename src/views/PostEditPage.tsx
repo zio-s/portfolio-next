@@ -17,7 +17,6 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Container } from '@/components/ui/container';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
-import { SEO } from '@/components/common/SEO';
 import { useAlertModal } from '@/components/modal/hooks';
 import { BLOG_CATEGORIES, DEFAULT_CATEGORY, isValidCategorySlug, type BlogCategorySlug } from '@/config/categories';
 import {
@@ -188,10 +187,6 @@ const PostEditPage = () => {
 
   return (
     <MainLayout>
-      <SEO
-        title={`${post.title} 수정 | Blog`}
-        description="게시글을 수정하세요"
-      />
 
       {/* Header */}
       <Section className="pt-8 pb-4">

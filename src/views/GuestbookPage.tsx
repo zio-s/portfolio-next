@@ -6,7 +6,6 @@
 import * as React from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MessageSquare, Loader2 } from 'lucide-react';
-import { SEO } from '@/components/common/SEO';
 import { GuestbookForm } from '@/features/guestbook/components/GuestbookForm';
 import { GuestbookCard } from '@/features/guestbook/components/GuestbookCard';
 import {
@@ -118,11 +117,6 @@ const GuestbookPage = () => {
 
   return (
     <MainLayout>
-      <SEO
-        title="방문록 | 변세민 | 프론트엔드 개발자 포트폴리오"
-        description="여러분의 소중한 의견을 남겨주세요. 프론트엔드 개발자 변세민의 포트폴리오 방문록입니다."
-        url="https://semincode.com/guestbook"
-      />
       <div className="w-full px-4 sm:px-6 max-w-[1400px] mx-auto py-12">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Left Column - Header & List */}
