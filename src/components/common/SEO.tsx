@@ -33,7 +33,7 @@ export const DEFAULT_SEO = {
   description: '프론트엔드 개발자 변세민의 포트폴리오입니다. React, TypeScript, Redux를 활용한 웹 애플리케이션 개발 프로젝트를 소개합니다.',
   keywords: '프론트엔드 개발자, Frontend Developer, React, TypeScript, Redux, 포트폴리오, 변세민, Semin Byun',
   url: 'https://semincode.com',
-  image: 'https://semincode.com/android-chrome-512x512.png',
+  image: 'https://semincode.com/og',
   type: 'website' as const,
   author: '변세민 (Semin Byun)',
 };
