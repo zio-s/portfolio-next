@@ -39,7 +39,12 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'comments', label: '댓글많은' },
 ];
 
-const PostsPage = () => {
+interface PostsPageProps {
+  /** 서버에서 미리 가져온 발행 글 목록 — 크롤러가 목록·카운트를 읽도록 첫 HTML에 포함 */
+  initialPosts?: Post[];
+}
+
+const PostsPage = ({ initialPosts }: PostsPageProps) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const user = useAppSelector(selectUser);
@@ -72,13 +77,16 @@ const PostsPage = () => {
   const sort = (searchParams.get('sort') as SortKey) ?? 'latest';
 
   // 전체 데이터 조회 (필터/정렬은 클라이언트에서 처리, 사이드바도 동일 데이터 사용)
-  const { data, isLoading: loading, error } = useGetPostsQuery({
+  const { data, isLoading, error } = useGetPostsQuery({
     status: isAdmin ? undefined : 'published',
     page: 1,
     limit: 200,
   });
 
-  const allPosts = data?.posts ?? [];
+  // 클라이언트 fetch 전에는 서버에서 내려준 initial 데이터로 렌더
+  // (initialPosts는 published만 담고 있으므로 관리자 모드에서는 fallback하지 않음)
+  const allPosts = data?.posts ?? (!isAdmin ? initialPosts ?? [] : []);
+  const loading = isLoading && allPosts.length === 0;
 
   // 필터링
   const filtered = useMemo(() => {

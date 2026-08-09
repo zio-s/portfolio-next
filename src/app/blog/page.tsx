@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { generateSEOMetadata } from '@/components/common/SEO';
 import { Suspense } from 'react';
+import { fetchPublishedPosts } from '@/lib/server-data';
 import PostsPage from '@/views/PostsPage';
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -22,10 +23,13 @@ function PostsPageFallback() {
   );
 }
 
-export default function Blog() {
+export default async function Blog() {
+  // 글 목록·카운트가 서버 HTML에 담기도록 미리 fetch — 크롤러가 "글 0개"로 읽지 않게 한다
+  const initialPosts = await fetchPublishedPosts();
+
   return (
     <Suspense fallback={<PostsPageFallback />}>
-      <PostsPage />
+      <PostsPage initialPosts={initialPosts} />
     </Suspense>
   );
 }

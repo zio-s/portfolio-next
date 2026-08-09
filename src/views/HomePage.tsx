@@ -26,6 +26,9 @@ import { ProfilePageJsonLd } from '@/components/common/JsonLd';
 import {useGetProjectsQuery} from "@/features/portfolio/api/projectsApi";
 import {useGetGuestbookQuery} from "@/features/guestbook/api/guestbookApi";
 import {useGetPostsQuery} from "@/store";
+import type { ProjectsResponse } from '@/features/portfolio/types/Project';
+import type { GuestbookListResponse } from '@/features/guestbook/types/Guestbook';
+import type { Post } from '@/store/types';
 import {ROUTES} from "@/router";
 import { skills, type Skill } from '@/data/skills';
 // 개별 아이콘 직접 import (Tree-shaking 지원)
@@ -123,24 +126,35 @@ const BackgroundParticles = () => {
   );
 };
 
-const HomePage = () => {
+interface HomePageProps {
+  /** 서버에서 미리 가져온 데이터 — 크롤러가 목록 내용을 읽을 수 있도록 첫 HTML에 포함 */
+  initialProjects?: ProjectsResponse;
+  initialPosts?: Post[];
+  initialGuestbook?: GuestbookListResponse;
+}
+
+const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageProps) => {
   const skillsRef     = useRef<HTMLDivElement>(null);
 
   // RTK Query로 프로젝트 목록 조회 (홈페이지에서는 featured만)
-  const { data: projectsData } = useGetProjectsQuery({
+  // 클라이언트 fetch가 끝나기 전(및 SSR)에는 서버에서 내려준 initial 데이터로 렌더
+  const { data: projectsQuery } = useGetProjectsQuery({
     featured: true,
   });
+  const projectsData = projectsQuery ?? initialProjects;
 
   // 방명록 최근 3개 조회
-  const { data: guestbookData } = useGetGuestbookQuery({
+  const { data: guestbookQuery } = useGetGuestbookQuery({
     limit: 3,
     approvedOnly: true,
   });
+  const guestbookData = guestbookQuery ?? initialGuestbook;
 
   // 블로그 최근 3개 조회
-  const { data: postsData } = useGetPostsQuery({
+  const { data: postsQuery } = useGetPostsQuery({
     status: 'published',
   });
+  const postsData = postsQuery ?? (initialPosts ? { posts: initialPosts } : undefined);
 
 
   useEffect(() => {

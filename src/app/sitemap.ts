@@ -8,29 +8,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
   const baseUrl = 'https://semincode.com';
 
-  // 정적 페이지
+  // 정적 페이지 — lastModified는 실제 변경 시점과 무관하게 빌드 시각으로 찍혀
+  // 매 배포마다 "전부 수정됨"이라는 거짓 신호가 되므로 넣지 않는다
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
       url: `${baseUrl}/projects`,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/blog`,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/guestbook`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },

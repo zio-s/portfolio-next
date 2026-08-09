@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useGetProjectsQuery } from '../features/portfolio/api/projectsApi';
-import type { ProjectCategory, ProjectFilters } from '../features/portfolio/types/Project';
+import type { ProjectCategory, ProjectFilters, ProjectsResponse } from '../features/portfolio/types/Project';
 import { Container } from '@/components/ui/container';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
@@ -36,18 +36,28 @@ const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
   { value: 'likes', label: '인기순' },
 ];
 
-export const ProjectsPage = () => {
+interface ProjectsPageProps {
+  /** 서버에서 미리 가져온 목록 — 크롤러가 프로젝트 내용을 읽도록 첫 HTML에 포함 */
+  initialProjects?: ProjectsResponse;
+}
+
+export const ProjectsPage = ({ initialProjects }: ProjectsPageProps) => {
   const [category, setCategory] = useState<ProjectCategory | undefined>();
   const [sort, setSort] = useState<SortOption>('default');
   const [page, setPage] = useState(1);
 
   // RTK Query로 프로젝트 목록 조회
-  const { data, isLoading, error } = useGetProjectsQuery({
+  const { data: queryData, isLoading: queryLoading, error } = useGetProjectsQuery({
     category,
     sort,
     page,
     limit: 6,
   });
+
+  // initial 데이터는 기본 필터(전체/추천순/1페이지)로 fetch한 것이므로 그 상태에서만 fallback
+  const isDefaultQuery = category === undefined && sort === 'default' && page === 1;
+  const data = queryData ?? (isDefaultQuery ? initialProjects : undefined);
+  const isLoading = queryLoading && !data;
 
   // 필터 변경 시 페이지 초기화
   const handleCategoryChange = (newCategory: ProjectCategory | undefined) => {
