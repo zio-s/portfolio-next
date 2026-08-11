@@ -144,6 +144,16 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /*
+   * Tailwind Preflight는 <button>에 cursor: default를 강제하므로,
+   * 버튼마다 개별적으로 cursor-pointer를 붙이지 않으면 클릭 가능해 보이지 않는다.
+   * 이 프로젝트 전역에서 그 리셋을 다시 되돌린다 (비활성 버튼은 제외).
+   */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
 
   /* Typography */
   h1, h2, h3, h4, h5, h6 {

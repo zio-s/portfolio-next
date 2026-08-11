@@ -57,10 +57,15 @@ type SetSearchParamsInput = URLSearchParams | Record<string, string> | ((prev: U
 
 /**
  * useSearchParams - react-router-dom 호환 (배열 반환)
+ *
+ * setSearchParams는 router.push 대신 window.history.pushState를 쓴다(shallow routing).
+ * 쿼리 파라미터 기반 필터/정렬/페이지네이션은 전부 클라이언트에서 처리되는데,
+ * router.push는 서버 RSC 왕복이 끝나야 searchParams가 갱신돼 클릭이 멈춘 것처럼
+ * 보였다. pushState는 서버 요청 없이 즉시 반영되며 Next.js가 useSearchParams를
+ * 동기화해준다.
  */
 export function useSearchParamsCompat(): [URLSearchParams, (params: SetSearchParamsInput) => void] {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
 
   const setSearchParams = (newParams: SetSearchParamsInput) => {
@@ -78,7 +83,8 @@ export function useSearchParamsCompat(): [URLSearchParams, (params: SetSearchPar
       }
     }
 
-    router.push(`${pathname}?${params.toString()}`);
+    const qs = params.toString();
+    window.history.pushState(null, '', `${pathname}${qs ? `?${qs}` : ''}`);
   };
 
   return [searchParams || new URLSearchParams(), setSearchParams];

@@ -9,6 +9,7 @@
  * 실패 시 undefined를 반환해 기존 클라이언트 fetch 동작으로 폴백한다.
  */
 
+import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { transformProject } from '@/features/portfolio/api/transform';
 import { transformGuestbookFromDB } from '@/features/guestbook/types/Guestbook';
@@ -67,30 +68,38 @@ export async function fetchProjectsList(options?: {
 /**
  * 발행된 블로그 글 목록 (postsApi.getPosts의 서버판)
  * post_stats 뷰 사용. is_liked는 사용자 식별자가 없으므로 false.
+ *
+ * /blog는 force-dynamic이라 매 요청 이 함수를 거친다 — Supabase 왕복을
+ * 요청마다 반복하면 페이지 진입이 수 초씩 걸리므로 데이터 캐시(5분)를 쓴다.
+ * 최신 글은 클라이언트 RTK Query가 어차피 다시 가져와 덮어쓴다.
  */
-export async function fetchPublishedPosts(): Promise<Post[] | undefined> {
-  const supabase = getClient();
-  if (!supabase) return undefined;
+export const fetchPublishedPosts = unstable_cache(
+  async (): Promise<Post[] | undefined> => {
+    const supabase = getClient();
+    if (!supabase) return undefined;
 
-  try {
-    const { data, error } = await supabase
-      .from('post_stats')
-      .select('*')
-      .eq('status', 'published');
+    try {
+      const { data, error } = await supabase
+        .from('post_stats')
+        .select('*')
+        .eq('status', 'published');
 
-    if (error) return undefined;
+      if (error) return undefined;
 
-    return (data || []).map((post: Record<string, unknown>) => ({
-      ...post,
-      is_liked: false,
-      createdAt: (post.created_at as string) || (post.createdAt as string),
-      updatedAt: (post.updated_at as string) || (post.updatedAt as string),
-      publishedAt: (post.published_at as string) || (post.publishedAt as string),
-    })) as Post[];
-  } catch {
-    return undefined;
-  }
-}
+      return (data || []).map((post: Record<string, unknown>) => ({
+        ...post,
+        is_liked: false,
+        createdAt: (post.created_at as string) || (post.createdAt as string),
+        updatedAt: (post.updated_at as string) || (post.updatedAt as string),
+        publishedAt: (post.published_at as string) || (post.publishedAt as string),
+      })) as Post[];
+    } catch {
+      return undefined;
+    }
+  },
+  ['published-posts'],
+  { revalidate: 300 }
+);
 
 /**
  * 방명록 미리보기 (guestbookApi.getGuestbook의 서버판)

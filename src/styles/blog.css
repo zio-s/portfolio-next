@@ -401,6 +401,7 @@
   padding: 10px 16px;
   border-left: 2px solid transparent;
   cursor: pointer;
+  cursor: pointer;
 }
 .blog-cmd-row[data-active='true'] {
   background: var(--blog-accent-soft);

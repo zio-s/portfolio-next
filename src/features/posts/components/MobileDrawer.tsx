@@ -174,7 +174,10 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
     else next.delete(key);
     next.delete('page');
     const qs = next.toString();
-    navigate(`${location.pathname}${qs ? `?${qs}` : ''}`);
+    // 쿼리 변경은 클라이언트 필터링만 하면 되므로 서버 왕복 없는 pushState 사용.
+    // pathname이 안 바뀌면 라우트 변경 자동 close가 안 걸리므로 직접 닫는다.
+    window.history.pushState(null, '', `${location.pathname}${qs ? `?${qs}` : ''}`);
+    setOpen(false);
   };
 
   const isActiveNav = (href: string) => href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
