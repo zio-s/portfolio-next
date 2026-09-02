@@ -12,6 +12,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
 
+  // 블로그 글 ID 형식 검증 — 존재하지 않는 글 번호(id)는 아래에서 notFound()로
+  // 처리하지만, generateMetadata가 비동기라 Next.js가 응답을 200으로 먼저
+  // 커밋해버려 notFound()가 실행돼도 상태 코드가 200으로 남는 soft 404가
+  // 발생한다 (렌더링 파이프라인에 들어가기 전이라 미들웨어에서만 진짜 404를
+  // 보낼 수 있다). /blog/:id, /blog/OtherComponent 같은 숫자가 아닌
+  // 경로(예전 React Router 코드나 봇이 남긴 흔적)를 여기서 걸러낸다.
+  const blogPostMatch = request.nextUrl.pathname.match(/^\/blog\/([^/]+)$/);
+  if (blogPostMatch && blogPostMatch[1] !== 'create' && !/^\d+$/.test(blogPostMatch[1])) {
+    return NextResponse.rewrite(new URL('/404', request.url), { status: 404 });
+  }
+
   // Admin 인증 체크
   if (request.nextUrl.pathname.startsWith('/admin')) {
     const accessToken = request.cookies.get('access_token')?.value;
