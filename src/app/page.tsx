@@ -15,10 +15,12 @@ export const revalidate = 3600;
 export default async function Home() {
   // 크롤러가 Featured Projects/블로그/방명록 실제 내용을 읽도록 서버에서 fetch.
   // 실패 시 undefined → 기존처럼 클라이언트 RTK Query가 채운다.
-  const [initialProjects, initialPosts, initialGuestbook] = await Promise.all([
+  // projectsTotal은 히어로의 "완성한 프로젝트" 카운터용 — limit:1로 count만 저렴하게 가져온다.
+  const [initialProjects, initialPosts, initialGuestbook, projectsTotal] = await Promise.all([
     fetchProjectsList({ featured: true }),
     fetchPublishedPosts(),
     fetchGuestbookPreview(3),
+    fetchProjectsList({ limit: 1 }),
   ]);
 
   return (
@@ -26,6 +28,7 @@ export default async function Home() {
       initialProjects={initialProjects}
       initialPosts={initialPosts}
       initialGuestbook={initialGuestbook}
+      initialProjectsTotal={projectsTotal?.pagination.total}
     />
   );
 }

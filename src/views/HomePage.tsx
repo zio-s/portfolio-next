@@ -3,25 +3,23 @@
 /**
  * Home/Landing Page
  *
- * Interactive portfolio landing page with animations
- * - GSAP ScrollTrigger animations
- * - Framer Motion 3D effects
- * - Shields.io badges with tooltips
+ * 에디토리얼 벤토(Editorial Bento) 리디자인
+ * - 대담한 디스플레이 타이포 + 벤토 그리드 레이아웃
+ * - GSAP ScrollTrigger 스크롤 애니메이션
+ * - 실제 데이터 기반 카운트업(경력/프로젝트 수) — 하드코딩 없이 자동 계산
  */
 
-import { Suspense, useEffect, useRef, useState, useMemo } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
-const HeroCanvas = dynamic(() => import('@/components/three/HeroCanvas'), { ssr: false });
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Github, MessageCircle, Mail, ArrowRight, ChevronRight } from 'lucide-react';
+import { Github, MessageCircle, Mail, ArrowRight, ArrowUpRight, ChevronRight } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Tooltip } from '@/components/ui/tooltip';
 import { ProjectCard } from '@/components/portfolio/ProjectCard';
+import { CountUp } from '@/components/home/CountUp';
 import { ProfilePageJsonLd } from '@/components/common/JsonLd';
 import {useGetProjectsQuery} from "@/features/portfolio/api/projectsApi";
 import {useGetGuestbookQuery} from "@/features/guestbook/api/guestbookApi";
@@ -31,6 +29,7 @@ import type { GuestbookListResponse } from '@/features/guestbook/types/Guestbook
 import type { Post } from '@/store/types';
 import {ROUTES} from "@/router";
 import { skills, type Skill } from '@/data/skills';
+import { getYearsOfExperience } from '@/data/experience';
 // 개별 아이콘 직접 import (Tree-shaking 지원)
 import AmazonwebservicesOriginalWordmark from 'devicons-react/lib/icons/AmazonwebservicesOriginalWordmark';
 import AxiosPlain from 'devicons-react/lib/icons/AxiosPlain';
@@ -51,10 +50,6 @@ import TypescriptOriginal from 'devicons-react/lib/icons/TypescriptOriginal';
 import VercelOriginal from 'devicons-react/lib/icons/VercelOriginal';
 import ViteOriginal from 'devicons-react/lib/icons/ViteOriginal';
 import { GsapIcon } from '@/components/icons/GsapIcon';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -81,49 +76,16 @@ const iconMap: Record<string, React.ComponentType<{ size?: string }>> = {
   vite: ViteOriginal,
 };
 
-/**
- * Background Particles Component
- * SSR-safe: 클라이언트에서만 랜덤 위치 생성
- */
-const BackgroundParticles = () => {
-  const [particles, setParticles] = useState<Array<{ left: number; top: number; duration: number; delay: number }>>([]);
+// 스킬 카테고리별 벤토 폭 — Frontend/Tools는 넓게, 나머지는 절반
+const WIDE_CATEGORIES = new Set(['Frontend', 'Tools']);
 
-  useEffect(() => {
-    // 클라이언트에서만 랜덤 위치 생성
-    const generated = [...Array(50)].map(() => ({
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      duration: 3 + Math.random() * 2,
-      delay: Math.random() * 2,
-    }));
-    setParticles(generated);
-  }, []);
-
-  if (particles.length === 0) return null;
-
-  return (
-    <div className="absolute inset-0">
-      {particles.map((particle, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-foreground/20 rounded-full"
-          style={{
-            left: `${particle.left}%`,
-            top: `${particle.top}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.2, 0.8, 0.2],
-          }}
-          transition={{
-            duration: particle.duration,
-            repeat: Infinity,
-            delay: particle.delay,
-          }}
-        />
-      ))}
-    </div>
-  );
+const categoryDescriptions: Record<string, string> = {
+  'Frontend': 'React, TypeScript, Next.js로 UI를 만듭니다.',
+  'Styling': 'Tailwind CSS, SCSS로 디자인 토큰 기반 스타일을 작성합니다.',
+  'State': 'Redux Toolkit과 RTK Query로 클라이언트·서버 상태를 다룹니다.',
+  'Backend & Data': 'Supabase의 Postgres, Auth, Edge Functions를 사용합니다.',
+  'Animation': 'GSAP, Framer Motion으로 인터랙션과 페이지 전환을 다룹니다.',
+  'Tools': 'Git, Vite, Vercel 환경에서 개발·배포합니다.',
 };
 
 interface HomePageProps {
@@ -131,10 +93,12 @@ interface HomePageProps {
   initialProjects?: ProjectsResponse;
   initialPosts?: Post[];
   initialGuestbook?: GuestbookListResponse;
+  /** 전체(비공개 제외) 프로젝트 수 — 히어로의 "완성한 프로젝트" 카운터용 */
+  initialProjectsTotal?: number;
 }
 
-const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageProps) => {
-  const skillsRef     = useRef<HTMLDivElement>(null);
+const HomePage = ({ initialProjects, initialPosts, initialGuestbook, initialProjectsTotal }: HomePageProps) => {
+  const skillsRef = useRef<HTMLDivElement>(null);
 
   // RTK Query로 프로젝트 목록 조회 (홈페이지에서는 featured만)
   // 클라이언트 fetch가 끝나기 전(및 SSR)에는 서버에서 내려준 initial 데이터로 렌더
@@ -142,6 +106,10 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
     featured: true,
   });
   const projectsData = projectsQuery ?? initialProjects;
+
+  // 전체 프로젝트 수 — limit:1로 개수만 저렴하게 조회 (카운트업 카드용)
+  const { data: projectsTotalQuery } = useGetProjectsQuery({ limit: 1 });
+  const projectsTotal = projectsTotalQuery?.pagination.total ?? initialProjectsTotal;
 
   // 방명록 최근 3개 조회
   const { data: guestbookQuery } = useGetGuestbookQuery({
@@ -156,26 +124,27 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
   });
   const postsData = postsQuery ?? (initialPosts ? { posts: initialPosts } : undefined);
 
+  const yearsOfExperience = getYearsOfExperience();
+  // "새 글" 배지 판정 기준 시각 — 렌더 중 Date.now()를 직접 호출하지 않도록 마운트 시 한 번만 고정
+  const [now] = useState(() => Date.now());
 
   useEffect(() => {
     // 스킬 섹션 스크롤 애니메이션
-    const skillCards = skillsRef.current?.querySelectorAll('.skill-badge');
+    const skillCards = skillsRef.current?.querySelectorAll('.skill-chip');
 
     if (skillCards) {
       gsap.fromTo(
         skillCards,
         {
           opacity: 0,
-          y: 50,
-          scale: 0.8
+          y: 30,
         },
         {
           opacity: 1,
           y: 0,
-          scale: 1,
-          duration: 0.6,
-          stagger: 0.05,
-          ease: 'back.out(1.2)',
+          duration: 0.5,
+          stagger: 0.03,
+          ease: 'power2.out',
           scrollTrigger: {
             trigger: skillsRef.current,
             start: 'top 80%',
@@ -190,11 +159,11 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
     gsap.utils.toArray<Element>('.fade-in-section').forEach((section) => {
       gsap.fromTo(
         section,
-        { opacity: 0, y: 60 },
+        { opacity: 0, y: 40 },
         {
           opacity: 1,
           y: 0,
-          duration: 1,
+          duration: 0.8,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: section,
@@ -223,305 +192,297 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
         description="프론트엔드 개발자 변세민의 포트폴리오입니다. React, TypeScript, Redux를 활용한 웹 애플리케이션 개발 프로젝트를 소개합니다."
       />
 
-      {/* Hero Section — Three.js 파티클 구 배경 */}
-      <section
-        id="hero"
-        className="relative min-h-screen flex items-center justify-center overflow-hidden select-none"
-      >
-        {/* Three.js 캔버스 (절대 위치로 배경 차지) */}
-        {/* ssr:false 컴포넌트는 자체 Suspense 경계가 없으면 CSR bailout이 페이지 전체로 전파된다 */}
-        <Suspense fallback={null}>
-          <HeroCanvas />
-        </Suspense>
+      {/* Hero Section — 대담한 에디토리얼 타이포 + 개인 대시보드형 벤토 카드 */}
+      <section id="hero" className="relative overflow-hidden">
+        {/* 은은한 배경 블롭 — 과한 그라데이션 대신 절제된 앰비언트 라이팅 정도만 */}
+        <div className="absolute -top-40 -left-32 w-[520px] h-[520px] rounded-full bg-accent/15 blur-[120px] pointer-events-none" />
+        <div className="absolute top-24 -right-40 w-[560px] h-[560px] rounded-full bg-secondary/10 blur-[130px] pointer-events-none" />
 
-        {/* 중앙 비네트 — 파티클과 텍스트가 겹치는 영역만 살짝 어둡게 */}
-        <div
-          className="absolute inset-0 pointer-events-none z-[5]"
-          style={{
-            background:
-              'radial-gradient(ellipse 55% 50% at 50% 45%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 45%, transparent 75%)',
-          }}
-        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 pt-28 sm:pt-36 pb-16 grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-16 items-start">
+          {/* Left: 헤드라인 */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="flex items-center gap-2.5 mb-6"
+            >
+              <span className="w-6 h-px bg-accent" />
+              <span className="font-mono text-xs tracking-[0.16em] text-accent font-semibold">
+                FRONTEND DEVELOPER — SEOUL, KR
+              </span>
+            </motion.div>
 
-        {/* 하단 페이드 — 다음 섹션으로 자연스럽게 이어짐 */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-10"
-          style={{ background: 'linear-gradient(to bottom, transparent, var(--color-background))' }}
-        />
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="text-[15vw] sm:text-7xl md:text-8xl font-extrabold leading-[0.95] tracking-tight"
+            >
+              Build.
+              <br />
+              Refine.
+              <br />
+              <span className="text-transparent [-webkit-text-stroke:2px_var(--color-accent)]">
+                Delight.
+              </span>
+            </motion.h1>
 
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25 }}
+              className="mt-8 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-lg"
+            >
+              정교한 인터랙션과 견고한 아키텍처로, 사용자가 오래 머무르고 싶은 웹을 만드는
+              프론트엔드 개발자 <span className="text-foreground font-semibold">변세민</span>입니다.
+              React와 TypeScript로 기반을 다지고, 애니메이션으로 완성도를 더합니다.
+            </motion.p>
 
-        {/* Hero 텍스트 콘텐츠 — 캔버스 위에 표시 */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 text-center pointer-events-none">
-          <motion.h1
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400/80 via-indigo-400 to-purple-400 bg-clip-text text-transparent"
-          >
-            Frontend Developer
-          </motion.h1>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.35 }}
+              className="flex flex-wrap items-center gap-3 mt-10"
+            >
+              <Link to={ROUTES.PROJECTS}>
+                <Button size="lg" className="group rounded-full">
+                  프로젝트 보기
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <Link to={ROUTES.BLOG}>
+                <Button variant="outline" size="lg" className="rounded-full">
+                  블로그 읽기
+                </Button>
+              </Link>
+            </motion.div>
 
-          <motion.p
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.45 }}
+              className="flex gap-3 mt-8"
+            >
+              {[
+                { icon: Github, href: 'https://github.com/zio-s', label: '깃허브' },
+                { icon: MessageCircle, href: 'https://open.kakao.com/o/sAtkrp1h', label: '오픈카톡' },
+                { icon: Mail, href: 'mailto:popqr1@gmail.com', label: '메일' }
+              ].map(({ icon: Icon, href, label }) => (
+                <Tooltip key={label} content={label} position="top">
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-card/60 hover:border-accent/50 hover:bg-card transition-colors"
+                    aria-label={label}
+                  >
+                    <Icon className="w-4 h-4 text-muted-foreground" />
+                  </a>
+                </Tooltip>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Right: 개인 대시보드형 벤토 */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.0 }}
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/95 mb-8 sm:mb-12 font-light [text-shadow:0_0_20px_rgba(0,0,0,0.85),0_2px_8px_rgba(0,0,0,0.7)]"
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="grid grid-cols-2 gap-4 lg:mt-2"
           >
-            사용자 경험을 최우선으로 생각하는 개발자
-          </motion.p>
+            <div className="col-span-2 rounded-2xl border border-border bg-card/60 p-6 transition-colors hover:border-border/80">
+              <span className="font-mono text-[11px] tracking-[0.1em] text-muted-foreground">
+                NOW BUILDING
+              </span>
+              <p className="mt-3 text-[15px] leading-relaxed text-foreground/90">
+                Next.js App Router 기반 개인 포트폴리오를 SSR·SEO 관점에서 계속 다듬는 중입니다.
+              </p>
+            </div>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 1.2 }}
-            className="text-sm sm:text-base md:text-lg text-white/85 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4 [text-shadow:0_0_16px_rgba(0,0,0,0.85),0_2px_6px_rgba(0,0,0,0.7)]"
-          >
-            <span className="text-white font-medium">React</span>와 <span className="text-white font-medium">TypeScript</span>로 견고한 웹 애플리케이션을 만들고,
-            <br className="hidden sm:block" />
-            <span className="sm:hidden"> </span>
-            세심한 애니메이션으로 <span className="text-white font-medium">사용자에게 즐거움</span>을 전달합니다.
-          </motion.p>
+            <div className="rounded-2xl border border-border bg-card/60 p-6 flex flex-col justify-between min-h-[148px] transition-colors hover:border-border/80">
+              <span className="font-mono text-[11px] tracking-[0.1em] text-muted-foreground">
+                EXPERIENCE
+              </span>
+              <CountUp
+                target={yearsOfExperience}
+                className="text-4xl font-extrabold tracking-tight tabular-nums"
+              />
+              <span className="text-[13px] text-muted-foreground">년차 프론트엔드</span>
+            </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.35 }}
-            className="flex flex-wrap gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 pointer-events-auto"
-          >
-            <Link to={ROUTES.PROJECTS}>
-              <Button size="lg" className="bg-accent hover:bg-accent/85 text-white shadow-lg shadow-accent/30 text-sm sm:text-base border-0">
-                View Projects
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to={ROUTES.BLOG}>
-              <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10 text-sm sm:text-base">
-                Read Blog
-              </Button>
-            </Link>
+            <div className="rounded-2xl border border-border bg-card/60 p-6 flex flex-col justify-between min-h-[148px] transition-colors hover:border-border/80">
+              <span className="font-mono text-[11px] tracking-[0.1em] text-muted-foreground">
+                SHIPPED
+              </span>
+              {projectsTotal !== undefined ? (
+                <CountUp target={projectsTotal} className="text-4xl font-extrabold tracking-tight tabular-nums" />
+              ) : (
+                <span className="text-4xl font-extrabold tracking-tight text-muted-foreground">–</span>
+              )}
+              <span className="text-[13px] text-muted-foreground">완성한 프로젝트</span>
+            </div>
+
+            <div className="col-span-2 rounded-2xl border border-border bg-card/60 px-6 py-5 flex items-center justify-between transition-colors hover:border-border/80">
+              <span className="font-mono text-[11px] tracking-[0.1em] text-muted-foreground">
+                DAILY DRIVERS
+              </span>
+              <div className="flex items-center gap-3">
+                {['react', 'nextjs', 'typescript', 'tailwindcss'].map((key) => {
+                  const Icon = iconMap[key];
+                  return Icon ? <Icon key={key} size="20" /> : null;
+                })}
+              </div>
+            </div>
           </motion.div>
+        </div>
 
-          {/* Social Links */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 1.5 }}
-            className="flex gap-4 justify-center pointer-events-auto"
-          >
-            {[
-              { icon: Github, href: 'https://github.com/zio-s', label: '깃허브' },
-              { icon: MessageCircle, href: 'https://open.kakao.com/o/sAtkrp1h', label: '오픈카톡' },
-              { icon: Mail, href: 'mailto:zio.s.dev@gmail.com', label: '메일' }
-            ].map(({ icon: Icon, href, label }) => (
-              <Tooltip key={label} content={label} position="top">
-                <motion.a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 rounded-lg bg-white/5 flex hover:bg-white/15 transition-colors border border-white/10"
-                  whileHover={{ y: -3 }}
-                  whileTap={{ scale: 0.95 }}
-                  aria-label={label}
-                >
-                  <Icon className="w-5 h-5 text-white/80" />
-                </motion.a>
-              </Tooltip>
+        {/* 기술 스택 마퀴 티커 */}
+        <div className="relative w-full max-w-full border-t border-b border-border py-6 overflow-hidden whitespace-nowrap">
+          <div className="marquee-track inline-flex w-max">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <span key={i} className="shrink-0 font-mono text-sm tracking-wider text-muted-foreground/50">
+                REACT&nbsp;&nbsp;·&nbsp;&nbsp;NEXT.JS&nbsp;&nbsp;·&nbsp;&nbsp;TYPESCRIPT&nbsp;&nbsp;·&nbsp;&nbsp;REDUX TOOLKIT&nbsp;&nbsp;·&nbsp;&nbsp;SUPABASE&nbsp;&nbsp;·&nbsp;&nbsp;GSAP&nbsp;&nbsp;·&nbsp;&nbsp;FRAMER MOTION&nbsp;&nbsp;·&nbsp;&nbsp;TAILWIND CSS&nbsp;&nbsp;·&nbsp;&nbsp;
+              </span>
             ))}
-          </motion.div>
-        </div>
-
-        {/* 스크롤 인디케이터 */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <div className="w-6 h-10 border-2 border-white/20 rounded-full p-1">
-            <motion.div
-              className="w-1.5 h-1.5 bg-white/60 rounded-full mx-auto"
-              animate={{ y: [0, 20, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* Skills Section */}
-      <section ref={skillsRef} className="py-32 px-8 relative fade-in-section bg-card/30">
+      {/* Skills Section — 카테고리별 벤토 카드 */}
+      <section ref={skillsRef} className="py-24 sm:py-32 px-4 sm:px-8 fade-in-section">
         <div className="max-w-7xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold mb-4 text-center"
-          >
-            제가 사용하는 <span className="text-accent">스킬</span>입니다.
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="text-muted-foreground text-center mb-16 text-lg"
-          >
-          </motion.p>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12 sm:mb-16">
+            <div>
+              <span className="font-mono text-xs tracking-[0.16em] text-accent font-semibold">01 — STACK</span>
+              <h2 className="mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight">제가 다루는 기술입니다</h2>
+            </div>
+            <p className="text-sm text-muted-foreground max-w-xs sm:text-right">
+              일상적으로 쓰는 도구부터 프로젝트 상황에 맞춰 골라 쓰는 도구까지, 카테고리별로 정리했습니다.
+            </p>
+          </div>
 
-          <div className="space-y-16">
-            {Object.entries(groupedSkills).map(([category, categorySkills]) => {
-              const categoryDescriptions: Record<string, string> = {
-                'Frontend': 'React, TypeScript, Next.js로 UI를 만듭니다.',
-                'Styling': 'Tailwind CSS, SCSS로 디자인 토큰 기반 스타일을 작성합니다.',
-                'State': 'Redux Toolkit과 RTK Query로 클라이언트·서버 상태를 다룹니다.',
-                'Backend': 'Supabase의 Postgres, Auth, Edge Functions를 사용합니다.',
-                'Animation': 'GSAP, Framer Motion으로 인터랙션과 페이지 전환을 다룹니다.',
-                'Tools': 'Git, Vite, Vercel 환경에서 개발·배포합니다.'
-              };
-
-              return (
-                <div key={category} className="space-y-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <h3 className="text-xl font-bold text-foreground text-accent">
-                      {category}
-                    </h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
-                    {categoryDescriptions[category]}
-                  </p>
-                  <div className="grid grid-cols-3 xs:grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-14 gap-3">
-                    {categorySkills.map((skill) => {
-                      const IconComponent = iconMap[skill.icon];
-                      return (
-                        <Tooltip key={skill.name} position="bottom" content={skill.tooltip}>
-                          <div
-                            className="skill-badge cursor-pointer flex justify-center items-center flex-col text-center p-2 rounded-lg border border-transparent hover:border-accent/50 transition-colors"
-                          >
-                            <div className="w-8 h-8 flex items-center justify-center">
-                              {IconComponent ? (
-                                <IconComponent size="32" />
-                              ) : (
-                                <div
-                                  className="w-8 h-8 rounded flex items-center justify-center text-center leading-8 text-xs font-bold"
-                                  style={{ backgroundColor: skill.color, color: 'white' }}
-                                >
-                                  {skill.name.substring(0, 2)}
-                                </div>
-                              )}
-                            </div>
-                            <span className="text-[10px] text-muted-foreground leading-tight flex items-center justify-center py-2">
-                              {skill.name}
-                            </span>
-                          </div>
-                        </Tooltip>
-                      );
-                    })}
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {Object.entries(groupedSkills).map(([category, categorySkills]) => (
+              <div
+                key={category}
+                className={`min-w-0 rounded-2xl border border-border bg-card/40 p-7 sm:p-8 ${
+                  WIDE_CATEGORIES.has(category) ? 'sm:col-span-2' : ''
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-bold text-accent">{category}</h3>
+                  <span className="font-mono text-xs text-muted-foreground/60">
+                    {String(categorySkills.length).padStart(2, '0')}
+                  </span>
                 </div>
-              );
-            })}
+                <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                  {categoryDescriptions[category]}
+                </p>
+                <div className="flex flex-wrap gap-2.5">
+                  {categorySkills.map((skill) => {
+                    const IconComponent = iconMap[skill.icon];
+                    return (
+                      <Tooltip key={skill.name} position="bottom" content={skill.tooltip}>
+                        <div className="skill-chip flex items-center gap-2 pl-2 pr-3.5 py-2 rounded-full border border-border bg-background/60">
+                          <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                            {IconComponent ? (
+                              <IconComponent size="20" />
+                            ) : (
+                              <div
+                                className="w-5 h-5 rounded flex items-center justify-center text-center text-[8px] font-bold text-white"
+                                style={{ backgroundColor: skill.color }}
+                              >
+                                {skill.name.substring(0, 2)}
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-xs text-foreground/90">{skill.name}</span>
+                        </div>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Projects Showcase Section */}
-      <section className="py-32 px-8 fade-in-section bg-card/30">
+      {/* Projects Showcase Section — 벤토 모자이크 */}
+      <section id="work" className="py-24 sm:py-32 px-4 sm:px-8 fade-in-section bg-card/20">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              <span className="text-accent">Featured</span> Projects
-            </h2>
-            <p className="text-lg md:text-xl text-foreground max-w-2xl mx-auto font-medium">
-              정성스럽게 개발한 프로젝트
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12 sm:mb-16">
+            <div>
+              <span className="font-mono text-xs tracking-[0.16em] text-accent font-semibold">02 — SELECTED WORK</span>
+              <h2 className="mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight">인상 깊은 프로젝트들</h2>
+            </div>
+            <p className="text-sm text-muted-foreground max-w-xs sm:text-right">
+              기획부터 배포까지, 직접 완성도를 끌어올린 프로젝트 위주로 골랐습니다.
             </p>
           </div>
 
           {projectsData && projectsData.items.length > 0 && (
-            <div className="relative px-4 sm:px-16">
-              <Swiper
-                modules={[Navigation]}
-                spaceBetween={16}
-                slidesPerView={1}
-                centeredSlides={false}
-                navigation={{
-                  nextEl: '.swiper-button-next-custom',
-                  prevEl: '.swiper-button-prev-custom',
-                  disabledClass: 'swiper-button-disabled',
-                }}
-                breakpoints={{
-                  640: {
-                    slidesPerView: 1.5,
-                    spaceBetween: 24,
-                  },
-                  1024: {
-                    slidesPerView: 2,
-                    spaceBetween: 32,
-                  },
-                }}
-                className="mb-8 home-projects-swiper"
-              >
-                {projectsData.items.map((project, index) => (
-                  <SwiperSlide key={project.id}>
-                    <ProjectCard
-                      id={project.id}
-                      title={project.title}
-                      description={project.description}
-                      thumbnail={project.thumbnail}
-                      tags={[project.category]}
-                      techStack={project.techStack}
-                      githubUrl={project.githubUrl}
-                      liveUrl={project.liveUrl}
-                      stats={project.stats}
-                      featured={project.featured}
-                      className={index === 0 ? 'ring-2 ring-accent/50 shadow-[0_0_20px_rgba(139,92,246,0.3)]' : ''}
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-
-              {/* Custom Navigation Buttons */}
-              <button className="swiper-button-prev-custom absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full border border-border bg-card hover:bg-accent hover:border-accent transition-all flex items-center justify-center shadow-lg">
-                <ArrowRight className="w-5 h-5 rotate-180" />
-              </button>
-              <button className="swiper-button-next-custom absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full border border-border bg-card hover:bg-accent hover:border-accent transition-all flex items-center justify-center shadow-lg">
-                <ArrowRight className="w-5 h-5" />
-              </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {projectsData.items.map((project, index) => (
+                <div key={project.id} className="min-w-0 relative">
+                  {index === 0 && (
+                    <span className="absolute top-3 left-3 z-10 font-mono text-[10px] tracking-[0.1em] text-white bg-accent/90 px-2.5 py-1 rounded-full pointer-events-none">
+                      FEATURED
+                    </span>
+                  )}
+                  <ProjectCard
+                    id={project.id}
+                    title={project.title}
+                    description={project.description}
+                    thumbnail={project.thumbnail}
+                    tags={[project.category]}
+                    techStack={project.techStack}
+                    githubUrl={project.githubUrl}
+                    liveUrl={project.liveUrl}
+                    stats={project.stats}
+                    featured={project.featured}
+                    className={index === 0 ? 'ring-2 ring-accent/50' : ''}
+                  />
+                </div>
+              ))}
             </div>
           )}
 
-          <div className="text-center mt-12">
-            <Link to={ROUTES.PROJECTS}>
-              <Button variant="outline" size="lg" className="group">
-                전체 프로젝트 보기
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </div>
+          <Link
+            to={ROUTES.PROJECTS}
+            className="group mt-5 flex items-center justify-between rounded-2xl border border-border bg-card/40 px-7 py-6 transition-colors hover:border-accent/40"
+          >
+            <span className="text-base font-semibold">전체 프로젝트 보기</span>
+            <span className="flex items-center gap-2 font-mono text-xs text-accent">
+              VIEW ALL
+              <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </span>
+          </Link>
         </div>
       </section>
 
       {/* Work & Guest Board Preview Section */}
-      <section className="py-16 px-8 fade-in-section bg-background">
+      <section id="journal" className="py-24 sm:py-32 px-4 sm:px-8 fade-in-section">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <span className="font-mono text-xs tracking-[0.16em] text-accent font-semibold">03 — WRITING &amp; VOICES</span>
+          <h2 className="mt-4 mb-12 sm:mb-16 text-3xl sm:text-5xl font-extrabold tracking-tight">기록하고, 나눈 이야기들</h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
             {/* Work Section */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="space-y-3"
-            >
+            <div className="rounded-2xl border border-border bg-card/40 p-3">
               <Link
                 to={ROUTES.BLOG}
-                className="flex items-center justify-between group mb-4"
+                className="flex items-center justify-between group px-4 pt-3 pb-2"
               >
                 <h3 className="text-lg font-bold text-foreground">Blog</h3>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent transition-colors" />
               </Link>
 
-              <div className="space-y-1.5">
-                {postsData?.posts?.slice(0, 3).map((post: any) => {
+              <div>
+                {postsData?.posts?.slice(0, 3).map((post: Post) => {
                   const postDate = new Date(post.publishedAt || post.createdAt);
-                  const daysDiff = Math.floor((Date.now() - postDate.getTime()) / (1000 * 60 * 60 * 24));
+                  const daysDiff = Math.floor((now - postDate.getTime()) / (1000 * 60 * 60 * 24));
                   const isNew = daysDiff >= 0 && daysDiff <= 3;
 
                   return (
@@ -530,8 +491,8 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
                       to={`/blog/${post.post_number}`}
                       className="block"
                     >
-                      <div className="py-2 px-3 rounded border border-transparent hover:border-border/50 hover:bg-card/20 transition-all cursor-pointer group">
-                        <div className="flex items-center justify-between gap-3">
+                      <div className="py-3 px-4 rounded-xl hover:bg-background/60 transition-colors cursor-pointer group">
+                        <div className="h-6 flex items-center justify-between gap-3">
                           <div className="flex items-center gap-1.5 flex-1 min-w-0">
                             <h4 className="text-sm font-medium text-foreground line-clamp-1 group-hover:text-accent transition-colors">
                               {post.title}
@@ -543,7 +504,7 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
                               </span>
                             )}
                           </div>
-                          <span className="text-[11px] text-muted-foreground/70 shrink-0">
+                          <span className="font-mono text-[11px] text-muted-foreground/70 shrink-0">
                             {postDate.toLocaleDateString('ko-KR', {
                               year: '2-digit',
                               month: '2-digit',
@@ -556,28 +517,22 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
 
             {/* Guest Board Section */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="space-y-3"
-            >
+            <div className="rounded-2xl border border-border bg-card/40 p-3">
               <Link
                 to={ROUTES.GUESTBOOK}
-                className="flex items-center justify-between group mb-4"
+                className="flex items-center justify-between group px-4 pt-3 pb-2"
               >
                 <h3 className="text-lg font-bold text-foreground">Guest Board</h3>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent transition-colors" />
               </Link>
 
-              <div className="space-y-1.5">
+              <div>
                 {guestbookData?.items.slice(0, 3).map((entry) => {
                   const entryDate = new Date(entry.createdAt);
-                  const daysDiff = Math.floor((Date.now() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
+                  const daysDiff = Math.floor((now - entryDate.getTime()) / (1000 * 60 * 60 * 24));
                   const isNew = daysDiff >= 0 && daysDiff <= 3;
 
                   return (
@@ -586,8 +541,8 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
                       to={ROUTES.GUESTBOOK}
                       className="block"
                     >
-                      <div className="py-2 px-3 rounded border border-transparent hover:border-border/50 hover:bg-card/20 transition-all cursor-pointer group">
-                        <div className="flex items-center justify-between gap-3">
+                      <div className="py-3 px-4 rounded-xl hover:bg-background/60 transition-colors cursor-pointer group">
+                        <div className="h-6 flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-accent/30 to-accent/60 flex items-center justify-center text-white font-semibold text-[10px] shrink-0">
                               {entry.authorName.charAt(0).toUpperCase()}
@@ -602,7 +557,7 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
                               </span>
                             )}
                           </div>
-                          <span className="text-[11px] text-muted-foreground/70 shrink-0">
+                          <span className="font-mono text-[11px] text-muted-foreground/70 shrink-0">
                             {entryDate.toLocaleDateString('ko-KR', {
                               year: '2-digit',
                               month: '2-digit',
@@ -615,7 +570,40 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook }: HomePageP
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact CTA */}
+      <section id="contact" className="px-4 sm:px-8 pb-24 sm:pb-32 fade-in-section">
+        <div className="max-w-6xl mx-auto rounded-3xl border border-border bg-card/40 px-8 py-16 sm:py-20 text-center">
+          <span className="font-mono text-xs tracking-[0.16em] text-accent font-semibold">04 — CONTACT</span>
+          <h2 className="mt-5 text-3xl sm:text-5xl font-extrabold tracking-tight">함께 만들어봐요</h2>
+          <a
+            href="mailto:popqr1@gmail.com"
+            className="inline-block mt-6 font-mono text-lg sm:text-xl text-accent border-b border-accent/40 pb-1 hover:border-accent transition-colors"
+          >
+            popqr1@gmail.com
+          </a>
+
+          <div className="flex items-center justify-center gap-3 mt-10">
+            {[
+              { icon: Github, href: 'https://github.com/zio-s', label: '깃허브' },
+              { icon: MessageCircle, href: 'https://open.kakao.com/o/sAtkrp1h', label: '오픈카톡' },
+            ].map(({ icon: Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-border hover:border-accent/50 transition-colors"
+                aria-label={label}
+              >
+                <Icon className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-foreground/90">{label}</span>
+              </a>
+            ))}
           </div>
         </div>
       </section>

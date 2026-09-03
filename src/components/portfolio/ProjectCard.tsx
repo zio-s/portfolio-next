@@ -35,7 +35,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   title,
   description,
   thumbnail,
-  techStack = [],
   githubUrl,
   liveUrl,
   stats,
@@ -77,7 +76,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {/* Content Overlay - slides up slightly from bottom on hover */}
         <div className="absolute inset-x-0 bottom-0 p-6 translate-y-[30%] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400 ease-out">
           {/* Title */}
-          <h3 className="text-xl font-bold mb-2 leading-tight text-white">
+          <h3 className="text-xl font-bold mb-2 leading-tight text-white truncate">
             {title}
           </h3>
 
@@ -85,25 +84,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <p className="text-sm text-white/90 line-clamp-2 leading-relaxed mb-4">
             {description}
           </p>
-
-          {/* Tech Stack */}
-          {techStack.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {techStack.slice(0, 5).map((tech) => (
-                <span
-                  key={tech}
-                  className="text-xs text-white/80 px-2 py-1 rounded bg-white/10 backdrop-blur-sm"
-                >
-                  {tech}
-                </span>
-              ))}
-              {techStack.length > 5 && (
-                <span className="text-xs text-white/80 px-2 py-1 rounded bg-white/10 backdrop-blur-sm">
-                  +{techStack.length - 5}
-                </span>
-              )}
-            </div>
-          )}
 
           {/* Footer: Links & Stats */}
           <div className="flex items-center justify-between">

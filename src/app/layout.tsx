@@ -1,8 +1,17 @@
 import type { Metadata } from 'next';
+import { JetBrains_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers/Providers';
 import { generateSEOMetadata } from '@/components/common/SEO';
 import { WebSiteJsonLd, PersonJsonLd, OrganizationJsonLd } from '@/components/common/JsonLd';
 import './globals.css';
+
+// 모노스페이스 폰트 — 라벨/코드성 UI 전용. next/font가 빌드 타임에 자체 호스팅한다.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   ...generateSEOMetadata(),
@@ -36,7 +45,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" data-theme="dark" suppressHydrationWarning>
+    <html lang="ko" data-theme="dark" suppressHydrationWarning className={jetbrainsMono.variable}>
+      <head>
+        {/* Pretendard Variable — next/font 미지원 폰트라 CDN 링크로 로드 (variables.css의 --font-sans가 참조) */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
       <body className="font-sans antialiased">
         <WebSiteJsonLd />
         <PersonJsonLd />
