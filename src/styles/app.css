@@ -283,9 +283,11 @@
   }
 
   /* 홈페이지 히어로의 기술 스택 마퀴 티커 — 콘텐츠를 두 번 이어 붙여 무한 루프처럼 보이게 함 */
+  /* 복사본 8개 중 정확히 1개 너비(=총 너비의 1/8)만큼만 이동시켜야
+     루프가 리셋되는 순간에도 이음매가 보이지 않는다 */
   @keyframes marquee-scroll {
     from { transform: translate3d(0, 0, 0); }
-    to { transform: translate3d(-50%, 0, 0); }
+    to { transform: translate3d(-12.5%, 0, 0); }
   }
 
   .marquee-track {

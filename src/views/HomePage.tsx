@@ -337,10 +337,14 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook, initialProj
           </motion.div>
         </div>
 
-        {/* 기술 스택 마퀴 티커 */}
-        <div className="relative w-full max-w-full border-t border-b border-border py-6 overflow-hidden whitespace-nowrap">
+        {/* 기술 스택 마퀴 티커 — 화면 폭이 복사본 1개 너비보다 넓으면 루프 리셋 시 빈 공간이 보이므로,
+            어떤 화면 크기에서도 항상 화면 폭보다 훨씬 넓게 렌더되도록 넉넉히 반복한다 */}
+        <div
+          className="relative w-full max-w-full border-t border-b border-border py-6 overflow-hidden whitespace-nowrap"
+          aria-hidden="true"
+        >
           <div className="marquee-track inline-flex w-max">
-            {Array.from({ length: 2 }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <span key={i} className="shrink-0 font-mono text-sm tracking-wider text-muted-foreground/50">
                 REACT&nbsp;&nbsp;·&nbsp;&nbsp;NEXT.JS&nbsp;&nbsp;·&nbsp;&nbsp;TYPESCRIPT&nbsp;&nbsp;·&nbsp;&nbsp;REDUX TOOLKIT&nbsp;&nbsp;·&nbsp;&nbsp;SUPABASE&nbsp;&nbsp;·&nbsp;&nbsp;GSAP&nbsp;&nbsp;·&nbsp;&nbsp;FRAMER MOTION&nbsp;&nbsp;·&nbsp;&nbsp;TAILWIND CSS&nbsp;&nbsp;·&nbsp;&nbsp;
               </span>
