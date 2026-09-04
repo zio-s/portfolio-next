@@ -253,7 +253,7 @@ const HomePage = ({ initialProjects, initialPosts, initialGuestbook, initialProj
               </Link>
               <Link to={ROUTES.BLOG}>
                 <Button variant="outline" size="lg" className="rounded-full">
-                  블로그 읽기
+                  블로그 보기
                 </Button>
               </Link>
             </motion.div>
