@@ -4,8 +4,8 @@
  * Public 사이트 헤더 (블로그 디자인 시스템)
  *
  * DESIGN_RESPONSE.md §3.10
- * - 60px sticky + backdrop-filter: blur(12px) + bg rgba(10,10,15,0.8)
- * - 좌: 로고 `semincode<accent>.</accent>` + 데스크탑 네비
+ * - 60px sticky + backdrop-filter: blur(12px) + bg rgba(17,17,16,0.8)
+ * - 좌: 로고(이름) + 데스크탑 네비
  * - 우: ⌘K 트리거 + 아바타(로그인 시) / 로그인 버튼
  * - 모바일: 햄버거(좌) + 로고(중앙) + ⌘K 아이콘(우)
  * - 햄버거 → 좌측 drawer (네비)
@@ -35,7 +35,7 @@ export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode
       <header
         className="fixed top-0 left-0 right-0 h-14 lg:h-[60px] z-[1020] flex items-center px-4 lg:px-8"
         style={{
-          background: 'rgba(10, 10, 15, 0.8)',
+          background: 'rgba(17, 17, 16, 0.8)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           borderBottom: '1px solid var(--blog-border)',
@@ -53,7 +53,7 @@ export const PublicHeader = ({ user, publicMenuItems = [], logoText = 'semincode
 
         {/* 로고 */}
         <Link to="/" className="font-bold text-[16px] tracking-[-0.02em]" style={{ color: 'var(--blog-fg)' }}>
-          {logoText}<span style={{ color: 'var(--blog-accent)' }}>.</span>
+          {logoText}
         </Link>
 
         {/* 데스크톱 네비 */}

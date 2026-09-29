@@ -46,9 +46,9 @@ export async function GET() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          backgroundColor: '#0a0a0f',
+          backgroundColor: '#111110',
           backgroundImage:
-            'radial-gradient(ellipse 60% 55% at 72% 30%, rgba(139, 92, 246, 0.22), transparent 70%), radial-gradient(ellipse 50% 45% at 20% 80%, rgba(96, 165, 250, 0.14), transparent 70%)',
+            'radial-gradient(ellipse 60% 55% at 78% 20%, rgba(255, 107, 44, 0.16), transparent 70%)',
           padding: '72px 80px',
           fontFamily: 'Noto Sans KR',
         }}
@@ -68,7 +68,7 @@ export async function GET() {
               width: 10,
               height: 10,
               borderRadius: 9999,
-              backgroundColor: '#8b5cf6',
+              backgroundColor: '#ff6b2c',
             }}
           />
           {DOMAIN}
@@ -91,9 +91,7 @@ export async function GET() {
                 fontSize: 54,
                 fontWeight: 700,
                 lineHeight: 1.1,
-                backgroundImage: 'linear-gradient(90deg, #60a5fa, #818cf8, #a78bfa)',
-                backgroundClip: 'text',
-                color: 'transparent',
+                color: '#ff6b2c',
               }}
             >
               {ROLE}
@@ -120,8 +118,8 @@ export async function GET() {
                 display: 'flex',
                 padding: '12px 28px',
                 borderRadius: 9999,
-                border: '1px solid rgba(139, 92, 246, 0.45)',
-                backgroundColor: 'rgba(139, 92, 246, 0.12)',
+                border: '1px solid rgba(237, 235, 230, 0.2)',
+                backgroundColor: 'rgba(237, 235, 230, 0.06)',
                 color: 'rgba(255,255,255,0.9)',
                 fontSize: 26,
               }}

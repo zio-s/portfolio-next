@@ -152,7 +152,7 @@ const TableRow = ({
           onClick={() => onToggleFeatured(project.id, project.featured)}
           className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${
             project.featured
-              ? 'bg-accent text-white hover:bg-accent/90'
+              ? 'bg-accent text-accent-foreground hover:bg-accent/90'
               : 'bg-muted text-muted-foreground hover:bg-muted/80'
           }`}
           title={project.featured ? '대표 해제' : '대표로 설정'}
@@ -307,7 +307,7 @@ const MobileCard = ({
           onClick={() => onToggleFeatured(project.id, project.featured)}
           className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
             project.featured
-              ? 'bg-accent text-white hover:bg-accent/90'
+              ? 'bg-accent text-accent-foreground hover:bg-accent/90'
               : 'bg-muted text-muted-foreground hover:bg-muted/80'
           }`}
         >
@@ -545,7 +545,7 @@ export const AdminProjectsPage = () => {
           </div>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent/90 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-lg font-medium hover:bg-accent/90 transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
             새 프로젝트

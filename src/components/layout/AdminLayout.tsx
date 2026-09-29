@@ -34,7 +34,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <header
           className="lg:hidden h-[56px] flex items-center px-4 sticky top-0 z-30"
           style={{
-            background: 'rgba(10, 10, 15, 0.85)',
+            background: 'rgba(17, 17, 16, 0.85)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             borderBottom: '1px solid var(--blog-border)',

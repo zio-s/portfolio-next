@@ -38,7 +38,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // Variant styles - clean, no gradients, no glow
     const variantStyles = {
       default:
-        'bg-accent text-white hover:bg-accent-hover',
+        'bg-accent text-accent-foreground hover:bg-accent-hover',
       secondary:
         'bg-card text-card-foreground border border-border hover:bg-accent/10',
       outline:
@@ -48,7 +48,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       destructive:
         'bg-red-600 text-white hover:bg-red-700',
       gradient:
-        'bg-gradient-to-r from-accent to-accent-hover text-white hover:opacity-90',
+        'bg-gradient-to-r from-accent to-accent-hover text-accent-foreground hover:opacity-90',
     };
 
     // Size styles

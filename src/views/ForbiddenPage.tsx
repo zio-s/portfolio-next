@@ -79,7 +79,7 @@ const ForbiddenPage = () => {
             padding: '12px 24px',
             border: 'none',
             borderRadius: '8px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #e8561b 0%, #b8400f 100%)',
             color: 'white',
             fontSize: '14px',
             fontWeight: '500',

@@ -214,7 +214,7 @@ export const CommentItem = ({
             borderRadius: '50%',
             background: comment.authorAvatar
               ? `url(${comment.authorAvatar})`
-              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              : 'linear-gradient(135deg, #e8561b 0%, #b8400f 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             flexShrink: 0,

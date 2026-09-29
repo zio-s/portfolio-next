@@ -198,7 +198,7 @@ export const GuestbookCard: React.FC<GuestbookCardProps> = ({
                 <button
                   onClick={handleSubmitReply}
                   disabled={isAddingReply || !replyText.trim()}
-                  className="px-4 py-2 text-xs font-medium rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 text-xs font-medium rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isAddingReply && <Loader2 className="w-3 h-3 animate-spin" />}
                   답글 작성

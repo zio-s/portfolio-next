@@ -117,7 +117,7 @@ export const ProjectsPage = ({ initialProjects }: ProjectsPageProps) => {
                     onClick={() => handleCategoryChange(value)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                       category === value
-                        ? 'bg-accent text-white shadow-sm'
+                        ? 'bg-accent text-accent-foreground shadow-sm'
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                   >

@@ -72,7 +72,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           email: user.email || '',
           avatar: user.user_metadata?.avatar_url,
         } : undefined}
-        logoText="Portfolio"
+        logoText="변세민"
         publicMenuItems={publicMenuItems}
       />
 

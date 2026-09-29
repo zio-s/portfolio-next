@@ -24,20 +24,14 @@ export const Footer = ({ className = '' }: FooterProps) => {
   return (
     <footer className={`w-full border-t border-border bg-background ${className}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex flex-col items-center justify-center text-center space-y-2">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           {/* Portfolio Purpose Statement */}
           <p className="text-xs text-muted-foreground">
-            이 웹사이트는 작업물을 프리뷰를 위한 포트폴리오 목적으로 제작되었습니다.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            이곳 공개되는 모든 프로젝트와 콘텐츠의 저작권은 원작자에게 있으며,
-            본사이트는 상업적 목적이 아닌 포트폴리오 전시 목적으로만 사용됩니다.
+            공개된 프로젝트와 콘텐츠의 저작권은 원작자에게 있으며, 포트폴리오 전시 목적으로만 사용합니다.
           </p>
 
           {/* Copyright */}
-          <p className="text-xs text-muted-foreground pt-2">
-            Copyright © {currentYear} B.S
-          </p>
+          <p className="text-xs text-muted-foreground">© {currentYear} 변세민</p>
         </div>
       </div>
     </footer>
