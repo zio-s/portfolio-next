@@ -244,7 +244,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${
         isAnimating ? 'opacity-100' : 'opacity-0'
       }`}
       onClick={handleClose}
@@ -270,7 +270,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             </div>
 
             {/* Content */}
-            <div className="p-8 md:p-10 bg-background">
+            <div className="p-5 sm:p-8 md:p-10 bg-background">
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -381,7 +381,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
                   <h2 className="text-xl font-bold">개요</h2>
                 </div>
-                <div className="text-muted-foreground leading-relaxed space-y-3 pl-[52px]">
+                <div className="text-muted-foreground leading-relaxed space-y-3 sm:pl-[52px]">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
@@ -452,7 +452,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     </div>
                     <h2 className="text-xl font-bold">주요 성과</h2>
                   </div>
-                  <div className="space-y-4 pl-[52px]">
+                  <div className="space-y-4 sm:pl-[52px]">
                     {project.achievements.map((achievement, index) => (
                       <div key={index} className="flex gap-4">
                         <span className="text-accent font-bold text-lg shrink-0">{index + 1}.</span>
@@ -474,7 +474,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     </div>
                     <h2 className="text-xl font-bold">기술 스택</h2>
                   </div>
-                  <div className="pl-[52px]">
+                  <div className="sm:pl-[52px]">
                     <div className="flex flex-wrap gap-2">
                       {project.techStack.map((tech: string) => (
                         <Badge key={tech} variant="outline" className="px-3 py-1.5 bg-accent/5 border-accent/20 hover:bg-accent/10">
@@ -495,7 +495,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     </div>
                     <h2 className="text-xl font-bold">기술적 도전 및 해결</h2>
                   </div>
-                  <div className="space-y-6 pl-[52px]">
+                  <div className="space-y-6 sm:pl-[52px]">
                     {project.challenges.map((challenge, index) => (
                       <div key={index} className="space-y-3">
                         <div className="flex gap-4">
@@ -529,7 +529,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
                   <h2 className="text-xl font-bold">갤러리</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-[52px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:pl-[52px]">
                   {project.images.map((mediaUrl, index) => {
                     // 파일 확장자로 video vs image 판단
                     const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(mediaUrl);
@@ -578,7 +578,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 </div>
                 <h2 className="text-xl font-bold">댓글</h2>
               </div>
-              <div className="pl-[52px]">
+              <div className="sm:pl-[52px]">
                 <CommentList projectId={project.id} />
               </div>
             </div>
@@ -592,7 +592,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
                   <h2 className="text-xl font-bold">태그</h2>
                 </div>
-                <div className="flex flex-wrap gap-2 pl-[52px]">
+                <div className="flex flex-wrap gap-2 sm:pl-[52px]">
                   {project.tags.map((tag) => (
                     <span
                       key={tag}
