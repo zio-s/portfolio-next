@@ -131,7 +131,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
         <div className="px-6 pb-6 flex justify-end">
           <button
             onClick={handleConfirm}
-            className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity min-w-[80px]"
+            className="px-4 py-2 bg-accent text-accent-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity min-w-[80px]"
           >
             {confirmText}
           </button>

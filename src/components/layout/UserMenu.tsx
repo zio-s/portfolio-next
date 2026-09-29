@@ -69,7 +69,7 @@ export function UserMenu({ user }: UserMenuProps) {
       >
         <div
           className="w-9 h-9 rounded-full grid place-items-center text-[13px] font-bold text-white"
-          style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #c2410c 0%, #9a3412 100%)' }}
           title={user.name}
         >
           {initial}

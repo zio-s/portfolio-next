@@ -145,7 +145,7 @@ export function MobileSidebar({
             {/* User Profile Card (Admin 모드이거나 로그인한 경우) */}
             {(mode === 'admin' || user) && user && (
               <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer group">
-                <div className="w-12 h-12 rounded-full border-2 border-border group-hover:border-accent transition-colors flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                <div className="w-12 h-12 rounded-full border-2 border-border group-hover:border-accent transition-colors flex items-center justify-center bg-accent text-accent-foreground font-semibold">
                   {user.avatar ? (
                     <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
                   ) : (
@@ -176,7 +176,7 @@ export function MobileSidebar({
                 onClick={handleItemClick}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 hover:translate-x-1 active:scale-[0.98] ${
                   isActive(item.href)
-                    ? 'bg-accent text-white shadow-sm'
+                    ? 'bg-accent text-accent-foreground shadow-sm'
                     : 'hover:bg-accent/10'
                 }`}
               >

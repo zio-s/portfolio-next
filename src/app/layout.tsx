@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { JetBrains_Mono } from 'next/font/google';
+import { Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers/Providers';
 import { generateSEOMetadata } from '@/components/common/SEO';
 import { WebSiteJsonLd, PersonJsonLd, OrganizationJsonLd } from '@/components/common/JsonLd';
@@ -10,6 +10,14 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
+
+// 영문 디스플레이 폰트 — 홈의 프로젝트명·큰 이메일 등 라틴 대제목 전용 (한글은 Pretendard가 받는다)
+const bricolage = Bricolage_Grotesque({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  variable: '--font-bricolage',
   display: 'swap',
 });
 
@@ -45,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" data-theme="dark" suppressHydrationWarning className={jetbrainsMono.variable}>
+    <html lang="ko" data-theme="dark" suppressHydrationWarning className={`${jetbrainsMono.variable} ${bricolage.variable}`}>
       <head>
         {/* Pretendard Variable — next/font 미지원 폰트라 CDN 링크로 로드 (variables.css의 --font-sans가 참조) */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />

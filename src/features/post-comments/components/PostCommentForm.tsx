@@ -194,7 +194,7 @@ export const PostCommentForm = ({
           <button
             type="submit"
             disabled={isLoading || (!isLoggedIn && !authorName.trim()) || !content.trim()}
-            className="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 shadow-sm hover:shadow-md"
+            className="px-4 py-2 text-sm font-medium text-accent-foreground bg-accent hover:bg-accent/90 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 shadow-sm hover:shadow-md"
           >
             {isLoading ? (
               <>

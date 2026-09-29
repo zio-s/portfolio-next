@@ -6,8 +6,31 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, AlertCircle } from 'lucide-react';
+import { X, Loader2, AlertCircle, Plus, Trash2 } from 'lucide-react';
 import type { Project, ProjectCategory, ProjectStatus } from '../../features/portfolio/types/Project';
+
+/** 문제 해결 한 줄 — DB에는 challenges[i] / solutions[i] 평행 배열로 저장된다 */
+interface ChallengeRow {
+  problem: string;
+  solution: string;
+}
+
+const toChallengeRows = (project?: Project | null): ChallengeRow[] =>
+  (project?.challenges ?? []).map((problem, index) => ({
+    problem,
+    solution: project?.solutions?.[index] ?? '',
+  }));
+
+/** 빈 줄은 버리고, challenges/solutions 평행 배열로 되돌린다 */
+const splitChallengeRows = (rows: ChallengeRow[]) => {
+  const filled = rows
+    .map((row) => ({ problem: row.problem.trim(), solution: row.solution.trim() }))
+    .filter((row) => row.problem);
+  return {
+    challenges: filled.map((row) => row.problem),
+    solutions: filled.map((row) => row.solution),
+  };
+};
 
 interface ProjectFormProps {
   project?: Project | null;
@@ -30,6 +53,7 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
     liveUrl: string;
     status: ProjectStatus;
     featured: boolean;
+    challenges: ChallengeRow[];
   }>({
     title: '',
     description: '',
@@ -43,6 +67,7 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
     liveUrl: '',
     status: 'public',
     featured: false,
+    challenges: [],
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -64,6 +89,7 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
         liveUrl: project.liveUrl || '',
         status: project.status || 'public',
         featured: project.featured || false,
+        challenges: toChallengeRows(project),
       });
     } else {
       setFormData({
@@ -79,6 +105,7 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
         liveUrl: '',
         status: 'public',
         featured: false,
+        challenges: [],
       });
     }
     setErrors({});
@@ -117,6 +144,21 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
     };
   }, [isOpen, onCancel]);
 
+  const updateChallenge = (index: number, field: keyof ChallengeRow, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      challenges: prev.challenges.map((row, i) => (i === index ? { ...row, [field]: value } : row)),
+    }));
+  };
+
+  const addChallenge = () => {
+    setFormData((prev) => ({ ...prev, challenges: [...prev.challenges, { problem: '', solution: '' }] }));
+  };
+
+  const removeChallenge = (index: number) => {
+    setFormData((prev) => ({ ...prev, challenges: prev.challenges.filter((_, i) => i !== index) }));
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -134,6 +176,9 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
     }
     if (!formData.techStack.trim()) {
       newErrors.techStack = '기술 스택을 입력해주세요';
+    }
+    if (formData.challenges.some((row) => !row.problem.trim() && row.solution.trim())) {
+      newErrors.challenges = '해결 내용만 있고 문제가 비어 있는 줄이 있어요';
     }
 
     setErrors(newErrors);
@@ -172,6 +217,7 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
         liveUrl: formData.liveUrl || undefined,
         status: formData.status,
         featured: formData.featured,
+        ...splitChallengeRows(formData.challenges),
       };
 
       await onSubmit(submitData);
@@ -420,6 +466,79 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
             </div>
           </div>
 
+          {/* 문제 해결 (홈 대표 작업 표 + 상세 모달에 표시) */}
+          <fieldset className="space-y-3">
+            <legend className="text-sm font-semibold text-foreground">
+              문제 해결{' '}
+              <span className="text-xs text-muted-foreground font-normal">
+                (홈의 대표 작업이면 위에서 3줄까지 표시)
+              </span>
+            </legend>
+            {formData.challenges.length === 0 && (
+              <p className="text-sm text-muted-foreground">아직 적은 문제가 없습니다.</p>
+            )}
+            {formData.challenges.map((row, index) => (
+              <div key={index} className="rounded-lg border border-border p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-muted-foreground">{String(index + 1).padStart(2, '0')}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeChallenge(index)}
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                    disabled={loading}
+                    aria-label={`${index + 1}번째 문제 삭제`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    삭제
+                  </button>
+                </div>
+                <div>
+                  <label htmlFor={`challenge-problem-${index}`} className="block text-xs font-semibold mb-1.5 text-foreground">
+                    문제
+                  </label>
+                  <textarea
+                    id={`challenge-problem-${index}`}
+                    value={row.problem}
+                    onChange={(e) => updateChallenge(index, 'problem', e.target.value)}
+                    rows={2}
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-muted text-foreground focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition-colors resize-vertical text-sm placeholder:text-muted-foreground"
+                    placeholder="예: 지도를 드래그하면 화면이 버벅였다 (원인까지 함께 적으면 좋아요)"
+                    disabled={loading}
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`challenge-solution-${index}`} className="block text-xs font-semibold mb-1.5 text-foreground">
+                    해결
+                  </label>
+                  <textarea
+                    id={`challenge-solution-${index}`}
+                    value={row.solution}
+                    onChange={(e) => updateChallenge(index, 'solution', e.target.value)}
+                    rows={2}
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-muted text-foreground focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition-colors resize-vertical text-sm placeholder:text-muted-foreground"
+                    placeholder="예: dispatch를 400ms 디바운스 안으로 옮기고 변화가 15% 미만이면 요청하지 않게 막음"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+            ))}
+            {errors.challenges && (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.challenges}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={addChallenge}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-border text-sm text-muted-foreground hover:text-foreground hover:border-accent transition-colors"
+              disabled={loading}
+            >
+              <Plus className="w-4 h-4" />
+              문제 추가
+            </button>
+          </fieldset>
+
           {/* Status & Featured */}
           <div className="flex flex-col sm:flex-row gap-6">
             {/* Status */}
@@ -466,7 +585,7 @@ export const ProjectForm = ({ project, onSubmit, onCancel, isOpen }: ProjectForm
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? '저장 중...' : project ? '수정하기' : '생성하기'}

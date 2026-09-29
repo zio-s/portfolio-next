@@ -182,7 +182,7 @@ export const AdminGuestbookPage = () => {
                             className="w-10 h-10 rounded-full border-2 border-border"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-semibold text-sm">
+                          <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-semibold text-sm">
                             {entry.authorName[0]}
                           </div>
                         )}
@@ -219,7 +219,7 @@ export const AdminGuestbookPage = () => {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleReplySubmit(entry.id, entry.authorName)}
-                              className="px-3 py-1.5 bg-accent text-white rounded-md text-xs font-medium hover:bg-accent/90 transition-colors cursor-pointer"
+                              className="px-3 py-1.5 bg-accent text-accent-foreground rounded-md text-xs font-medium hover:bg-accent/90 transition-colors cursor-pointer"
                             >
                               등록
                             </button>
@@ -256,7 +256,7 @@ export const AdminGuestbookPage = () => {
                             setReplyingTo(entry.id);
                             setReplyText('');
                           }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white rounded-md text-xs font-medium hover:bg-accent/90 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent text-accent-foreground rounded-md text-xs font-medium hover:bg-accent/90 transition-colors cursor-pointer"
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
                           답글 작성
@@ -270,7 +270,7 @@ export const AdminGuestbookPage = () => {
                         onClick={() => togglePinned(entry.id, entry.isPinned, entry.authorName)}
                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                           entry.isPinned
-                            ? 'bg-accent text-white hover:bg-accent/90'
+                            ? 'bg-accent text-accent-foreground hover:bg-accent/90'
                             : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                       >
@@ -320,7 +320,7 @@ export const AdminGuestbookPage = () => {
                       className="w-10 h-10 rounded-full border-2 border-border flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-semibold text-sm flex-shrink-0">
                       {entry.authorName[0]}
                     </div>
                   )}
@@ -357,7 +357,7 @@ export const AdminGuestbookPage = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleReplySubmit(entry.id, entry.authorName)}
-                      className="flex-1 px-3 py-2 bg-accent text-white rounded-md text-sm font-medium hover:bg-accent/90 transition-colors cursor-pointer"
+                      className="flex-1 px-3 py-2 bg-accent text-accent-foreground rounded-md text-sm font-medium hover:bg-accent/90 transition-colors cursor-pointer"
                     >
                       등록
                     </button>
@@ -403,7 +403,7 @@ export const AdminGuestbookPage = () => {
                         setReplyingTo(entry.id);
                         setReplyText('');
                       }}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-accent text-white rounded-md text-xs font-medium hover:bg-accent/90 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-accent text-accent-foreground rounded-md text-xs font-medium hover:bg-accent/90 transition-colors cursor-pointer"
                     >
                       <MessageSquare className="w-3 h-3" />
                       답글
@@ -413,7 +413,7 @@ export const AdminGuestbookPage = () => {
                     onClick={() => togglePinned(entry.id, entry.isPinned, entry.authorName)}
                     className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                       entry.isPinned
-                        ? 'bg-accent text-white hover:bg-accent/90'
+                        ? 'bg-accent text-accent-foreground hover:bg-accent/90'
                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     }`}
                   >

@@ -126,7 +126,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   `.trim();
 
   // Active button (matches filter button active state)
-  const activeButtonClasses = `${baseButtonClasses} bg-accent text-white cursor-default`;
+  const activeButtonClasses = `${baseButtonClasses} bg-accent text-accent-foreground cursor-default`;
 
   // Inactive button (matches filter button inactive state)
   const inactiveButtonClasses = `${baseButtonClasses} text-muted-foreground hover:text-foreground hover:bg-card border border-border`;

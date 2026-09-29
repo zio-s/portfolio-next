@@ -153,7 +153,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
         <div className="flex items-center gap-2.5 px-1">
           <div
             className="w-8 h-8 rounded-full grid place-items-center text-[12px] font-bold text-white shrink-0"
-            style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #c2410c 0%, #9a3412 100%)' }}
           >
             {userInitial}
           </div>

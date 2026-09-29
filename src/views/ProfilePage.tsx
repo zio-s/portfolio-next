@@ -111,7 +111,7 @@ const ProfilePage = () => {
           {/* Avatar Section */}
           <div className="p-6 bg-gradient-to-r from-accent/10 to-accent/5 border-b border-border">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+              <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-2xl font-bold shadow-lg">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -173,7 +173,7 @@ const ProfilePage = () => {
                 <div className="pt-4 border-t border-border">
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-white font-medium text-sm hover:bg-accent/90 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-accent-foreground font-medium text-sm hover:bg-accent/90 transition-colors cursor-pointer"
                   >
                     <Pencil className="w-4 h-4" />
                     프로필 수정
@@ -231,7 +231,7 @@ const ProfilePage = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-white font-medium text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-accent-foreground font-medium text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {loading ? (
                       <>

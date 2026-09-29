@@ -305,7 +305,7 @@ const PostDetailPage = ({ initialPost }: PostDetailPageProps) => {
           >
             <div
               className="w-14 h-14 rounded-full grid place-items-center font-bold text-[18px] text-white shrink-0"
-              style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #c2410c 0%, #9a3412 100%)' }}
             >
               {PROFILE.initials}
             </div>

@@ -2,7 +2,7 @@
  * Blog Section Tokens & Utilities
  *
  * blog-n/SPEC.md 기반 블로그 전용 스타일 토큰
- * - dark first, accent purple #8b5cf6
+ * - dark first, accent orange #ff6b2c
  * - Linear / overreacted.io 무드 (단정한 다크, 글에 집중)
  *
  * 적용 범위: /blog, /blog/[id], /blog/create, /blog/edit/[id]
@@ -11,17 +11,17 @@
 
 :root {
   /* Blog colors (light mode default - 토큰만 정의, 다크 우선) */
-  --blog-bg: #0a0a0f;
-  --blog-bg-soft: #0d1118;
-  --blog-card: #131824;
-  --blog-card-hover: #171d2c;
-  --blog-border: #202d3f;
-  --blog-border-soft: #1a2433;
-  --blog-fg: #f8f9fb;
-  --blog-fg-muted: #94a3b8;
-  --blog-fg-subtle: #64748b;
-  --blog-accent: #8b5cf6;
-  --blog-accent-soft: rgba(139, 92, 246, 0.12);
+  --blog-bg: #111110;
+  --blog-bg-soft: #151513;
+  --blog-card: #1a1a18;
+  --blog-card-hover: #20201d;
+  --blog-border: #2a2a27;
+  --blog-border-soft: #222220;
+  --blog-fg: #edebe6;
+  --blog-fg-muted: #a3a19b;
+  --blog-fg-subtle: #8a8882;
+  --blog-accent: #ff6b2c;
+  --blog-accent-soft: rgba(255, 107, 44, 0.12);
   --blog-heart: #f43f5e;
 
   --blog-font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, system-ui, sans-serif;
@@ -112,7 +112,7 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
-  text-decoration-color: rgba(139, 92, 246, 0.4);
+  text-decoration-color: rgba(255, 107, 44, 0.4);
   transition: text-decoration-color 120ms ease;
 }
 .blog-article a:hover {
@@ -247,7 +247,7 @@
   border-bottom: none;
 }
 .blog-article tbody tr:hover {
-  background: rgba(139, 92, 246, 0.04);
+  background: rgba(255, 107, 44, 0.04);
 }
 .blog-article td > code,
 .blog-article th > code {
@@ -270,7 +270,7 @@
 
 /* mark — 본문 (R4 §3.3): underline + soft bg, 텍스트 색은 그대로 */
 .blog-article mark {
-  background: rgba(139, 92, 246, 0.18);
+  background: rgba(255, 107, 44, 0.18);
   color: var(--blog-fg);
   padding: 0 3px;
   border-radius: 2px;

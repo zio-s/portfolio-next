@@ -51,14 +51,21 @@ export function deriveCategory(post: Pick<Post, 'category' | 'tags'>): { slug: s
   return { slug: fallback.slug, label: fallback.label };
 }
 
+// 서버(Vercel, UTC)와 브라우저(KST)가 같은 날짜를 내도록 한국 시간으로 고정한다.
+// 로컬 타임존을 쓰면 00~09시(KST)에 발행한 글이 서버 HTML에서 하루 전 날짜가 되어 하이드레이션 불일치가 난다.
+const blogDateFormatter = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
 export function formatBlogDate(dateString: string | undefined | null): string {
   if (!dateString) return '';
   const d = new Date(dateString);
   if (Number.isNaN(d.getTime())) return '';
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}.${m}.${day}`;
+  const parts = Object.fromEntries(blogDateFormatter.formatToParts(d).map((p) => [p.type, p.value]));
+  return `${parts.year}.${parts.month}.${parts.day}`;
 }
 
 export function formatRelative(dateString: string | undefined | null): string {

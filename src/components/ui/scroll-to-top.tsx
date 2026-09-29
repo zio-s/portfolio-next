@@ -84,7 +84,7 @@ export const ScrollToTop: React.FC<ScrollToTopProps> = ({
           className={cn(
             'fixed bottom-8 right-8 z-50',
             'p-3 rounded-lg',
-            'bg-accent text-white',
+            'bg-accent text-accent-foreground',
             'border border-accent shadow-lg',
             'hover:bg-accent/90 hover:shadow-xl',
             'transition-all duration-300 ease-out',

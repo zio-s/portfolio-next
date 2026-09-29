@@ -26,7 +26,7 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
       warning: 'bg-orange-500/10 text-orange-500',
       error: 'bg-red-500/10 text-red-500',
       outline: 'border border-border text-foreground bg-transparent',
-      gradient: 'bg-gradient-to-r from-accent to-accent-hover text-white',
+      gradient: 'bg-gradient-to-r from-accent to-accent-hover text-accent-foreground',
     };
 
     // Size styles

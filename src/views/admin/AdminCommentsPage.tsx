@@ -44,7 +44,7 @@ const AdminReplyForm = ({
     <tr>
       <td colSpan={6} className="px-6 py-3 bg-accent/5">
         <form onSubmit={handleSubmit} className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+          <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-xs font-bold flex-shrink-0 mt-0.5">
             {adminName[0]}
           </div>
           <div className="flex-1 space-y-2">
@@ -73,7 +73,7 @@ const AdminReplyForm = ({
               <button
                 type="submit"
                 disabled={isLoading || !content.trim()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-accent-foreground bg-accent hover:bg-accent/90 rounded-lg transition-colors disabled:opacity-50"
               >
                 {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                 답글 작성
@@ -264,7 +264,7 @@ export const AdminCommentsPage = () => {
                               className="w-10 h-10 rounded-full border-2 border-border"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-semibold text-sm">
+                            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-semibold text-sm">
                               {comment.authorName[0]}
                             </div>
                           )}
@@ -369,7 +369,7 @@ export const AdminCommentsPage = () => {
                       className="w-10 h-10 rounded-full border-2 border-border flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-semibold text-sm flex-shrink-0">
                       {comment.authorName[0]}
                     </div>
                   )}
@@ -469,7 +469,7 @@ export const AdminCommentsPage = () => {
                       <button
                         type="submit"
                         disabled={isReplying}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-accent hover:bg-accent/90 rounded-lg disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-accent-foreground bg-accent hover:bg-accent/90 rounded-lg disabled:opacity-50"
                       >
                         {isReplying ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                         답글

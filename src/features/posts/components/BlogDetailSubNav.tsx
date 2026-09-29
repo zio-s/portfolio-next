@@ -96,7 +96,7 @@ export function BlogDetailSubNav({
         <div
           className="flex items-center h-9 px-4 lg:px-8 gap-3"
           style={{
-            background: 'rgba(10, 10, 15, 0.85)',
+            background: 'rgba(17, 17, 16, 0.85)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             borderBottom: '1px solid var(--blog-border)',

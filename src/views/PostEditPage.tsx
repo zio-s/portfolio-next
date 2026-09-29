@@ -205,7 +205,7 @@ const PostEditPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3">
               게시글 수정
             </h1>
             <p className="text-muted-foreground text-lg">

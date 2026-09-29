@@ -157,7 +157,7 @@ export const GuestbookForm: React.FC = () => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 cursor-pointer px-4 rounded-lg bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-white font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/20"
+          className="w-full py-3 cursor-pointer px-4 rounded-lg bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/20"
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">

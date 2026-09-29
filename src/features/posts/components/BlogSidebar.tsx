@@ -35,7 +35,7 @@ export function BlogSidebar({ posts, onOpenSearch }: BlogSidebarProps) {
       {/* Profile */}
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-full grid place-items-center font-bold text-[17px] text-white"
-             style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }}>
+             style={{ background: 'linear-gradient(135deg, #c2410c 0%, #9a3412 100%)' }}>
           {PROFILE.initials}
         </div>
         <div className="min-w-0">

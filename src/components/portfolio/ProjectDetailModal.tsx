@@ -36,6 +36,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import { getProjectCoverUrl } from '@/data/projectShowcase';
 
 interface ProjectDetailModalProps {
   projectId: string;
@@ -261,7 +262,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             {/* Main Image - Hero Section */}
             <div className="relative aspect-[21/9] bg-gradient-to-br from-card via-background to-card overflow-hidden">
               <img
-                src={project.thumbnail}
+                src={getProjectCoverUrl(project)}
                 alt={project.title}
                 className="w-full h-full object-cover"
               />
