@@ -23,6 +23,7 @@ import { useGetPostsQuery } from '@/store';
 import type { Project, ProjectsResponse } from '@/features/portfolio/types/Project';
 import type { Post } from '@/store/types';
 import { ROUTES } from '@/router';
+import { formatBlogDate } from '@/lib/blog';
 import {
   HOME_HERO_STACK_IDS,
   getProjectCoverUrl,
@@ -45,7 +46,7 @@ interface HomePageProps {
 const toStackItem = (project: Project): HeroStackItem => ({
   projectId: project.id,
   title: splitProjectTitle(project.title).name,
-  src: getProjectCoverUrl(project),
+  src: getProjectShowcase(project.id)?.cover.src ?? project.thumbnail,
   alt: `${splitProjectTitle(project.title).name} 화면`,
 });
 
@@ -64,17 +65,13 @@ const buildHeroStack = (spotlight: Project | undefined, others: Project[]): Hero
     ? {
         projectId: spotlight.id,
         title: splitProjectTitle(spotlight.title).name,
-        src: screen.src.src,
+        src: screen.src,
         alt: screen.alt,
+        isPhone: true,
       }
     : toStackItem(spotlight);
-  return isPlaceholderImage(front.src) ? back : [...back, front];
-};
-
-const formatDate = (value: string) => {
-  const date = new Date(value);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
+  const frontUrl = typeof front.src === 'string' ? front.src : front.src.src;
+  return isPlaceholderImage(frontUrl) ? back : [...back, front];
 };
 
 const underlineLink =
@@ -187,7 +184,7 @@ const HomePage = ({ initialProjects, initialPosts }: HomePageProps) => {
                         dateTime={post.publishedAt || post.createdAt}
                         className="shrink-0 font-mono text-[13px] text-muted-foreground"
                       >
-                        {formatDate(post.publishedAt || post.createdAt)}
+                        {formatBlogDate(post.publishedAt || post.createdAt)}
                       </time>
                     </Link>
                   </li>

@@ -218,7 +218,7 @@ export function MobileDrawer({ publicMenuItems = [], user }: MobileDrawerProps) 
           <div className="flex items-center gap-2.5">
             <div
               className="w-[38px] h-[38px] rounded-full grid place-items-center font-bold text-[14px] text-white"
-              style={{ background: 'linear-gradient(135deg, #e8561b 0%, #b8400f 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #c2410c 0%, #9a3412 100%)' }}
             >
               {PROFILE.initials}
             </div>

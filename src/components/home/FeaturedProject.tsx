@@ -12,7 +12,7 @@
 import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import type { Project } from '@/features/portfolio/types/Project';
-import { getProjectCoverUrl, getProjectShowcase, splitProjectTitle } from '@/data/projectShowcase';
+import { getProjectCoverUrl, getProjectShowcase, isPlaceholderImage, splitProjectTitle } from '@/data/projectShowcase';
 import { openProjectModal } from '@/components/portfolio/openProjectModal';
 
 interface FeaturedProjectProps {
@@ -27,6 +27,9 @@ const pillLink =
 export function FeaturedProject({ project, maxChallenges = 3 }: FeaturedProjectProps) {
   const { name, subtitle } = splitProjectTitle(project.title);
   const showcase = getProjectShowcase(project.id);
+  const coverUrl = getProjectCoverUrl(project);
+  const hasScreens = Boolean(showcase?.screens?.length);
+  const hasVisual = hasScreens || !isPlaceholderImage(coverUrl);
   const challenges = (project.challenges ?? [])
     .map((problem, index) => ({ problem, solution: project.solutions?.[index] }))
     .filter((row) => row.problem.trim())
@@ -51,10 +54,18 @@ export function FeaturedProject({ project, maxChallenges = 3 }: FeaturedProjectP
             </h2>
           </div>
           <div className="flex flex-col gap-3 lg:col-span-5 lg:pb-3">
-            <p className="text-lg font-medium leading-relaxed text-foreground sm:text-xl text-pretty">
-              {subtitle ?? project.description}
-              {project.duration ? <span className="text-muted-foreground"> · {project.duration}</span> : null}
-            </p>
+            {/* 부제가 없으면 설명은 아래 본문에만 쓴다 (같은 문단이 두 번 나오지 않게) */}
+            {(subtitle || project.duration) && (
+              <p className="text-lg font-medium leading-relaxed text-foreground sm:text-xl text-pretty">
+                {subtitle}
+                {project.duration ? (
+                  <span className="text-muted-foreground">
+                    {subtitle ? ' · ' : ''}
+                    {project.duration}
+                  </span>
+                ) : null}
+              </p>
+            )}
             {project.techStack.length > 0 && (
               <p className="font-mono text-[13px] leading-relaxed text-muted-foreground">
                 {project.techStack.slice(0, 6).join(' · ')}
@@ -65,7 +76,7 @@ export function FeaturedProject({ project, maxChallenges = 3 }: FeaturedProjectP
 
         {/* 화면 + 설명 */}
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-6">
-          {showcase?.screens?.length ? (
+          {hasScreens && showcase?.screens ? (
             <div className="relative overflow-hidden rounded-[20px] bg-[#efe3d3] lg:col-span-7">
               <div className="grid grid-cols-2 items-start gap-4 px-5 pb-10 pt-8 sm:gap-8 sm:px-12 sm:pb-16 sm:pt-12">
                 {showcase.screens.slice(0, 2).map((screen, index) => (
@@ -81,15 +92,17 @@ export function FeaturedProject({ project, maxChallenges = 3 }: FeaturedProjectP
                 ))}
               </div>
             </div>
-          ) : (
+          ) : hasVisual ? (
             <img
-              src={getProjectCoverUrl(project)}
+              src={coverUrl}
               alt={`${name} 화면`}
               className="aspect-video w-full rounded-[20px] border border-border object-cover lg:col-span-7"
             />
-          )}
+          ) : null}
 
-          <div className="flex flex-col justify-between gap-10 lg:col-span-5 lg:pl-4">
+          <div
+            className={`flex flex-col justify-between gap-10 ${hasVisual ? 'lg:col-span-5 lg:pl-4' : 'lg:col-span-8'}`}
+          >
             <div className="flex flex-col gap-8">
               <p className="max-w-[60ch] text-[17px] leading-[1.8] text-[#d6d4ce] sm:text-lg text-pretty">
                 {project.description}

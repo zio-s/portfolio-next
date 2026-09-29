@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import Image, { type StaticImageData } from 'next/image';
 import { useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { openProjectModal } from '@/components/portfolio/openProjectModal';
@@ -18,8 +19,11 @@ import { openProjectModal } from '@/components/portfolio/openProjectModal';
 export interface HeroStackItem {
   projectId: string;
   title: string;
-  src: string;
+  /** 저장소 캡처는 StaticImageData(next/image로 최적화), DB 썸네일은 외부 URL 문자열 */
+  src: string | StaticImageData;
   alt: string;
+  /** 세로 폰 화면 캡처 — 항상 맨 앞 폰 슬롯에 놓는다 */
+  isPhone?: boolean;
 }
 
 interface HeroWorkStackProps {
@@ -43,16 +47,27 @@ const SLOTS = [
 
 export function HeroWorkStack({ items, className }: HeroWorkStackProps) {
   const reduceMotion = useReducedMotion();
-  const cards = items.slice(0, SLOTS.length);
-  // 처음엔 폰 화면(마지막 카드)이 맨 앞
-  const [active, setActive] = useState(cards.length - 1);
+  // 카드는 뒤에서부터 슬롯을 채운다 — 폰 캡처가 맨 앞이면 [세로, 가로, 폰] 3칸,
+  // 아니면 폰 슬롯을 비우고 [세로, 가로] 2칸만 쓴다. 장수가 모자라면 앞쪽 슬롯부터 비운다.
+  const endsWithPhone = Boolean(items.at(-1)?.isPhone);
+  const slotCount = endsWithPhone ? SLOTS.length : SLOTS.length - 1;
+  const cards = items.slice(-slotCount).map((item, index, list) => ({
+    item,
+    slot: SLOTS[slotCount - list.length + index],
+  }));
+  // null이면 "맨 뒤 카드(폰 화면)가 앞" — 데이터가 늦게 바뀌어 카드 수가 달라져도 범위를 벗어나지 않게 매번 계산
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const active = activeIndex !== null && activeIndex < cards.length ? activeIndex : cards.length - 1;
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     if (reduceMotion || paused || cards.length < 2) return;
     const timer = window.setInterval(() => {
       if (document.visibilityState !== 'visible') return;
-      setActive((prev) => (prev + 1) % cards.length);
+      setActiveIndex((prev) => {
+        const current = prev !== null && prev < cards.length ? prev : cards.length - 1;
+        return (current + 1) % cards.length;
+      });
     }, ROTATE_MS);
     return () => window.clearInterval(timer);
   }, [reduceMotion, paused, cards.length]);
@@ -67,16 +82,15 @@ export function HeroWorkStack({ items, className }: HeroWorkStackProps) {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      {cards.map((item, index) => {
-        const slot = SLOTS[index];
+      {cards.map(({ item, slot }, index) => {
         const isActive = index === active;
         return (
           <button
             key={item.projectId}
             type="button"
             onClick={() => openProjectModal(item.projectId)}
-            onMouseEnter={() => setActive(index)}
-            onFocus={() => setActive(index)}
+            onMouseEnter={() => setActiveIndex(index)}
+            onFocus={() => setActiveIndex(index)}
             aria-label={`${item.title} 자세히 보기`}
             className={cn(
               'absolute overflow-hidden bg-card shadow-[0_32px_64px_rgba(0,0,0,0.55)] outline-none',
@@ -87,12 +101,26 @@ export function HeroWorkStack({ items, className }: HeroWorkStackProps) {
               isActive ? 'z-30 -translate-y-2 scale-[1.03] opacity-100' : 'z-10 opacity-80'
             )}
           >
-            <img
-              src={item.src}
-              alt={item.alt}
-              className={cn('h-full w-full object-cover', slot.image)}
-              draggable={false}
-            />
+            {typeof item.src === 'string' ? (
+              <img
+                src={item.src}
+                alt={item.alt}
+                className={cn('h-full w-full object-cover', slot.image)}
+                loading="eager"
+                fetchPriority="high"
+                draggable={false}
+              />
+            ) : (
+              <Image
+                src={item.src}
+                alt={item.alt}
+                fill
+                priority
+                sizes="(min-width: 1024px) 440px, 72vw"
+                className={cn('object-cover', slot.image)}
+                draggable={false}
+              />
+            )}
           </button>
         );
       })}

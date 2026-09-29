@@ -73,7 +73,8 @@ export function WorkIndex({ projects }: WorkIndexProps) {
                 type="button"
                 onClick={() => openProjectModal(project.id)}
                 onPointerEnter={(event) => event.pointerType === 'mouse' && setHoveredId(project.id)}
-                onFocus={() => setHoveredId(null)}
+                // 키보드 포커스일 때만 커서 미리보기를 끈다 (마우스 클릭도 focus를 일으키므로)
+                onFocus={(event) => event.currentTarget.matches(':focus-visible') && setHoveredId(null)}
                 className="group flex w-full items-center gap-4 py-6 text-left outline-none focus-visible:ring-2 focus-visible:ring-accent sm:gap-6 sm:py-8 lg:items-baseline lg:justify-between lg:gap-10"
               >
                 {preview && (
@@ -81,6 +82,7 @@ export function WorkIndex({ projects }: WorkIndexProps) {
                     src={preview}
                     alt=""
                     aria-hidden="true"
+                    loading="lazy"
                     className="h-16 w-24 shrink-0 rounded-lg object-cover sm:h-20 sm:w-32 lg:hidden"
                   />
                 )}
