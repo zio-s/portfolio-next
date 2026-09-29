@@ -102,13 +102,13 @@ const HomePage = ({ initialProjects, initialPosts }: HomePageProps) => {
       <section id="hero" className="overflow-hidden px-4 sm:px-8">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 pb-20 pt-14 sm:pt-20 lg:min-h-[calc(100dvh-60px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:gap-10 lg:pb-24 lg:pt-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,620px)]">
           <div className="flex flex-col gap-7 sm:gap-8">
-            <p className="text-[15px] text-muted-foreground sm:text-[17px]">프론트엔드 개발자 · 서울</p>
-            <h1 className="whitespace-nowrap text-[clamp(5.25rem,15vw,10.75rem)] font-bold leading-[0.95] tracking-[-0.06em] lg:text-[clamp(6.5rem,11vw,10.75rem)]">
+            <p className="text-[15px] text-muted-foreground sm:text-[17px]">프론트엔드 개발자 · React / Next.js</p>
+            <h1 className="whitespace-nowrap text-[clamp(4.5rem,19vw,10.75rem)] font-bold leading-[0.95] tracking-[-0.06em] lg:text-[clamp(6.5rem,11vw,10.75rem)]">
               변세민
             </h1>
             <p className="max-w-[34rem] text-[21px] font-medium leading-[1.55] tracking-[-0.02em] text-foreground sm:text-[26px] text-pretty">
-              지도 위에서 <span className="text-accent">분위기로 카페를 찾는 서비스</span>를 설계부터 배포까지 혼자
-              만들었습니다.
+              화면만이 아니라 데이터 설계와 배포까지, 서비스를{' '}
+              <span className="text-accent">처음부터 끝까지</span> 만들어 봤습니다.
             </p>
             <div className="mt-1 flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-7">
               <a
@@ -133,7 +133,19 @@ const HomePage = ({ initialProjects, initialPosts }: HomePageProps) => {
           </div>
 
           {heroStack.length > 0 && (
-            <HeroWorkStack items={heroStack} className="mx-auto lg:mr-0" />
+            <div className="mx-auto flex w-[88%] max-w-[620px] flex-col gap-4 sm:w-full lg:mr-0">
+              <HeroWorkStack items={heroStack} />
+              {/* 겹친 카드가 무엇인지 알려주는 캡션 — 히어로 문장은 사람 소개, 대표작은 여기서 연결 */}
+              {spotlight && (
+                <a
+                  href="#work"
+                  className="self-end text-[14px] text-muted-foreground transition-colors hover:text-accent sm:text-[15px]"
+                >
+                  최근 작업 · {splitProjectTitle(spotlight.title).name}
+                  {splitProjectTitle(spotlight.title).subtitle ? `, ${splitProjectTitle(spotlight.title).subtitle}` : ''}
+                </a>
+              )}
+            </div>
           )}
         </div>
       </section>
