@@ -10,8 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ExternalLink, Github, Eye, Heart } from 'lucide-react';
-import { modalManager } from '@/components/modal/modal-manager';
-import { ProjectDetailModal } from './ProjectDetailModal';
+import { openProjectModal } from './openProjectModal';
 
 export interface ProjectCardProps {
   id: string;
@@ -41,17 +40,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   featured = false,
   className,
 }) => {
-  const handleCardClick = () => {
-    modalManager.custom({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      component: ProjectDetailModal as React.ComponentType<any>,
-      props: {
-        projectId: id,
-      },
-      closeOnBackdrop: true,
-      closeOnEsc: true,
-    });
-  };
+  const handleCardClick = () => openProjectModal(id);
 
   return (
     <Card

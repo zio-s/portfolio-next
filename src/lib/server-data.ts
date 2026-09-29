@@ -3,7 +3,7 @@
  *
  * 목록 페이지(홈/블로그/프로젝트)의 알맹이가 서버 HTML에 담기도록
  * page.tsx(서버 컴포넌트)에서 호출해 initial props로 내려준다.
- * 클라이언트의 RTK Query(projectsApi/postsApi/guestbookApi)와 동일한
+ * 클라이언트의 RTK Query(projectsApi/postsApi)와 동일한
  * 쿼리를 재현하므로, 하이드레이션 후 RTK가 다시 fetch해도 결과가 같다.
  *
  * 실패 시 undefined를 반환해 기존 클라이언트 fetch 동작으로 폴백한다.
@@ -12,9 +12,7 @@
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { transformProject } from '@/features/portfolio/api/transform';
-import { transformGuestbookFromDB } from '@/features/guestbook/types/Guestbook';
 import type { ProjectsResponse } from '@/features/portfolio/types/Project';
-import type { GuestbookListResponse, GuestbookDB } from '@/features/guestbook/types/Guestbook';
 import type { Post } from '@/store/types';
 
 const getClient = () => {
@@ -101,42 +99,3 @@ export const fetchPublishedPosts = unstable_cache(
   { revalidate: 300 }
 );
 
-/**
- * 방명록 미리보기 (guestbookApi.getGuestbook의 서버판)
- * 승인된 항목만, 고정글 우선 + 최신순
- */
-export async function fetchGuestbookPreview(
-  limit = 3
-): Promise<GuestbookListResponse | undefined> {
-  const supabase = getClient();
-  if (!supabase) return undefined;
-
-  try {
-    const { count } = await supabase
-      .from('guestbook')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_approved', true);
-
-    const { data, error } = await supabase
-      .from('guestbook')
-      .select('*')
-      .eq('is_approved', true)
-      .order('is_pinned', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(limit + 1);
-
-    if (error) return undefined;
-
-    const hasMore = (data || []).length > limit;
-    const items = (data || []).slice(0, limit) as GuestbookDB[];
-
-    return {
-      items: items.map(transformGuestbookFromDB),
-      total: count || 0,
-      limit,
-      hasMore,
-    };
-  } catch {
-    return undefined;
-  }
-}

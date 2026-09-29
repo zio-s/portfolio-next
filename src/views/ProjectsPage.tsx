@@ -16,6 +16,7 @@ import { Container } from '@/components/ui/container';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
 import { ProjectCard } from '@/components/portfolio/ProjectCard';
+import { getProjectCoverUrl } from '@/data/projectShowcase';
 import { Tooltip } from '@/components/ui/tooltip';
 import { Pagination } from '@/components/common/Pagination';
 import { CollectionPageJsonLd, BreadcrumbJsonLd } from '@/components/common/JsonLd';
@@ -201,7 +202,7 @@ export const ProjectsPage = ({ initialProjects }: ProjectsPageProps) => {
                         id={project.id}
                         title={project.title}
                         description={project.description}
-                        thumbnail={project.thumbnail}
+                        thumbnail={getProjectCoverUrl(project)}
                         tags={[project.category]}
                         techStack={project.techStack}
                         githubUrl={project.githubUrl}

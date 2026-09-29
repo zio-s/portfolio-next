@@ -255,6 +255,9 @@
     line-height: var(--line-height-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* 한글이 음절 단위로 끊기지 않게(단어 단위 줄바꿈), 긴 영문/URL은 넘치지 않게 */
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
 
   /*
