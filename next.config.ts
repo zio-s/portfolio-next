@@ -8,8 +8,6 @@ const nextConfig: NextConfig = {
       'react-router-dom': '@/lib/react-router-shim',
     },
   },
-  // 트랜스파일이 필요한 패키지들
-  transpilePackages: ['devicons-react'],
   async redirects() {
     return [
       // 프로젝트 상세 페이지 미구현 — 페이지 컴포넌트의 redirect()는 스트리밍 중이라
