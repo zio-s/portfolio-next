@@ -514,7 +514,8 @@ export function CommandPalette({ open, onClose, posts }: CommandPaletteProps) {
 export function useCommandPaletteShortcut(open: boolean, onToggle: () => void) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const isK = e.key === 'k' || e.key === 'K';
+      // 한글 입력 상태에서는 e.key가 'ㅏ'로 들어오므로, 자판 위치(e.code)로도 판별한다
+      const isK = e.code === 'KeyK' || e.key === 'k' || e.key === 'K';
       if (isK && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         onToggle();
