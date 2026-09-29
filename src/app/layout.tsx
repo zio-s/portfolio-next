@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers/Providers';
 import { generateSEOMetadata } from '@/components/common/SEO';
@@ -20,6 +20,12 @@ const bricolage = Bricolage_Grotesque({
   variable: '--font-bricolage',
   display: 'swap',
 });
+
+// 모바일 브라우저 상단 바(상태 표시줄 영역) 색 — 페이지 배경과 같은 근흑색으로 맞춘다
+export const viewport: Viewport = {
+  themeColor: '#111110',
+  colorScheme: 'dark',
+};
 
 export const metadata: Metadata = {
   ...generateSEOMetadata(),
