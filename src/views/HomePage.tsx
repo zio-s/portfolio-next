@@ -28,6 +28,7 @@ import {
   getProjectCoverUrl,
   getProjectShowcase,
   isPlaceholderImage,
+  isThisSite,
   splitProjectTitle,
 } from '@/data/projectShowcase';
 
@@ -82,7 +83,8 @@ const underlineLink =
 const HomePage = ({ initialProjects, initialPosts }: HomePageProps) => {
   // 클라이언트 fetch가 끝나기 전(및 SSR)에는 서버에서 내려준 initial 데이터로 렌더
   const { data: projectsQuery } = useGetProjectsQuery({ featured: true });
-  const projects = (projectsQuery ?? initialProjects)?.items ?? [];
+  // 이 사이트 자체(semincode.com)는 방문자가 이미 보고 있으므로 홈 목록에서 뺀다
+  const projects = ((projectsQuery ?? initialProjects)?.items ?? []).filter((project) => !isThisSite(project));
 
   const { data: postsQuery } = useGetPostsQuery({ status: 'published' });
   const posts = (postsQuery?.posts ?? initialPosts ?? []).slice(0, 3);
