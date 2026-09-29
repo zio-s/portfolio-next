@@ -204,8 +204,8 @@ export const projectsApi = createApi({
             team_size: 1,
             role: '개발자',
             achievements: [],
-            challenges: [],
-            solutions: [],
+            challenges: data.challenges ?? [],
+            solutions: data.solutions ?? [],
             images: data.images ?? [],
           };
 
@@ -259,6 +259,8 @@ export const projectsApi = createApi({
           if (data.githubUrl !== undefined) updateData.github_url = data.githubUrl;
           if (data.liveUrl !== undefined) updateData.demo_url = data.liveUrl;
           if (data.images !== undefined) updateData.images = data.images;
+          if (data.challenges !== undefined) updateData.challenges = data.challenges;
+          if (data.solutions !== undefined) updateData.solutions = data.solutions;
           if (data.hidden !== undefined) (updateData as Record<string, unknown>).hidden = data.hidden;
 
           const { data: result, error } = await supabase
