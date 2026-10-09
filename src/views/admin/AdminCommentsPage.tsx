@@ -11,6 +11,7 @@ import { useAlertModal } from '@/components/modal/hooks/use-alert-modal';
 import { useConfirmModal } from '@/components/modal/hooks/use-confirm-modal';
 import { useGetAllCommentsQuery, useDeleteCommentMutation, useAddCommentMutation } from '../../features/comments/api/commentsApi';
 import { useCreatePostCommentMutation } from '../../store/api/postCommentsApi';
+import { adminWrite } from '../../services/adminWrite';
 import { Loader2, Trash2, Heart, MessageCircle, Reply, Send, X } from 'lucide-react';
 import { useAppSelector } from '../../store';
 import { selectUser } from '../../store/slices/authSlice';
@@ -146,13 +147,9 @@ export const AdminCommentsPage = () => {
       onConfirm: async () => {
         try {
           if (sourceType === 'blog') {
-            // 블로그 댓글은 post_comments 테이블에서 삭제
-            const { deletePostComment } = await import('../../store/api/postCommentsApi').then(m => ({
-              deletePostComment: m.postCommentsApi.endpoints.deletePostComment.initiate,
-            }));
-            // RTK Query를 직접 호출할 수 없으므로 supabase 직접 사용
-            const { supabase } = await import('../../lib/supabase');
-            await (supabase as any).from('post_comments').delete().eq('id', id);
+            // 블로그 댓글은 관리자 라우트로 삭제 (DB RLS가 관리자만 허용)
+            const { error } = await adminWrite({ table: 'post_comments', method: 'DELETE', id });
+            if (error) throw new Error(error.data.message);
           } else {
             await deleteComment(id).unwrap();
           }

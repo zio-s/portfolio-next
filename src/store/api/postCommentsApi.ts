@@ -8,6 +8,8 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { supabaseBaseQuery, buildSupabaseQuery } from '../../services/supabaseBaseQuery';
 import type { PostComment } from '../types';
 
+export type PostCommentDeleteResult = 'deleted' | 'wrong_password' | 'no_password' | 'not_found';
+
 export const postCommentsApi = createApi({
   reducerPath: 'postCommentsApi',
   baseQuery: supabaseBaseQuery(),
@@ -144,16 +146,37 @@ export const postCommentsApi = createApi({
 
     /**
      * 댓글 생성 (자동으로 approved 상태로 생성)
+     *
+     * - 방문자: 비밀번호와 함께 create_post_comment RPC로 작성 (비밀번호는 DB에 해시로만 저장)
+     * - 관리자: 비밀번호 없이 작성 → supabaseBaseQuery가 /api/admin/write로 보냄
      */
-    createPostComment: builder.mutation<PostComment, Partial<PostComment>>({
-      query: (comment) => buildSupabaseQuery.insert('post_comments', {
-        post_id: comment.post_id || comment.postId,
-        author_name: comment.author_name || comment.authorName,
-        author_email: comment.author_email || comment.authorEmail,
-        content: comment.content,
-        parent_id: comment.parent_id || comment.parentId || null,
-        status: 'approved', // 모든 댓글 자동 승인
-      }),
+    createPostComment: builder.mutation<PostComment, Partial<PostComment> & { password?: string }>({
+      query: (comment) => {
+        const postId = comment.post_id || comment.postId;
+        const parentId = comment.parent_id || comment.parentId || null;
+        const authorName = comment.author_name || comment.authorName;
+        const authorEmail = comment.author_email || comment.authorEmail;
+
+        if (comment.password !== undefined) {
+          return buildSupabaseQuery.rpc('create_post_comment', {
+            p_post_id: postId,
+            p_author_name: authorName,
+            p_content: comment.content,
+            p_password: comment.password,
+            p_author_email: authorEmail || null,
+            p_parent_id: parentId,
+          });
+        }
+
+        return buildSupabaseQuery.insert('post_comments', {
+          post_id: postId,
+          author_name: authorName,
+          author_email: authorEmail,
+          content: comment.content,
+          parent_id: parentId,
+          status: 'approved', // 모든 댓글 자동 승인
+        });
+      },
       invalidatesTags: (_result, _error, comment) => [
         { type: 'PostComment', id: `POST_${comment.post_id || comment.postId}` },
         { type: 'PostComment', id: 'LIST' },
@@ -197,13 +220,26 @@ export const postCommentsApi = createApi({
 
     /**
      * 댓글 삭제
+     *
+     * - 관리자: id만 전달 → /api/admin/write로 삭제
+     * - 방문자: { id, password } 전달 → delete_post_comment_with_password RPC로 비밀번호 확인 후 삭제
+     *   결과: 'deleted' | 'wrong_password' | 'no_password' | 'not_found'
      */
-    deletePostComment: builder.mutation<void, string>({
-      query: (id) => buildSupabaseQuery.delete('post_comments', id),
-      invalidatesTags: (_result, _error, id) => [
-        { type: 'PostComment', id },
-        { type: 'PostComment', id: 'LIST' },
-      ],
+    deletePostComment: builder.mutation<PostCommentDeleteResult | null, string | { id: string; password: string }>({
+      query: (arg) =>
+        typeof arg === 'string'
+          ? buildSupabaseQuery.delete('post_comments', arg)
+          : buildSupabaseQuery.rpc('delete_post_comment_with_password', {
+              p_comment_id: arg.id,
+              p_password: arg.password,
+            }),
+      invalidatesTags: (_result, _error, arg) => {
+        const id = typeof arg === 'string' ? arg : arg.id;
+        return [
+          { type: 'PostComment', id },
+          { type: 'PostComment', id: 'LIST' },
+        ];
+      },
     }),
   }),
 });

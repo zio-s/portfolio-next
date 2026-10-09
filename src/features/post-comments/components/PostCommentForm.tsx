@@ -6,7 +6,7 @@
 
 import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Send, X, User, Mail, Loader2, Shield } from 'lucide-react';
+import { Send, X, User, Mail, Lock, Loader2, Shield } from 'lucide-react';
 import { useAppSelector } from '../../../store';
 import { selectUser, selectIsAdmin } from '../../../store/slices/authSlice';
 import { useCreatePostCommentMutation } from '../../../store/api/postCommentsApi';
@@ -33,6 +33,7 @@ export const PostCommentForm = ({
   const [content, setContent] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [authorEmail, setAuthorEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const [createComment, { isLoading }] = useCreatePostCommentMutation();
@@ -48,6 +49,11 @@ export const PostCommentForm = ({
 
     if (!isLoggedIn && !authorName.trim()) {
       setError('이름을 입력해주세요.');
+      return false;
+    }
+
+    if (!isLoggedIn && password.length < 4) {
+      setError('삭제할 때 쓸 비밀번호를 4자 이상 입력해주세요.');
       return false;
     }
 
@@ -70,6 +76,8 @@ export const PostCommentForm = ({
         author_name: isLoggedIn ? currentUser!.name : authorName.trim(),
         author_email: isLoggedIn ? currentUser!.email : (authorEmail.trim() || undefined),
         parent_id: parentId || null,
+        // 방문자만 비밀번호로 작성 (관리자는 로그인 세션으로 관리)
+        ...(!isLoggedIn && { password }),
       }).unwrap();
 
       // 작성한 댓글 ID를 localStorage에 저장
@@ -83,14 +91,19 @@ export const PostCommentForm = ({
       setContent('');
       setAuthorName('');
       setAuthorEmail('');
+      setPassword('');
       setError('');
 
       // 부모 컴포넌트에 성공 알림
       onSuccess?.();
     } catch (err: unknown) {
-      const errorMessage = err && typeof err === 'object' && 'message' in err && typeof (err as { message?: string }).message === 'string'
-        ? (err as { message: string }).message
-        : '댓글 작성에 실패했습니다.';
+      // RTK Query 에러는 { status, data: { message } } 형태 (DB 검증 메시지 포함)
+      const dataMessage = (err as { data?: { message?: unknown } } | null)?.data?.message;
+      const errorMessage = typeof dataMessage === 'string'
+        ? dataMessage
+        : err && typeof err === 'object' && 'message' in err && typeof (err as { message?: string }).message === 'string'
+          ? (err as { message: string }).message
+          : '댓글 작성에 실패했습니다.';
       setError(errorMessage);
     }
   };
@@ -153,6 +166,21 @@ export const PostCommentForm = ({
               />
             </div>
           </div>
+          <div className="flex-1 min-w-[200px]">
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="비밀번호 * (삭제 시 필요)"
+                autoComplete="new-password"
+                maxLength={72}
+                disabled={isLoading}
+                className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -193,7 +221,7 @@ export const PostCommentForm = ({
           )}
           <button
             type="submit"
-            disabled={isLoading || (!isLoggedIn && !authorName.trim()) || !content.trim()}
+            disabled={isLoading || (!isLoggedIn && (!authorName.trim() || password.length < 4)) || !content.trim()}
             className="px-4 py-2 text-sm font-medium text-accent-foreground bg-accent hover:bg-accent/90 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 shadow-sm hover:shadow-md"
           >
             {isLoading ? (
