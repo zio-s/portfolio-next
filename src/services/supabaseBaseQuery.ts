@@ -7,6 +7,7 @@
 
 import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { supabase } from '../lib/supabase';
+import { adminWrite, isAdminWriteTable } from './adminWrite';
 
 interface SupabaseQueryArgs {
   table: string;
@@ -124,6 +125,11 @@ export const supabaseBaseQuery = (): BaseQueryFn<
             },
           };
         }
+      }
+
+      // 관리자 전용 테이블 쓰기는 서버 라우트를 거친다 (DB RLS가 관리자만 허용)
+      if ((method === 'INSERT' || method === 'UPDATE' || method === 'DELETE') && isAdminWriteTable(table)) {
+        return adminWrite({ table, method, id, data });
       }
 
       // INSERT
