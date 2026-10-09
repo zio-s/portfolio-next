@@ -8,6 +8,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { supabaseBaseQuery, buildSupabaseQuery } from '../../../services/supabaseBaseQuery';
 import { supabase } from '../../../lib/supabase';
+import { adminWrite } from '../../../services/adminWrite';
 import { transformProject } from './transform';
 import type { Database } from '../../../lib/database.types';
 import type {
@@ -209,17 +210,17 @@ export const projectsApi = createApi({
             images: data.images ?? [],
           };
 
-          const { data: result, error } = await supabase
-            .from('projects')
-            .insert(insertData)
-            .select()
-            .single();
+          const { data: result, error } = await adminWrite<Database['public']['Tables']['projects']['Row']>({
+            table: 'projects',
+            method: 'INSERT',
+            data: insertData,
+          });
 
           if (error) {
             return {
               error: {
-                status: 400,
-                data: { message: error.message },
+                status: error.status,
+                data: { message: error.data.message },
               },
             };
           }
@@ -263,18 +264,18 @@ export const projectsApi = createApi({
           if (data.solutions !== undefined) updateData.solutions = data.solutions;
           if (data.hidden !== undefined) (updateData as Record<string, unknown>).hidden = data.hidden;
 
-          const { data: result, error } = await supabase
-            .from('projects')
-            .update(updateData)
-            .eq('id', id)
-            .select()
-            .single();
+          const { data: result, error } = await adminWrite<Database['public']['Tables']['projects']['Row']>({
+            table: 'projects',
+            method: 'UPDATE',
+            id,
+            data: updateData,
+          });
 
           if (error) {
             return {
               error: {
-                status: 400,
-                data: { message: error.message },
+                status: error.status,
+                data: { message: error.data.message },
               },
             };
           }
@@ -657,16 +658,18 @@ export const projectsApi = createApi({
         try {
           // 각 프로젝트의 sort_order를 업데이트
           for (const { id, sortOrder } of updates) {
-            const { error } = await supabase
-              .from('projects')
-              .update({ sort_order: sortOrder })
-              .eq('id', id);
+            const { error } = await adminWrite({
+              table: 'projects',
+              method: 'UPDATE',
+              id,
+              data: { sort_order: sortOrder },
+            });
 
             if (error) {
               return {
                 error: {
-                  status: 400,
-                  data: { message: error.message },
+                  status: error.status,
+                  data: { message: error.data.message },
                 },
               };
             }
