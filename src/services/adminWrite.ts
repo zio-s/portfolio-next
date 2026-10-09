@@ -1,12 +1,12 @@
 /**
  * 관리자 전용 쓰기 요청
  *
- * posts / projects 쓰기는 DB RLS가 관리자만 허용하므로 브라우저(anon 키)에서 직접 보내지 않고
+ * posts / projects / 댓글 관리(수정·삭제) 쓰기는 DB RLS가 관리자만 허용하므로 브라우저(anon 키)에서 직접 보내지 않고
  * /api/admin/write 라우트를 거친다. 라우트가 HttpOnly 쿠키의 관리자 토큰을 붙여 대신 실행한다.
  * 반환 형태는 supabaseBaseQuery와 같아서 RTK Query 쪽 호출부는 그대로 쓸 수 있다.
  */
 
-export const ADMIN_WRITE_TABLES = ['posts', 'projects'] as const;
+export const ADMIN_WRITE_TABLES = ['posts', 'projects', 'post_comments', 'comments'] as const;
 export type AdminWriteTable = (typeof ADMIN_WRITE_TABLES)[number];
 
 export interface AdminWriteArgs {

@@ -4,9 +4,9 @@
  * 블로그 게시글 댓글 목록 컴포넌트 - Tailwind CSS & Framer Motion
  */
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Reply, Trash2, Shield } from 'lucide-react';
+import { MessageCircle, Reply, Trash2, Shield, Lock } from 'lucide-react';
 import { useGetPostCommentsQuery, useDeletePostCommentMutation } from '../../../store/api/postCommentsApi';
 import { PostCommentForm } from './PostCommentForm';
 import { useAlertModal, useConfirmModal } from '@/components/modal/hooks';
@@ -136,20 +136,27 @@ const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false, isAdmin
   // 이 댓글이 관리자가 작성한 댓글인지 확인
   const isAdminComment = adminEmail && comment.author_email === adminEmail;
 
-  // localStorage에서 본인 댓글인지 확인
-  const isMyComment = () => {
-    const myComments = JSON.parse(localStorage.getItem('myComments') || '[]');
-    return myComments.includes(comment.id);
-  };
+  // 방문자 삭제: 작성할 때 정한 비밀번호 입력 (다른 기기에서도 가능하도록 모든 댓글에 버튼 표시)
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
 
-  // 삭제 가능 여부: 본인 댓글 또는 관리자
-  const canDelete = isAdmin || isMyComment();
+  const removeFromMyComments = () => {
+    const myComments = JSON.parse(localStorage.getItem('myComments') || '[]');
+    const updatedComments = myComments.filter((id: string) => id !== comment.id);
+    localStorage.setItem('myComments', JSON.stringify(updatedComments));
+  };
 
   const handleReplySuccess = () => {
     setShowReplyForm(false);
   };
 
   const handleDeleteClick = () => {
+    if (!isAdmin) {
+      setShowPasswordInput((prev) => !prev);
+      setDeletePassword('');
+      return;
+    }
+
     showConfirm({
       title: '댓글 삭제',
       message: '댓글을 삭제하시겠습니까?',
@@ -159,11 +166,7 @@ const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false, isAdmin
       onConfirm: async () => {
         try {
           await deleteComment(comment.id).unwrap();
-
-          // localStorage에서 삭제
-          const myComments = JSON.parse(localStorage.getItem('myComments') || '[]');
-          const updatedComments = myComments.filter((id: string) => id !== comment.id);
-          localStorage.setItem('myComments', JSON.stringify(updatedComments));
+          removeFromMyComments();
 
           showAlert({
             title: '완료',
@@ -179,6 +182,35 @@ const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false, isAdmin
         }
       },
     });
+  };
+
+  const handlePasswordDelete = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!deletePassword) return;
+
+    try {
+      const result = await deleteComment({ id: comment.id, password: deletePassword }).unwrap();
+
+      if (result === 'deleted') {
+        removeFromMyComments();
+        setShowPasswordInput(false);
+        showAlert({ title: '완료', message: '댓글이 삭제되었습니다', type: 'success' });
+        return;
+      }
+
+      const messages: Record<string, string> = {
+        wrong_password: '비밀번호가 일치하지 않습니다',
+        no_password: '비밀번호 없이 작성된 댓글은 관리자만 삭제할 수 있습니다',
+        not_found: '이미 삭제된 댓글입니다',
+      };
+      showAlert({
+        title: '삭제할 수 없음',
+        message: messages[result ?? ''] ?? '댓글 삭제에 실패했습니다',
+        type: 'error',
+      });
+    } catch {
+      showAlert({ title: '오류', message: '댓글 삭제에 실패했습니다', type: 'error' });
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -254,18 +286,52 @@ const CommentItem = ({ comment, postId, depth, maxDepth, isLast = false, isAdmin
               </button>
             )}
 
-            {/* 본인 댓글 또는 관리자일 때 삭제 버튼 표시 */}
-            {canDelete && (
-              <button
-                onClick={handleDeleteClick}
-                disabled={isDeleting}
-                className="inline-flex items-center gap-1.5 text-xs text-destructive/70 hover:text-destructive font-medium transition-colors group disabled:opacity-50"
-              >
-                <Trash2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-                삭제
-              </button>
-            )}
+            {/* 관리자는 바로 삭제, 방문자는 비밀번호 확인 후 삭제 */}
+            <button
+              onClick={handleDeleteClick}
+              disabled={isDeleting}
+              className="inline-flex items-center gap-1.5 text-xs text-destructive/70 hover:text-destructive font-medium transition-colors group disabled:opacity-50"
+            >
+              <Trash2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              {showPasswordInput ? '취소' : '삭제'}
+            </button>
           </div>
+
+          {/* 방문자 삭제용 비밀번호 입력 */}
+          <AnimatePresence>
+            {showPasswordInput && (
+              <motion.form
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                onSubmit={handlePasswordDelete}
+                className="mt-3 flex items-center gap-2"
+              >
+                <div className="relative flex-1 max-w-[240px]">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <input
+                    type="password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    placeholder="작성 시 입력한 비밀번호"
+                    aria-label="댓글 비밀번호"
+                    autoComplete="current-password"
+                    autoFocus
+                    disabled={isDeleting}
+                    className="w-full pl-9 pr-3 py-1.5 border border-border rounded-lg text-xs bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors disabled:opacity-50"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isDeleting || !deletePassword}
+                  className="px-3 py-1.5 text-xs font-medium text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isDeleting ? '확인 중...' : '삭제'}
+                </button>
+              </motion.form>
+            )}
+          </AnimatePresence>
 
           {/* 답글 폼 */}
           <AnimatePresence>

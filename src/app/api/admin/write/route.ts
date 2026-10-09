@@ -1,7 +1,7 @@
 /**
  * Admin Write API Route
  *
- * posts / projects 쓰기(INSERT·UPDATE·DELETE)를 관리자 토큰으로 대신 수행한다.
+ * posts / projects / 댓글 관리 쓰기(INSERT·UPDATE·DELETE)를 관리자 토큰으로 대신 수행한다.
  * 브라우저의 Supabase 클라이언트는 anon 키만 갖고 있어 관리자를 구분할 수 없으므로,
  * HttpOnly 쿠키의 access_token을 실어 보내 DB의 RLS(is_admin)가 관리자를 확인하게 한다.
  *
@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { ADMIN_WRITE_TABLES, type AdminWriteTable } from '@/services/adminWrite';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -18,13 +19,10 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const ACCESS_TOKEN_MAX_AGE = 60 * 60; // 1시간
 const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7일
 
-// 이 라우트로 쓸 수 있는 테이블만 허용
-const WRITABLE_TABLES = ['posts', 'projects'] as const;
-type WritableTable = (typeof WRITABLE_TABLES)[number];
 type WriteMethod = 'INSERT' | 'UPDATE' | 'DELETE';
 
 interface WriteBody {
-  table: WritableTable;
+  table: AdminWriteTable;
   method: WriteMethod;
   id?: string;
   data?: Record<string, unknown>;
@@ -37,7 +35,8 @@ function errorResponse(status: number, message: string, extra?: { hint?: string;
 function isWriteBody(body: unknown): body is WriteBody {
   if (!body || typeof body !== 'object') return false;
   const { table, method, id, data } = body as Record<string, unknown>;
-  if (!WRITABLE_TABLES.includes(table as WritableTable)) return false;
+  // 이 라우트로 쓸 수 있는 테이블만 허용
+  if (!ADMIN_WRITE_TABLES.includes(table as AdminWriteTable)) return false;
   if (method !== 'INSERT' && method !== 'UPDATE' && method !== 'DELETE') return false;
   if (method !== 'INSERT' && (typeof id !== 'string' || id.length === 0)) return false;
   if (method !== 'DELETE' && (!data || typeof data !== 'object' || Array.isArray(data))) return false;
